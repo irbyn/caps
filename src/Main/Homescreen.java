@@ -45,6 +45,7 @@ public class Homescreen extends JFrame {
  	   ConnDetails conDeets = new ConnDetails(user, pass);
  	   
     	
+ 	   
 
     	Mycolour = Color.decode("#66c6ff");
     	
