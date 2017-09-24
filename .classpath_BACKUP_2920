@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="src" path="src"/>
+<<<<<<< HEAD
+	<classpathentry kind="lib" path="src/Resources/fontbox-2.0.7.jar"/>
+	<classpathentry kind="lib" path="src/Resources/jempbox-1.8.13.jar"/>
+	<classpathentry kind="lib" path="src/Resources/mssql-jdbc-6.2.1.jre8.jar"/>
+	<classpathentry kind="lib" path="src/Resources/pdfbox-2.0.7.jar"/>
+	<classpathentry kind="lib" path="src/Resources/pdfbox-tools-2.0.7.jar"/>
+	<classpathentry kind="lib" path="src/Resources/preflight-2.0.7.jar"/>
+	<classpathentry kind="lib" path="src/Resources/rs2xml.jar"/>
+	<classpathentry kind="lib" path="src/Resources/xmpbox-2.0.7.jar"/>
+=======
+<<<<<<< HEAD
+	<classpathentry exported="true" kind="lib" path="C:/Users/jason/Desktop/pdfBox/fontbox-2.0.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/jason/Desktop/pdfBox/jempbox-1.8.13.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/jason/Desktop/pdfBox/pdfbox-2.0.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/jason/Desktop/pdfBox/pdfbox-tools-2.0.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/jason/Desktop/pdfBox/preflight-2.0.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/jason/Desktop/pdfBox/xmpbox-2.0.7.jar"/>
+	<classpathentry kind="lib" path="C:/Users/jason/Desktop/pdfBox/mssql-jdbc-6.2.1.jre8.jar"/>
+	<classpathentry kind="lib" path="C:/Users/jason/Desktop/pdfBox/rs2xml.jar"/>
+=======
+	<classpathentry kind="lib" path="C:/Users/jason/Downloads/rs2xml.jar"/>
+	<classpathentry kind="lib" path="C:/Temp/fontbox-2.0.7.jar"/>
+	<classpathentry kind="lib" path="C:/Temp/jempbox-1.8.13.jar"/>
+	<classpathentry kind="lib" path="C:/Temp/mssql-jdbc-6.2.1.jre8.jar"/>
+	<classpathentry kind="lib" path="C:/Temp/pdfbox-2.0.7.jar"/>
+	<classpathentry kind="lib" path="C:/Temp/pdfbox-tools-2.0.7.jar"/>
+	<classpathentry kind="lib" path="C:/Temp/preflight-2.0.7.jar"/>
+	<classpathentry kind="lib" path="C:/Temp/xmpbox-2.0.7.jar"/>
+	<classpathentry kind="lib" path="C:/Temp/rs2xml.jar"/>
+>>>>>>> 34891957bd7e4241124b20d2f0cac461ee78c0dc
+>>>>>>> 34798bba6dc545de2bf086c29366b818fedf062a
+	<classpathentry kind="output" path="bin"/>
+</classpath>
