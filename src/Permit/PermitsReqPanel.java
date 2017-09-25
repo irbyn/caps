@@ -108,6 +108,7 @@ class PermitsReqPanel extends JPanel {
 	private String pass = "";
 	private String dbURL = "";
 	
+	private ConnDetails conDeets;	
 
 	  public PermitsReqPanel(ConnDetails conDeets, PermitPane pp)
       {   
@@ -115,12 +116,12 @@ class PermitsReqPanel extends JPanel {
   		user = conDeets.getUser();
   		pass = conDeets.getPass();
   		dbURL = conDeets.getURL();
-  		
+
 /*  		System.out.println("user  : " + user);
   		System.out.println("pass  : " + pass);
   		System.out.println("dbURL : " + dbURL);
 */		  
-		  connecting = new CreateConnection();
+	//	  connecting = new CreateConnection();
 	  	 		  	
 		    model1 = new DefaultTableModel();  
 		    model1.setRowCount(0);
@@ -316,7 +317,7 @@ class PermitsReqPanel extends JPanel {
 				}
 		  	});
 		  	
-		  	rs = pp.getTableData();		  	
+		  	rs = pp.getResults(0, conDeets);		
 		  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs));  	
 		  	spaceHeader();  	
 	  }
@@ -359,7 +360,7 @@ class PermitsReqPanel extends JPanel {
 		private void updatePermitDetails(String parameter) {
 	        try
 	        {
-	        	Connection conn = connecting.CreateConnection();
+	        	Connection conn = connecting.CreateConnection(conDeets);
 	        	PreparedStatement st2 =conn.prepareStatement(result2 + parameter);
 	        	ResultSet rs2 = st2.executeQuery();
 	    

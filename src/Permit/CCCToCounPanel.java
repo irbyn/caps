@@ -62,8 +62,14 @@ class CCCToCounPanel extends JPanel {
 	private String pass = "";
 	private String dbURL = "";
 	
+	private CreateConnection conn;
+	
+	private ConnDetails conDets;
+
+	
 	public CCCToCounPanel(ConnDetails conDeets, PermitPane pp) {
 
+		  conDets = conDeets;
      	//Get User connection details
   		user = conDeets.getUser();
   		pass = conDeets.getPass();
@@ -166,7 +172,7 @@ class CCCToCounPanel extends JPanel {
 		private void updatePermitDetails(String parameter) {
 	        try
 	        {
-	        	Connection conn = connecting.CreateConnection();
+	        	Connection conn = connecting.CreateConnection(conDets);
 	        	PreparedStatement st2 =conn.prepareStatement(result2 + parameter);
 	        	ResultSet rs2 = st2.executeQuery();
 	    

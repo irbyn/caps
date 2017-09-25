@@ -61,9 +61,18 @@ class ProdStatementPanel extends JPanel {
 	private String user = "";
 	private String pass = "";
 	private String dbURL = "";
+	
+	private ConnDetails conDets;
+
+
+//	private CreateConnection conn;
 
 	  public ProdStatementPanel(ConnDetails conDeets, PermitPane pp) {
 		  
+			
+			conDets = conDeets;
+
+
 	     	//Get User connection details
 	  		user = conDeets.getUser();
 	  		pass = conDeets.getPass();
@@ -143,9 +152,9 @@ class ProdStatementPanel extends JPanel {
 					}
 			  	});
 			  	
-		//	  	rs = pp.getTableData();		  	
-		//	  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs));  	
-		//	  	spaceHeader();
+	//		  	rs = pp.getTableData();		  	
+	//		  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs));  	
+	//		  	spaceHeader();
 		  }
 		  
 		public void spaceHeader() {
@@ -166,7 +175,7 @@ class ProdStatementPanel extends JPanel {
 			private void updatePermitDetails(String parameter) {
 		        try
 		        {
-		        	Connection conn = connecting.CreateConnection();
+		        	Connection conn = connecting.CreateConnection(conDets);
 		        	PreparedStatement st2 =conn.prepareStatement(result2 + parameter);
 		        	ResultSet rs2 = st2.executeQuery();
 		    

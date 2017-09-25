@@ -8,6 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Schedule.SchedulePane;
 import Sales.SalesPane;
@@ -38,11 +39,14 @@ public class Homescreen extends JFrame {
     public Homescreen() {
     	
     	// TEMP SETUP OF PASSWORDS - TO BE DELETED!!!!!!!!
+    	
  	    String user = "Khgv92367hdkfug9";
  	    String pass = "Locei02h84b5KJUVaW";
  	    
  	    //PASS THE LOGIN DETAILS TO Class connectionDetails
  	   ConnDetails conDeets = new ConnDetails(user, pass);
+ 	   
+ 	   CreateConnection conn = new CreateConnection();
  	   
     	Mycolour = Color.decode("#555500");
     	
@@ -130,6 +134,7 @@ public class Homescreen extends JFrame {
         		contentPanel.repaint();
         	}
         });
+        
         //Making the schedule the first view the user sees.  
         contentPanel.add(schedulePanel);        		        
         //Load the frame

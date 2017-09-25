@@ -69,9 +69,13 @@ class RecvPermitPanel extends JPanel {
 	private String pass = "";
 	private String dbURL = "";
 	
+	private ConnDetails conDets;
 
 	  public RecvPermitPanel(ConnDetails conDeets, PermitPane pp1)
+	  
+
       {   
+		  conDets = conDeets;
       	//Get User connection details
   		user = conDeets.getUser();
   		pass = conDeets.getPass();
@@ -150,11 +154,8 @@ class RecvPermitPanel extends JPanel {
 					}
 				}
 		  	});
-		  	
-		  	rs = pp1.getTableData();		  	
-		  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs));  	
-		  	spaceHeader();
 	  }
+	  
 	  
 	    public void spaceHeader() {
 	        int i;
@@ -174,7 +175,7 @@ class RecvPermitPanel extends JPanel {
 	private void updatePermitDetails(String parameter) {
 	        try
 	        {
-	        	Connection conn = connecting.CreateConnection();
+	        	Connection conn = connecting.CreateConnection(conDets);
 	        	PreparedStatement st2 =conn.prepareStatement(result2 + parameter);
 	        	ResultSet rs2 = st2.executeQuery();
 	    

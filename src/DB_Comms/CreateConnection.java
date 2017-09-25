@@ -24,17 +24,24 @@ import java.util.concurrent.Executor;
 
 import javax.swing.JOptionPane;
 
+import Main.ConnDetails;
+
 public class CreateConnection implements Connection {
 	
 
-	
-	
-	static final String dbURL = "jdbc:sqlserver://wchdb.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:1433";
+		private String user;
+		private String pass;
+		private String dbURL;
 
-	   static final String user = "Khgv92367hdkfug9";
-	   static final String pass = "Locei02h84b5KJUVaW";
+//		static final String dbURL = "jdbc:sqlserver://wchdb.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:1433";
+//		static final String user = "Khgv92367hdkfug9";
+//		static final String pass = "Locei02h84b5KJUVaW";
 	
-	  public Connection CreateConnection() {
+	  public Connection CreateConnection(ConnDetails conDeets) {
+		  
+  		user = conDeets.getUser();
+  		pass = conDeets.getPass();
+  		dbURL = conDeets.getURL();
 		  
 	        Connection conn = null;
 
@@ -43,17 +50,16 @@ public class CreateConnection implements Connection {
 	            conn = DriverManager.getConnection(dbURL, user, pass);
 	            
 	            if (conn != null) {
-
 	            	return conn;
 	            }
 	        } catch (SQLException e) {
-	        	System.out.println("Connection Failed");
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	        
 	        JOptionPane.showMessageDialog(null, "Connection Failed!");	        
-			return conn;
+	        System.out.println("Conn failed");
+	        return conn;
 
 	  }
 

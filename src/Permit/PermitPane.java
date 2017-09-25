@@ -17,6 +17,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.TableColumnModel;
 
 import Main.*;
 import DB_Comms.*;
@@ -35,6 +36,9 @@ public class PermitPane extends JPanel
 	private String pass = "";
 	private String dbURL = "";
 	private CreateConnection connecting;
+	
+	private ConnDetails conDeets;
+	
 	private ResultSet results;
 	private int tabIndex = 0;
 	
@@ -89,7 +93,7 @@ public class PermitPane extends JPanel
     		permitP.addTab("CCC to Client", cccToClient);
     		add(permitP); 
 
-    	//	getResults(0);  
+    //		getResults(0);  
     		
     		permitP.addChangeListener(new ChangeListener() {
 
@@ -99,33 +103,36 @@ public class PermitPane extends JPanel
                         JTabbedPane pane = (JTabbedPane) e.getSource();
                         tabIndex = pane.getSelectedIndex();
                         
-                        getResults(tabIndex); 
+                        getResults(tabIndex, conDeets); 
                         ResultSet r1 = results;
                         
                         tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));               
-
-/*                		permitReq.spaceHeader();
-                		permitRecv.spaceHeader();
-                		prodStmnt.spaceHeader();
-                		cccToCouncil.spaceHeader();
-                		cccApproved.spaceHeader();
-                		cccToClient.spaceHeader();
-       */                 
+                        TableColumnModel tcm = tablez[tabIndex].getColumnModel();
+                        tcm.getColumn(0).setMaxWidth(60);
+                        tcm.getColumn(1).setMaxWidth(120);
+                        tcm.getColumn(2).setMaxWidth(150);
+                        tcm.getColumn(9).setMaxWidth(100);
+                        tcm.getColumn(10).setMaxWidth(100);
+                        tcm.getColumn(11).setMaxWidth(100);
 
                     }
                 }
             });
     		
-    		
         }
         
         
-        private ResultSet getResults(int ind){
+        public ResultSet getResults(int ind, ConnDetails connDeets){
+        	
+        	
             try
 	        {
-	        	Connection conn = connecting.CreateConnection();
+	        	Connection conn = connecting.CreateConnection(connDeets);
 	        	PreparedStatement st =conn.prepareStatement(procedure[ind]);	//ind]);
 	        	results = st.executeQuery();
+	        	if (results==null){
+	        		getResults(0, conDeets);
+	        	}
 	        }
 	        catch(Exception ex)
 	        { 
@@ -138,10 +145,11 @@ public class PermitPane extends JPanel
         
         public ResultSet getTableData(){
         	if (results==null){
-        		getResults(0);
+        //		System.out.println("getResults(0, conDeets)");
+        		results = getResults(0, conDeets);
         		return results;
         	}else {
-
+        //		System.out.println("getTableData(0, conDeets)");
         		return results;
         	}       	
         }

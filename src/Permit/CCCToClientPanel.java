@@ -63,9 +63,15 @@ class CCCToClientPanel extends JPanel {
 	private String user = "";
 	private String pass = "";
 	private String dbURL = "";
+	
+	private CreateConnection conn;
+	
+	private ConnDetails conDets;
+
 
 	public CCCToClientPanel(ConnDetails conDeets, PermitPane pp) {
 
+		  conDets = conDeets;
      	//Get User connection details
   		user = conDeets.getUser();
   		pass = conDeets.getPass();
@@ -75,7 +81,7 @@ class CCCToClientPanel extends JPanel {
   		System.out.println("pass  : " + pass);
   		System.out.println("dbURL : " + dbURL);
 */		  
-		  connecting = new CreateConnection();
+//		  connecting = new CreateConnection();
 	  	 		  	
 		    model1 = new DefaultTableModel();  
 		    model1.setRowCount(0);
@@ -168,7 +174,7 @@ class CCCToClientPanel extends JPanel {
 		private void updatePermitDetails(String parameter) {
 	        try
 	        {
-	        	Connection conn = connecting.CreateConnection();
+	        	Connection conn = connecting.CreateConnection(conDets);
 	        	PreparedStatement st2 =conn.prepareStatement(result2 + parameter);
 	        	ResultSet rs2 = st2.executeQuery();
 	    
