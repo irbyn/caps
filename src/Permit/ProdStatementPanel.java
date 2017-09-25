@@ -133,8 +133,12 @@ class ProdStatementPanel extends JPanel {
 					@Override
 					public void valueChanged(ListSelectionEvent arg0) {
 						if (!arg0.getValueIsAdjusting()){
-							param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
-				        	updatePermitDetails(param);
+							try{
+								param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
+					        	updatePermitDetails(param);
+								} catch (IndexOutOfBoundsException e){
+									//
+								}
 						}
 					}
 			  	});

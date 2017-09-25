@@ -47,10 +47,10 @@ public class PermitPane extends JPanel
 
 	private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.p_PermitsRequired", // procedure[0]
 												"EXEC AWS_WCH_DB.dbo.p_PermitsReceived", // procedure[1]
-												"EXEC AWS_WCH_DB.dbo.p_PermitsRequired", // procedure[2]
-												"EXEC AWS_WCH_DB.dbo.p_PermitsRequired", // procedure[3]
-												"EXEC AWS_WCH_DB.dbo.p_PermitsRequired", // procedure[4]
-												"EXEC AWS_WCH_DB.dbo.p_PermitsRequired"};// procedure[5]
+												"EXEC AWS_WCH_DB.dbo.p_PermitsProdStat", // procedure[2]
+												"EXEC AWS_WCH_DB.dbo.p_PermitsCCC_Council", // procedure[3]
+												"EXEC AWS_WCH_DB.dbo.p_PermitsCCC_Apprvd", // procedure[4]
+												"EXEC AWS_WCH_DB.dbo.p_PermitsCCC_Client"};// procedure[5]
 
 	
         public PermitPane(ConnDetails conDeets)
