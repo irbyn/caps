@@ -39,10 +39,11 @@ class PermitsReqPanel extends JPanel {
 	
 	private int [] columnWidth = {20, 150, 150, 100, 100, 100};
 	private String qry = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
-	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+	private String qry2 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String param = "";  
 	private ResultSet rs;
 	private ResultSet rs2;
+	private ResultSet rs3;
 	
 	private String[] doctype = {"NONE","Rates Notice","Certificate of Title", "Lease Agreement", "Sale & Purchase", "Other"};
 	private String[] firestyle = {"FS","IS", "IB","Other"};
@@ -77,9 +78,11 @@ class PermitsReqPanel extends JPanel {
 	private JTextField yearTxtBx;
 	private JLabel locationLbl;
 	private JTextField locationTxtBx;
+	private JLabel ownerLbl;
+	private JComboBox ownerCmbo;
+	
 	private JLabel fireIDLbl;
 	private JTextField fireIDTxtBx;
-	
 	private JLabel makeLbl;
 	private JTextField makeTxtBx;
 	private JLabel modelLbl;
@@ -92,8 +95,6 @@ class PermitsReqPanel extends JPanel {
 	private JLabel nelsonLbl;
 	private JTextField nelsonTxtBx;
 	
-	private JLabel ownerLbl;
-	private JComboBox ownerCmbo;
 	private JLabel fireLbl;
 	private JComboBox fireCmbo;
 	private JLabel fuelLbl;
@@ -112,18 +113,15 @@ class PermitsReqPanel extends JPanel {
 	private ConnDetails conDeets;	
 	private PermitPane pp;
 
-	  public PermitsReqPanel(ConnDetails conDeets, PermitPane pp)
+	  public PermitsReqPanel(ConnDetails conDetts, PermitPane ppn)
       {   
-		  this.conDeets = conDeets;
-		  this.pp = pp;
-      	//Get User connection details
-/*  		user = conDeets.getUser();
+		  this.conDeets = conDetts;
+		  this.pp = ppn;
+/*      	//Get User connection details
+  		user = conDeets.getUser();
   		pass = conDeets.getPass();
   		dbURL = conDeets.getURL();
-  		
-*/	  
-	//	  connecting = new CreateConnection();
-	  	 		  	
+*/	  	 		  	
 		    model1 = new DefaultTableModel();  
 		    model1.setRowCount(0);
 	        permitsTbl = new JTable(model1);
@@ -327,51 +325,111 @@ class PermitsReqPanel extends JPanel {
 		
 		private void updatePermitDetails(String parameter) {
 			
-			
 			rs2 = pp.getDetails(qry, param, conDeets);
-			System.out.println("" + qry);
-			System.out.println("" + param);
-			System.out.println("" + conDeets.toString());
-/*	        try
-	        {
-	        	Connection conn = connecting.CreateConnection(conDeets);
-	        	PreparedStatement st2 =conn.prepareStatement(qry + parameter);
-	        	ResultSet rs2 = st2.executeQuery();
-	    
-*/	                //Retrieve by column name
-/*	        	 try {
+			
+	        	 try {
 					while(rs2.next()){
-						 
-						 detailsTxtArea.setText("\n INVOICE:\t" + param + "\n");
-						 detailsTxtArea.append( " CLIENT:\t" + rs2.getString("CustomerName") + "\n\n");
-						 detailsTxtArea.append( " SITE:\t" + rs2.getString("StreetAddress") + "\n");
-						 detailsTxtArea.append( "\t" + rs2.getString("Suburb") + "\n\n");
-						 detailsTxtArea.append( " POSTAL:\t" + rs2.getString("CustomerAddress") + "\n");
-						 detailsTxtArea.append( "\t" + rs2.getString("CustomerSuburb") + "\n");
-						 detailsTxtArea.append( "\t" + rs2.getString("CustomerPostCode") + "\n\n");
-						 detailsTxtArea.append( " PHONE:\t" + rs2.getString("CustomerPhone") + "\n");
-						 detailsTxtArea.append( " MOBILE:\t" + rs2.getString("CustomerMobile") + "\n\n");
-						 detailsTxtArea.append( " EMAIL:\t" + rs2.getString("CustomerEmail") + "\n");
+						
+/*						ResultSetMetaData  rsmd =  rs2.getMetaData();
+			            int cols = rsmd.getColumnCount();
+			            
+			                        System.out.printf("The query fetched %d columns\n",cols);
+			            
+			                        System.out.println("These columns are: ");
+			            
+			                        for (int i=1;i<=cols;i++) {
+			            
+			                            String colName = rsmd.getColumnName(i);
+			            
+			                            String colType = rsmd.getColumnTypeName(i);
+			            
+			                            System.out.println(colName+" of type "+colType);
+			            
+			                             
+			            
+			                        }*/
 
-					    lotTxtBx.setText(rs2.getString("Lot"));
-					    dpTxtBx.setText(rs2.getString("DP"));
-					    consentTxtBx.setText(rs2.getString("Consent"));
-					    buildingTxtBx.setText(rs2.getString("Building"));
-					    valueTxtBx.setText(rs2.getString("Unit_Level"));
-					    yearTxtBx.setText(rs2.getString("YearConstructed"));
-					    locationTxtBx.setText(rs2.getString("Fire_Location"));
-					    valueTxtBx.setText(rs2.getString("Value"));	                
-					 }
+						
+						 String customerName 	= rs2.getString("CustomerName");
+						 String streetAddress 	= rs2.getString("StreetAddress");
+						 String suburb 			= rs2.getString("Suburb");
+						 String customerAddress = rs2.getString("CustomerAddress");
+						 String customerSuburb 	= rs2.getString("CustomerSuburb");
+						 String customerPostCode= rs2.getString("CustomerPostCode");
+						 String customerPhone 	= rs2.getString("CustomerPhone");
+						 String customerMobile 	= rs2.getString("CustomerMobile");
+						 String customerEmail 	= rs2.getString("CustomerEmail");						
+ 
+						 String sb =" CLIENT:\t" + customerName + "\n\n" + 
+								 	" SITE:\t" + streetAddress + "\n" +
+								 	"\t" + suburb + "\n\n" + 
+								 	" POSTAL:\t" + customerAddress + "\n" +
+								 	"\t" + customerSuburb + "\n" + 
+								 	"\t" + customerPostCode + "\n\n" +
+								 	" PHONE:\t" + customerPhone + "\n" + 
+								 	" MOBILE:\t" + customerMobile + "\n\n" +
+								 	" EMAIL:\t" + customerEmail + "\n";
+						 detailsTxtArea.setText(sb);
+						 
+						 String lot = rs2.getString("Lot");
+						 String dP = rs2.getString("DP");
+						 String consent = rs2.getString("Consent");
+						 String building = rs2.getString("Building");
+						 String unit_Level = rs2.getString("Unit_Level");
+						 String value = rs2.getString("Value");
+						 String yearConstructed = rs2.getString("YearConstructed");
+						 String fire_Location = rs2.getString("Fire_Location");
+						 						 
+					    lotTxtBx.setText(lot);
+					    dpTxtBx.setText(dP);
+					    consentTxtBx.setText(consent);
+					    buildingTxtBx.setText(building);
+					    levelTxtBx.setText(unit_Level);
+					    valueTxtBx.setText(value);
+					    yearTxtBx.setText(yearConstructed);
+					    locationTxtBx.setText(fire_Location);
+					    
+					    String ownershipDoc = rs2.getString("Value");
+					    if (ownershipDoc == "None"){
+					    	ownerCmbo.setSelectedIndex(0); 
+					    } else if(ownershipDoc == "Rates Notice"){
+					    	ownerCmbo.setSelectedIndex(1); 
+					    } else if(ownershipDoc == "Certificate of Title"){
+					    	ownerCmbo.setSelectedIndex(2); 
+					    } else if(ownershipDoc == "Lease Agreement"){
+					    	ownerCmbo.setSelectedIndex(3); 
+					    } else if(ownershipDoc == "Sale & Purchase€"){
+					    	ownerCmbo.setSelectedIndex(4); 
+					    }else
+					    	ownerCmbo.setSelectedIndex(5);                
+					 	}
+					
+					System.out.println("" + rs2.getMetaData());
+	/*				
+					
+				    int wetback = rs2.getByte("Wetback");
+				    if (wetback == 0){
+				    	wetChk.setSelected(false); 
+				    	System.out.println("WB = 0 ");
+				    } else {
+				    	System.out.println("WB = 1 ");
+				    	wetChk.setSelected(true);  
+				    } 				
+					*/
+					
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-	        	 
-	        	 
-/*		        	PreparedStatement st3 =conn.prepareStatement(result3 + parameter);
-		        	
-		        	ResultSet rs3 = null;
-		        	rs3 = st3.executeQuery();
+	        	 updateFireDetails(param);
+		}        	 
+	        
+		
+		private void updateFireDetails(String parameter) {
+			
+			rs3 = pp.getDetails(qry2, param, conDeets);
+
+			 try {
 		    
 		        	 while(rs3.next()){
 		        		 
@@ -416,16 +474,13 @@ class PermitsReqPanel extends JPanel {
 		    	        } else{
 		    	        	fireCmbo.setSelectedIndex(3);
 		    	        }
+		        	}
 		        	 }
-		        } 
-		        
-	        	conn.close();	
-	        }
-	        catch(Exception ex)
-	        { 
-	        JOptionPane.showMessageDialog(null, ex.toString());
-	        }	  	
-*/	}	
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}    	
 		
 	  
 	    public void spaceHeader() {

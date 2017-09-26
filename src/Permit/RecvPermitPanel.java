@@ -38,12 +38,13 @@ import Main.*;
 
 class RecvPermitPanel extends JPanel {
 	
-	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
-	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+	private String qry = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
+	private String qry2 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String param = "";  
 	private ResultSet rs;
+	private ResultSet rs2;
 	
-	private CreateConnection connecting;
+//	private CreateConnection connecting;
 	
 	private JTableHeader header;
 	private TableColumnModel columnModel;
@@ -63,23 +64,23 @@ class RecvPermitPanel extends JPanel {
 	private JButton cancelPermitReqBtn; 
 	private JButton savePermitReqBtn; 
 	
-	private String user = "";
+/*	private String user = "";
 	private String pass = "";
-	private String dbURL = "";
+	private String dbURL = "";*/
 	
-	private ConnDetails conDets;
+	private ConnDetails conDeets;
+	private PermitPane pp;
 
-	  public RecvPermitPanel(ConnDetails conDeets, PermitPane pp1)
-	  
-
+	  public RecvPermitPanel(ConnDetails conDetts, PermitPane ppn)
       {   
-		  conDets = conDeets;
+		  this.conDeets = conDetts;
+		  this.pp = ppn;
       	//Get User connection details
-  		user = conDeets.getUser();
-  		pass = conDeets.getPass();
-  		dbURL = conDeets.getURL();
+ // 		user = conDeets.getUser();
+ // 		pass = conDeets.getPass();
+  //		dbURL = conDeets.getURL();
   			  
-		  connecting = new CreateConnection();
+//		  connecting = new CreateConnection();
 	  	 		  	
 		    model2 = new DefaultTableModel();  
 		    model2.setRowCount(0);
@@ -161,13 +162,10 @@ class RecvPermitPanel extends JPanel {
 	    }
 		
 	private void updatePermitDetails(String parameter) {
-	        try
-	        {
-	        	Connection conn = connecting.CreateConnection(conDets);
-	        	PreparedStatement st2 =conn.prepareStatement(result2 + parameter);
-	        	ResultSet rs2 = st2.executeQuery();
-	    
-	                //Retrieve by column name
+		
+		rs2 = pp.getDetails(qry, param, conDeets);
+		
+        	 try {
 	        	 while(rs2.next()){
 	        		 
 	        		 detailsTxtArea.setText("\n INVOICE:\t" + param + "\n");
@@ -189,16 +187,20 @@ class RecvPermitPanel extends JPanel {
 	    	        yearTxtBx.setText(rs2.getString("YearConstructed"));
 	    	        locationTxtBx.setText(rs2.getString("Fire_Location"));
 	    	        valueTxtBx.setText(rs2.getString("Value"));	                
-*/	        	 }
+*/	        	 					 }
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 	        	 
-	        	 
+	/*        	 
 		        	PreparedStatement st3 =conn.prepareStatement(result3 + parameter);
 		        	
 		        	ResultSet rs3 = null;
 		        	rs3 = st3.executeQuery();
 		    
 		        	 while(rs3.next()){
-	/*	        		 
+	*//*	        		 
 		        	if (!rs3.getString("FireID").equals(parameter)){
 		                //Retrieve by column name
 		        		fireIDTxtBx.setText("");
@@ -241,7 +243,7 @@ class RecvPermitPanel extends JPanel {
 		    	        	fireCmbo.setSelectedIndex(3);
 		    	        }
 		        	 }
-	*/	        } 
+		        } 
 		        
 	        	conn.close();	
 	        }
@@ -249,7 +251,7 @@ class RecvPermitPanel extends JPanel {
 	        { 
 	        JOptionPane.showMessageDialog(null, ex.toString());
 	        }	
-
+*/
  	}	
 		
 }

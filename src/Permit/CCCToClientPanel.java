@@ -71,12 +71,8 @@ class CCCToClientPanel extends JPanel {
 	public CCCToClientPanel(ConnDetails conDeets, PermitPane pp) {
 
 		  conDets = conDeets;
-     	//Get User connection details
-  		user = conDeets.getUser();
-  		pass = conDeets.getPass();
-  		dbURL = conDeets.getURL();
   		  
-//		  connecting = new CreateConnection();
+		  connecting = new CreateConnection();
 	  	 		  	
 		    model1 = new DefaultTableModel();  
 		    model1.setRowCount(0);
