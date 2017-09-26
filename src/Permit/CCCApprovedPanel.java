@@ -70,10 +70,7 @@ class CCCApprovedPanel extends JPanel {
 	public CCCApprovedPanel(ConnDetails conDeets, PermitPane pp) {
 
 		  conDets = conDeets;
-     	//Get User connection details
-  		user = conDeets.getUser();
-  		pass = conDeets.getPass();
-  		dbURL = conDeets.getURL();
+
 
 		  connecting = new CreateConnection();
 	  	 		  	

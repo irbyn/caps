@@ -45,13 +45,15 @@ public class PermitPane extends JPanel
 	private ResultSet qryResults;
 	private int tabIndex = 0;
 	
+	//Panels loaded in Tabs
 	private PermitsReqPanel permitReq;
 	private RecvPermitPanel permitRecv;
 	private ProdStatementPanel prodStmnt;
 	private CCCToCounPanel cccToCouncil;
 	private CCCApprovedPanel cccApproved;
 	private CCCToClientPanel cccToClient;
-
+	
+	// Stored procedures to fill tables (Triggered by tab selection)
 	private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.p_PermitsRequired", // procedure[0]
 												"EXEC AWS_WCH_DB.dbo.p_PermitsReceived", // procedure[1]
 												"EXEC AWS_WCH_DB.dbo.p_PermitsProdStat", // procedure[2]
@@ -63,10 +65,7 @@ public class PermitPane extends JPanel
         public PermitPane(ConnDetails conDeets)
         {   
 
-        	//Get User connection details
-    		user = conDeets.getUser();
-    		pass = conDeets.getPass();
-    		dbURL = conDeets.getURL();
+
     		
   		  connecting = new CreateConnection();
         	
@@ -103,13 +102,14 @@ public class PermitPane extends JPanel
                 @Override
                 public void stateChanged(ChangeEvent e) {
                     if (e.getSource() instanceof JTabbedPane) {
+                    	
                         JTabbedPane pane = (JTabbedPane) e.getSource();
                         tabIndex = pane.getSelectedIndex();
                         
                         getResults(tabIndex, conDeets); 
-                        ResultSet r1 = results;
+                 //       ResultSet r1 = results;
                         
-                        
+                        // add ResultSet into Selected Tab JTable.
                         tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));               
                         TableColumnModel tcm = tablez[tabIndex].getColumnModel();
                          int cols = tcm.getColumnCount();
@@ -117,9 +117,12 @@ public class PermitPane extends JPanel
                          if (cols == 6){
                         	 int[] colWidths = new int[]{20, 150, 150, 100, 100, 100}; 
                         	 spaceHeader(colWidths, tcm);
+                         } else if (cols == 7){
+                        	 int[] colWidths = new int[]{20, 150, 150, 100, 100, 100, 100};   
+                        	 spaceHeader(colWidths, tcm);                         
                          } else if (cols == 9){
-                        	 int[] colWidths = new int[]{30, 100, 120, 80, 40, 40, 40, 40, 40};   
-                        	 spaceHeader(colWidths, tcm);
+                            	 int[] colWidths = new int[]{30, 100, 120, 80, 40, 40, 40, 40, 40};   
+                            	 spaceHeader(colWidths, tcm);
                          }else {
                         	 int[] colWidths = new int[]{30, 100, 120, 80, 30, 30, 40, 40, 40, 30, 30};    
                         	 spaceHeader(colWidths, tcm);
@@ -160,16 +163,11 @@ public class PermitPane extends JPanel
         	
             try
 	        {
-	        	Connection conn = connecting.CreateConnection(conDeets);
-	        	PreparedStatement st2 =conn.prepareStatement(qry + param);
-	 //       	rs2 = st2.executeQuery();
-	        	
-	//        	Connection conn = connecting.CreateConnection(connDeets);
-	//        	PreparedStatement st =conn.prepareStatement(qry);	
+	        	Connection conn = connecting.CreateConnection(connDeets);
+	        	PreparedStatement st2 =conn.prepareStatement(qry + param);	
 	        	qryResults = st2.executeQuery();
 	        	if (qryResults==null){
 	    			System.out.println("null query");
-	        	//	getResults(0, conDeets);
 	        	}
 	        }
 	        catch(Exception ex)
@@ -179,17 +177,5 @@ public class PermitPane extends JPanel
         		return qryResults;       		            
         }
         
-        
-  /*      
-        public ResultSet getTableData(){
-        	if (results==null){
-        //		System.out.println("getResults(0, conDeets)");
-        		results = getResults(0, conDeets);
-        		return results;
-        	}else {
-        //		System.out.println("getTableData(0, conDeets)");
-        		return results;
-        	}       	
-        }
-               */
+
 }
