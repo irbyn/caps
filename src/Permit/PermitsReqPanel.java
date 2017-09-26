@@ -329,37 +329,30 @@ class PermitsReqPanel extends JPanel {
 			
 	        	 try {
 					while(rs2.next()){
-						
-/*						ResultSetMetaData  rsmd =  rs2.getMetaData();
-			            int cols = rsmd.getColumnCount();
-			            
-			                        System.out.printf("The query fetched %d columns\n",cols);
-			            
-			                        System.out.println("These columns are: ");
-			            
-			                        for (int i=1;i<=cols;i++) {
-			            
-			                            String colName = rsmd.getColumnName(i);
-			            
-			                            String colType = rsmd.getColumnTypeName(i);
-			            
-			                            System.out.println(colName+" of type "+colType);
-			            
-			                             
-			            
-			                        }*/
-
-						
+								    					
+						 String invoice 		= rs2.getString("Invoice");
 						 String customerName 	= rs2.getString("CustomerName");
-						 String streetAddress 	= rs2.getString("StreetAddress");
-						 String suburb 			= rs2.getString("Suburb");
 						 String customerAddress = rs2.getString("CustomerAddress");
 						 String customerSuburb 	= rs2.getString("CustomerSuburb");
 						 String customerPostCode= rs2.getString("CustomerPostCode");
 						 String customerPhone 	= rs2.getString("CustomerPhone");
 						 String customerMobile 	= rs2.getString("CustomerMobile");
-						 String customerEmail 	= rs2.getString("CustomerEmail");						
- 
+						 String customerEmail 	= rs2.getString("CustomerEmail");
+						 String streetAddress 	= rs2.getString("StreetAddress");
+						 String suburb 			= rs2.getString("Suburb");
+						 String status 			= rs2.getString("PermitStatus");
+						 String consent 		= rs2.getString("Consent");						 						
+						 String lot 			= rs2.getString("Lot");
+						 String dP 				= rs2.getString("DP"); 
+						 String ownershipDoc 	= rs2.getString("ownershipDoc");							
+						 String building 		= rs2.getString("Building");
+						 String unit_Level 		= rs2.getString("Unit_Level");						
+						 String yearConstructed = rs2.getString("YearConstructed");
+						 String fireID 			= rs2.getString("FireID");						 
+						 Boolean wetback 		= rs2.getBoolean("Wetback");						 
+						 String value 			= rs2.getString("Value");						 
+						 String fire_Location 	= rs2.getString("Fire_Location");						
+						
 						 String sb =" CLIENT:\t" + customerName + "\n\n" + 
 								 	" SITE:\t" + streetAddress + "\n" +
 								 	"\t" + suburb + "\n\n" + 
@@ -370,26 +363,23 @@ class PermitsReqPanel extends JPanel {
 								 	" MOBILE:\t" + customerMobile + "\n\n" +
 								 	" EMAIL:\t" + customerEmail + "\n";
 						 detailsTxtArea.setText(sb);
-						 
-						 String lot = rs2.getString("Lot");
-						 String dP = rs2.getString("DP");
-						 String consent = rs2.getString("Consent");
-						 String building = rs2.getString("Building");
-						 String unit_Level = rs2.getString("Unit_Level");
-						 String value = rs2.getString("Value");
-						 String yearConstructed = rs2.getString("YearConstructed");
-						 String fire_Location = rs2.getString("Fire_Location");
 						 						 
-					    lotTxtBx.setText(lot);
-					    dpTxtBx.setText(dP);
-					    consentTxtBx.setText(consent);
-					    buildingTxtBx.setText(building);
-					    levelTxtBx.setText(unit_Level);
-					    valueTxtBx.setText(value);
-					    yearTxtBx.setText(yearConstructed);
-					    locationTxtBx.setText(fire_Location);
-					    
-					    String ownershipDoc = rs2.getString("Value");
+						 lotTxtBx.setText(lot);
+						 dpTxtBx.setText(dP);
+						 consentTxtBx.setText(consent);
+						 buildingTxtBx.setText(building);
+						 levelTxtBx.setText(unit_Level);
+						 valueTxtBx.setText(value);
+						 yearTxtBx.setText(yearConstructed);
+						 locationTxtBx.setText(fire_Location);
+					
+						 if (wetback == false){
+						 	wetChk.setSelected(false); 
+						 } else {
+						 	wetChk.setSelected(true);  
+						 } 
+						 	
+				//	    String ownershipDoc = rs2.getString("Value");
 					    if (ownershipDoc == "None"){
 					    	ownerCmbo.setSelectedIndex(0); 
 					    } else if(ownershipDoc == "Rates Notice"){
@@ -404,18 +394,8 @@ class PermitsReqPanel extends JPanel {
 					    	ownerCmbo.setSelectedIndex(5);                
 					 	}
 					
-					System.out.println("" + rs2.getMetaData());
-	/*				
-					
-				    int wetback = rs2.getByte("Wetback");
-				    if (wetback == 0){
-				    	wetChk.setSelected(false); 
-				    	System.out.println("WB = 0 ");
-				    } else {
-				    	System.out.println("WB = 1 ");
-				    	wetChk.setSelected(true);  
-				    } 				
-					*/
+
+									
 					
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
@@ -433,7 +413,34 @@ class PermitsReqPanel extends JPanel {
 		    
 		        	 while(rs3.next()){
 		        		 
+/*						ResultSetMetaData  rsmd =  rs3.getMetaData();
+				            int cols = rsmd.getColumnCount();
+				            
+				                        System.out.printf("The query fetched %d columns\n",cols);
+				            
+				                        System.out.println("These columns are: ");
+				            
+				                        for (int i=1;i<=cols;i++) {
+				            
+				                            String colName = rsmd.getColumnName(i);
+				            
+				                            String colType = rsmd.getColumnTypeName(i);
+				            
+				                            System.out.println(colName+" of type "+colType);
+				                        }
+	*/	
 		        	if (!rs3.getString("FireID").equals(parameter)){
+		        		
+		        		
+						 String fireID	 		= rs3.getString("FireID");
+						 String make 			= rs3.getString("Make");
+						 String model 			= rs3.getString("Model");
+						 String fireType 		= rs3.getString("FireType");
+						 String fuel 			= rs3.getString("Fuel");
+						 String ecan 			= rs3.getString("ECAN");
+						 String nelson			= rs3.getString("Nelson");
+						 String life 			= rs3.getString("Life");
+		        		
 		                //Retrieve by column name
 		        		fireIDTxtBx.setText("");
 		        		makeTxtBx.setText("");
@@ -444,14 +451,13 @@ class PermitsReqPanel extends JPanel {
 		    	        lifeTxtBx.setText("");
 		    	        fireCmbo.setSelectedIndex(0);
 		    	        fireCmbo.setSelectedIndex(0);
-		        	
-		        		fireIDTxtBx.setText(rs3.getString("FireID"));
-		        		makeTxtBx.setText(rs3.getString("Make"));
-		        		makeTxtBx.setText(rs3.getString("Make"));
-		        		modelTxtBx.setText(rs3.getString("Model"));
-		    	        ecanTxtBx.setText(rs3.getString("ECAN"));
-		    	        nelsonTxtBx.setText(rs3.getString("Nelson"));
-		   // 	        lifeTxtBx.setText(rs2.getString("Life"));
+		    	        
+		        		fireIDTxtBx.setText(fireID);
+		        		makeTxtBx.setText(make);
+		        		modelTxtBx.setText(model);
+		    	        ecanTxtBx.setText(ecan);
+		    	        nelsonTxtBx.setText(nelson);
+		    	        lifeTxtBx.setText(life);
 		    	        
 		    	        String ft = rs3.getString("FireType");
 		    	        if (ft.equals("FS")){
