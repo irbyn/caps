@@ -17,6 +17,7 @@ import Permit.PermitPane;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.JLabel;
 
 public class Homescreen extends JFrame {
 
@@ -25,14 +26,13 @@ public class Homescreen extends JFrame {
 	private JButton salesBtn;
 	private JButton installBtn;
 	private JButton permitBtn;
+	private JButton adminLoginBtn;
     private JPanel btnPanel;
     private JPanel contentPanel;
     private SchedulePane schedulePanel;
     private SalesPane salesPanel;
     private InstallsPane installPanel;
-    private PermitPane permitPanel;
-    
-    
+    private PermitPane permitPanel;    
     
     public Color Mycolour;
 
@@ -58,6 +58,7 @@ public class Homescreen extends JFrame {
     
         // creating main button JPanel (blue)
         btnPanel = new JPanel();
+        btnPanel.setLayout(null);
    //     btnPanel.setBackground(Mycolour);
         btnPanel.setBounds(0, 0, 1100, 40);
         btnPanel.setPreferredSize(new Dimension(1100, 40));
@@ -65,18 +66,32 @@ public class Homescreen extends JFrame {
         
         // creating JButtons in the main button JPanel (blue)
         scheduleBtn = new JButton("SCHEDULE");
-        salesBtn = new JButton("SALES");              
+        scheduleBtn.setBounds(246, 11, 128, 24);
+        
+        salesBtn = new JButton("SALES"); 
+        salesBtn.setBounds(394, 11, 128, 24);
+        
         installBtn = new JButton("INSTALLS");
+        installBtn.setBounds(542, 11, 128, 24);
+        
         permitBtn = new JButton("PERMIT");
+        permitBtn.setBounds(690, 11, 128, 24);
+        
+        adminLoginBtn = new JButton("Admin Login");
+        adminLoginBtn.setBounds(962, 11, 128, 24);
         
         btnPanel.add(scheduleBtn);
         btnPanel.add(salesBtn);
         btnPanel.add(installBtn);
         btnPanel.add(permitBtn);
+        btnPanel.add(adminLoginBtn);
+        
+        JLabel lblUser = new JLabel("Logged in as: ...");
+        lblUser.setBounds(10, 16, 100, 14);
+        btnPanel.add(lblUser);
         
         // creating main content JPanel (red)
         contentPanel = new JPanel();
-//        contentPanel.setBackground(Mycolour);
         contentPanel.setBounds(0, 40, 1100, 630);
         contentPanel.setPreferredSize(new Dimension(1100, 630));
         getContentPane().add(contentPanel);
@@ -86,8 +101,6 @@ public class Homescreen extends JFrame {
         salesPanel = new SalesPane();  
         installPanel = new InstallsPane();
         permitPanel = new PermitPane(conDeets);
-       // permitPanel = new PermitPane();
-        
         
         //Action listeners for each button
         scheduleBtn.addActionListener(new ActionListener() {
@@ -132,6 +145,13 @@ public class Homescreen extends JFrame {
         		contentPanel.add(permitPanel);        		
         		pack();
         		contentPanel.repaint();
+        	}
+        });
+        
+        //Log into the Admin Panel
+        adminLoginBtn.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {	
+        		
         	}
         });
         

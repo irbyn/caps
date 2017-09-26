@@ -22,22 +22,33 @@ class CustomerPanel extends JPanel {
 	private JTextField pAddrtxtbx;
 	private JTextField pSuburbtxtbx;
 	private JTextField pAreaCodetxtbx;
-	private JTextField textField;
-	private JTextField textField_1;
-	private JTextField textField_2;
-	private JTextField textField_3;
-	private JTextField textField_4;
+	private JLabel contactlbl;
+	private JLabel fNameLbl;
+	private JLabel lNameLbl;
+	private JLabel lblPhone;
+	private JLabel emaillbl;
+	private JLabel pAddrlbl;
+	private JLabel pSuburblbl;
+	private JLabel pAreaCodelbl;
+	private JLabel siteAddrLbl;
+	private JLabel postAddrlbl; 
+	private JLabel sSuburblbl;
+	private JLabel sAddrlbl;
+	private JCheckBox pAddChbx;
+	private JButton searchCustBtn;
+	private JButton cancelBtn;
+	private JButton createCustBtn;
 
 	  public CustomerPanel() {
 	  	setLayout(null);
 	  	
 	  	//Personal Customer Information
-	  	JLabel contactlbl = new JLabel("Contact Information");
+	  	contactlbl = new JLabel("Contact Information");
 	  	contactlbl.setFont(new Font("Arial", Font.BOLD, 20));
 	  	contactlbl.setBounds(263, 10, 201, 20);
 	  	add(contactlbl);
 	  	
-	  	JLabel fNameLbl = new JLabel("First Name:");
+	  	fNameLbl = new JLabel("First Name:");
 	  	fNameLbl.setBounds(346, 40, 102, 14);
 	  	add(fNameLbl);
 	  	
@@ -46,7 +57,7 @@ class CustomerPanel extends JPanel {
 	  	add(fNameTxtBx);
 	  	fNameTxtBx.setColumns(10);
 	  	
-	  	JLabel lNameLbl = new JLabel("Last Name:");
+	  	lNameLbl = new JLabel("Last Name:");
 	  	lNameLbl.setBounds(346, 80, 102, 15);
 	  	add(lNameLbl);
 	  	
@@ -55,16 +66,16 @@ class CustomerPanel extends JPanel {
 	  	lNameTxtBx.setBounds(492, 80, 302, 20);
 	  	add(lNameTxtBx);
 	  	
-	  	JLabel label = new JLabel("Phone Number:");
-	  	label.setBounds(346, 120, 102, 15);
-	  	add(label);
+	  	lblPhone = new JLabel("Phone Number:");
+	  	lblPhone.setBounds(346, 120, 102, 15);
+	  	add(lblPhone);
 	  	
 	  	phoneTxtBx = new JTextField();
 	  	phoneTxtBx.setColumns(10);
 	  	phoneTxtBx.setBounds(492, 120, 302, 20);
 	  	add(phoneTxtBx);
 	  	
-	  	JLabel emaillbl = new JLabel("Email:");
+	  	emaillbl = new JLabel("Email:");
 	  	emaillbl.setBounds(346, 160, 102, 15);
 	  	add(emaillbl);
 	  	
@@ -74,12 +85,12 @@ class CustomerPanel extends JPanel {
 	  	add(emailtxtbx);
 	  		  	
 	  	//Postal Address Information
-	  	JLabel postAddrlbl = new JLabel("Postal Address");
+	  	postAddrlbl = new JLabel("Postal Address");
 	  	postAddrlbl.setFont(new Font("Arial", Font.BOLD, 20));
 	  	postAddrlbl.setBounds(263, 200, 201, 20);
 	  	add(postAddrlbl);
 	  	
-	  	JLabel pAddrlbl = new JLabel("Postal Street Address:");
+	  	pAddrlbl = new JLabel("Postal Street Address:");
 	  	pAddrlbl.setBounds(346, 231, 173, 15);
 	  	add(pAddrlbl);
 	  	
@@ -88,7 +99,7 @@ class CustomerPanel extends JPanel {
 	  	pAddrtxtbx.setBounds(492, 228, 302, 20);
 	  	add(pAddrtxtbx);
 	  	
-	  	JLabel pSuburblbl = new JLabel("Postal Suburb:");
+	  	pSuburblbl = new JLabel("Postal Suburb:");
 	  	pSuburblbl.setBounds(346, 272, 173, 15);
 	  	add(pSuburblbl);
 	  	
@@ -97,7 +108,7 @@ class CustomerPanel extends JPanel {
 	  	pSuburbtxtbx.setBounds(492, 269, 302, 20);
 	  	add(pSuburbtxtbx);
 	  	
-	  	JLabel pAreaCodelbl = new JLabel("Post Code");
+	  	pAreaCodelbl = new JLabel("Post Code");
 	  	pAreaCodelbl.setBounds(346, 310, 173, 15);
 	  	add(pAreaCodelbl);
 	  	
@@ -108,16 +119,16 @@ class CustomerPanel extends JPanel {
 	  	
 	  	//Site Address Information
 	  	
-	  	JLabel siteAddrLbl = new JLabel("Site Address");
+	  	siteAddrLbl = new JLabel("Site Address");
 	  	siteAddrLbl.setBounds(263, 338, 201, 20);
 	  	siteAddrLbl.setFont(new java.awt.Font("Arial", Font.BOLD, 20));
 	  	add(siteAddrLbl);
 	  	
-	  	JCheckBox pAddChbx = new JCheckBox("Postal Address is Site Address");
+	  	pAddChbx = new JCheckBox("Postal Address is Site Address");
 	  	pAddChbx.setBounds(346, 370, 222, 23);
 	  	add(pAddChbx);
 	  	
-	  	JLabel sAddrlbl = new JLabel("Site Street Address:");
+	  	sAddrlbl = new JLabel("Site Street Address:");
 	  	sAddrlbl.setBounds(346, 414, 135, 15);
 	  	add(sAddrlbl);
 	  	
@@ -126,7 +137,7 @@ class CustomerPanel extends JPanel {
 	  	sAddrtxtbx.setBounds(492, 411, 302, 20);
 	  	add(sAddrtxtbx);
   	
-	  	JLabel sSuburblbl = new JLabel("Site Suburb:");
+	  	sSuburblbl = new JLabel("Site Suburb:");
 	  	sSuburblbl.setBounds(346, 453, 135, 15);
 	  	add(sSuburblbl);
 	  	
@@ -135,15 +146,15 @@ class CustomerPanel extends JPanel {
 	  	sSuburbtxtbx.setBounds(492, 450, 302, 20);
 	  	add(sSuburbtxtbx);
 	  	
-	  	JButton searchCustBtn = new JButton("Search for Existing Customer");
+	  	searchCustBtn = new JButton("Search for Existing Customer");
 	  	searchCustBtn.setBounds(263, 489, 210, 25);
 	  	add(searchCustBtn);
 	  	
-	  	JButton cancelBtn = new JButton("Cancel");
+	  	cancelBtn = new JButton("Cancel");
 	  	cancelBtn.setBounds(537, 489, 135, 25);
 	  	add(cancelBtn);
 	  	
-	  	JButton createCustBtn = new JButton("Create Customer");
+	  	createCustBtn = new JButton("Create Customer");
 	  	createCustBtn.setBounds(735, 489, 135, 25);
 	  	add(createCustBtn);
 	  	
