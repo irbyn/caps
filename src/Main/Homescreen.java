@@ -48,7 +48,7 @@ public class Homescreen extends JFrame {
  	   
  	   CreateConnection conn = new CreateConnection();
  	   
-    	Mycolour = Color.decode("#555500");
+    	Mycolour = Color.decode("#eeeeee");
     	
         // setting up JFrame
         getContentPane().setLayout(null);
@@ -58,7 +58,7 @@ public class Homescreen extends JFrame {
     
         // creating main button JPanel (blue)
         btnPanel = new JPanel();
-        btnPanel.setBackground(Mycolour);
+   //     btnPanel.setBackground(Mycolour);
         btnPanel.setBounds(0, 0, 1100, 40);
         btnPanel.setPreferredSize(new Dimension(1100, 40));
         getContentPane().add(btnPanel);
@@ -76,7 +76,7 @@ public class Homescreen extends JFrame {
         
         // creating main content JPanel (red)
         contentPanel = new JPanel();
-        contentPanel.setBackground(Color.BLACK);
+//        contentPanel.setBackground(Mycolour);
         contentPanel.setBounds(0, 40, 1100, 630);
         contentPanel.setPreferredSize(new Dimension(1100, 630));
         getContentPane().add(contentPanel);

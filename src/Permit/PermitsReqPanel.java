@@ -37,11 +37,12 @@ import Main.*;
 
 class PermitsReqPanel extends JPanel {
 	
-	private int [] columnWidth = {6, 30, 30, 20, 20, 20};
-	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
+	private int [] columnWidth = {20, 150, 150, 100, 100, 100};
+	private String qry = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
 	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String param = "";  
 	private ResultSet rs;
+	private ResultSet rs2;
 	
 	private String[] doctype = {"NONE","Rates Notice","Certificate of Title", "Lease Agreement", "Sale & Purchase", "Other"};
 	private String[] firestyle = {"FS","IS", "IB","Other"};
@@ -109,18 +110,18 @@ class PermitsReqPanel extends JPanel {
 	private String dbURL = "";
 	
 	private ConnDetails conDeets;	
+	private PermitPane pp;
 
 	  public PermitsReqPanel(ConnDetails conDeets, PermitPane pp)
       {   
+		  this.conDeets = conDeets;
+		  this.pp = pp;
       	//Get User connection details
-  		user = conDeets.getUser();
+/*  		user = conDeets.getUser();
   		pass = conDeets.getPass();
   		dbURL = conDeets.getURL();
-
-/*  		System.out.println("user  : " + user);
-  		System.out.println("pass  : " + pass);
-  		System.out.println("dbURL : " + dbURL);
-*/		  
+  		
+*/	  
 	//	  connecting = new CreateConnection();
 	  	 		  	
 		    model1 = new DefaultTableModel();  
@@ -301,7 +302,6 @@ class PermitsReqPanel extends JPanel {
 	        
 		  	tablePanel.add(scrollPane, BorderLayout.CENTER);
 		  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);        
-	//	  	this.add(infoPanel, BorderLayout.SOUTH);
 		  	
 		  	permitsTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 				@Override
@@ -309,7 +309,8 @@ class PermitsReqPanel extends JPanel {
 					if (!arg0.getValueIsAdjusting()){
 						try{
 						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
-			        	updatePermitDetails(param);
+						
+						updatePermitDetails(param);
 						} catch (IndexOutOfBoundsException e){
 							//
 						}
@@ -322,74 +323,52 @@ class PermitsReqPanel extends JPanel {
 		  	spaceHeader();  	
 	  }
 	  
-	    public void spaceHeader() {
-	        int i;
-	        TableColumn tabCol = columnModel.getColumn(0);
-	        for (i=0; i<columnWidth.length; i++){
-	             tabCol = columnModel.getColumn(i);
-	            tabCol.setPreferredWidth(columnWidth[i]*5);
-	        }
-	        header.repaint();
-	  }
-	    
-	    
-	    
-	    public JTable getPermitsTbl(){
-	    	return permitsTbl;
-	    }
-	    
-	    
-	  
-/*		private void readPermitsRequired() {
-	        try
-	        {
-	        	Connection conn = connecting.CreateConnection();
-	        	PreparedStatement st =conn.prepareStatement(procedure);
-	        	ResultSet rs = st.executeQuery();
-	        	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs));
-	      
-	        	conn.close();	
-	        }
-	        catch(Exception ex)
-	        { 
-	        JOptionPane.showMessageDialog(null, ex.toString());
-	        }	  	
- 	}	
-		*/
+
 		
 		private void updatePermitDetails(String parameter) {
-	        try
+			
+			
+			rs2 = pp.getDetails(qry, param, conDeets);
+			System.out.println("" + qry);
+			System.out.println("" + param);
+			System.out.println("" + conDeets.toString());
+/*	        try
 	        {
 	        	Connection conn = connecting.CreateConnection(conDeets);
-	        	PreparedStatement st2 =conn.prepareStatement(result2 + parameter);
+	        	PreparedStatement st2 =conn.prepareStatement(qry + parameter);
 	        	ResultSet rs2 = st2.executeQuery();
 	    
-	                //Retrieve by column name
-	        	 while(rs2.next()){
-	        		 
-	        		 detailsTxtArea.setText("\n INVOICE:\t" + param + "\n");
-	        		 detailsTxtArea.append( " CLIENT:\t" + rs2.getString("CustomerName") + "\n\n");
-	        		 detailsTxtArea.append( " SITE:\t" + rs2.getString("StreetAddress") + "\n");
-	        		 detailsTxtArea.append( "\t" + rs2.getString("Suburb") + "\n\n");
-	        		 detailsTxtArea.append( " POSTAL:\t" + rs2.getString("CustomerAddress") + "\n");
-	        		 detailsTxtArea.append( "\t" + rs2.getString("CustomerSuburb") + "\n");
-	        		 detailsTxtArea.append( "\t" + rs2.getString("CustomerPostCode") + "\n\n");
-	        		 detailsTxtArea.append( " PHONE:\t" + rs2.getString("CustomerPhone") + "\n");
-	        		 detailsTxtArea.append( " MOBILE:\t" + rs2.getString("CustomerMobile") + "\n\n");
-	        		 detailsTxtArea.append( " EMAIL:\t" + rs2.getString("CustomerEmail") + "\n");
+*/	                //Retrieve by column name
+/*	        	 try {
+					while(rs2.next()){
+						 
+						 detailsTxtArea.setText("\n INVOICE:\t" + param + "\n");
+						 detailsTxtArea.append( " CLIENT:\t" + rs2.getString("CustomerName") + "\n\n");
+						 detailsTxtArea.append( " SITE:\t" + rs2.getString("StreetAddress") + "\n");
+						 detailsTxtArea.append( "\t" + rs2.getString("Suburb") + "\n\n");
+						 detailsTxtArea.append( " POSTAL:\t" + rs2.getString("CustomerAddress") + "\n");
+						 detailsTxtArea.append( "\t" + rs2.getString("CustomerSuburb") + "\n");
+						 detailsTxtArea.append( "\t" + rs2.getString("CustomerPostCode") + "\n\n");
+						 detailsTxtArea.append( " PHONE:\t" + rs2.getString("CustomerPhone") + "\n");
+						 detailsTxtArea.append( " MOBILE:\t" + rs2.getString("CustomerMobile") + "\n\n");
+						 detailsTxtArea.append( " EMAIL:\t" + rs2.getString("CustomerEmail") + "\n");
 
-	    	        lotTxtBx.setText(rs2.getString("Lot"));
-	    	        dpTxtBx.setText(rs2.getString("DP"));
-	    	        consentTxtBx.setText(rs2.getString("Consent"));
-	    	        buildingTxtBx.setText(rs2.getString("Building"));
-	    	        valueTxtBx.setText(rs2.getString("Unit_Level"));
-	    	        yearTxtBx.setText(rs2.getString("YearConstructed"));
-	    	        locationTxtBx.setText(rs2.getString("Fire_Location"));
-	    	        valueTxtBx.setText(rs2.getString("Value"));	                
-	        	 }
+					    lotTxtBx.setText(rs2.getString("Lot"));
+					    dpTxtBx.setText(rs2.getString("DP"));
+					    consentTxtBx.setText(rs2.getString("Consent"));
+					    buildingTxtBx.setText(rs2.getString("Building"));
+					    valueTxtBx.setText(rs2.getString("Unit_Level"));
+					    yearTxtBx.setText(rs2.getString("YearConstructed"));
+					    locationTxtBx.setText(rs2.getString("Fire_Location"));
+					    valueTxtBx.setText(rs2.getString("Value"));	                
+					 }
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 	        	 
 	        	 
-		        	PreparedStatement st3 =conn.prepareStatement(result3 + parameter);
+/*		        	PreparedStatement st3 =conn.prepareStatement(result3 + parameter);
 		        	
 		        	ResultSet rs3 = null;
 		        	rs3 = st3.executeQuery();
@@ -446,6 +425,24 @@ class PermitsReqPanel extends JPanel {
 	        { 
 	        JOptionPane.showMessageDialog(null, ex.toString());
 	        }	  	
- 	}	
+*/	}	
 		
+	  
+	    public void spaceHeader() {
+	        int i;
+	        TableColumn tabCol = columnModel.getColumn(0);
+	        for (i=0; i<columnWidth.length; i++){
+	             tabCol = columnModel.getColumn(i);
+	            tabCol.setPreferredWidth(columnWidth[i]);
+	        }
+	        header.repaint();
+	  }
+	    
+	    
+	    
+	    public JTable getPermitsTbl(){
+	    	return permitsTbl;
+	    }
+	    
+
 }

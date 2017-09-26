@@ -33,7 +33,6 @@ import net.proteanit.sql.DbUtils;
 
 class CCCToCounPanel extends JPanel {
 	
-	private int [] columnWidth = {6, 30, 30, 20, 20, 20};
 	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
 	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String param = "";  
@@ -74,11 +73,7 @@ class CCCToCounPanel extends JPanel {
   		user = conDeets.getUser();
   		pass = conDeets.getPass();
   		dbURL = conDeets.getURL();
-  		
-/*  		System.out.println("user  : " + user);
-  		System.out.println("pass  : " + pass);
-  		System.out.println("dbURL : " + dbURL);
-*/		  
+  				  
 		  connecting = new CreateConnection();
 	  	 		  	
 		    model1 = new DefaultTableModel();  
@@ -133,7 +128,6 @@ class CCCToCounPanel extends JPanel {
 	        
 		  	tablePanel.add(scrollPane, BorderLayout.CENTER);
 		  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);        
-	//	  	this.add(infoPanel, BorderLayout.SOUTH);
 		  	
 		  	permitsTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 				@Override
@@ -141,6 +135,7 @@ class CCCToCounPanel extends JPanel {
 					if (!arg0.getValueIsAdjusting()){
 						try{
 						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
+						
 			        	updatePermitDetails(param);
 						} catch (IndexOutOfBoundsException e){
 							//
@@ -148,21 +143,8 @@ class CCCToCounPanel extends JPanel {
 					}
 				}
 		  	});
-		  	
-	//	  	rs = pp.getTableData();		  	
-	//	  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs));  	
-	//	  	spaceHeader();
-	  }
+		  		  }
 	  
-	public void spaceHeader() {
-	        int i;
-	        TableColumn tabCol = columnModel.getColumn(0);
-	        for (i=0; i<columnWidth.length; i++){
-	             tabCol = columnModel.getColumn(i);
-	            tabCol.setPreferredWidth(columnWidth[i]*5);
-	        }
-	        header.repaint();
-	  }
 	    
 	    public JTable getPermitsTbl(){
 	    	return permitsTbl;

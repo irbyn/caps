@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Enumeration;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -17,6 +18,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import Main.*;
@@ -40,6 +42,7 @@ public class PermitPane extends JPanel
 	private ConnDetails conDeets;
 	
 	private ResultSet results;
+	private ResultSet qryResults;
 	private int tabIndex = 0;
 	
 	private PermitsReqPanel permitReq;
@@ -59,7 +62,7 @@ public class PermitPane extends JPanel
 	
         public PermitPane(ConnDetails conDeets)
         {   
-        	
+
         	//Get User connection details
     		user = conDeets.getUser();
     		pass = conDeets.getPass();
@@ -106,24 +109,36 @@ public class PermitPane extends JPanel
                         getResults(tabIndex, conDeets); 
                         ResultSet r1 = results;
                         
+                        
                         tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));               
                         TableColumnModel tcm = tablez[tabIndex].getColumnModel();
-                        tcm.getColumn(0).setMaxWidth(60);
-                        tcm.getColumn(1).setMaxWidth(120);
-                        tcm.getColumn(2).setMaxWidth(150);
-                        tcm.getColumn(9).setMaxWidth(100);
-                        tcm.getColumn(10).setMaxWidth(100);
-                        tcm.getColumn(11).setMaxWidth(100);
+                         int cols = tcm.getColumnCount();
 
+                         if (cols == 6){
+                        	 int[] colWidths = new int[]{20, 150, 150, 100, 100, 100}; 
+                        	 spaceHeader(colWidths, tcm);
+                         } else if (cols == 9){
+                        	 int[] colWidths = new int[]{30, 100, 120, 80, 40, 40, 40, 40, 40};   
+                        	 spaceHeader(colWidths, tcm);
+                         }else {
+                        	 int[] colWidths = new int[]{30, 100, 120, 80, 30, 30, 40, 40, 40, 30, 30};    
+                        	 spaceHeader(colWidths, tcm);
+                         }
                     }
                 }
-            });
-    		
+            });   		
         }
         
         
-        public ResultSet getResults(int ind, ConnDetails connDeets){
-        	
+        private void spaceHeader(int[] widths, TableColumnModel tcm){
+        	int cols = tcm.getColumnCount();
+            for (int i = 0; i < cols; i++){
+           	 tcm.getColumn(i).setPreferredWidth(widths[i]);
+            }
+        }
+        
+        
+        public ResultSet getResults(int ind, ConnDetails connDeets){      	
         	
             try
 	        {
@@ -141,8 +156,31 @@ public class PermitPane extends JPanel
         		return results;       		            
         }
         
+        public ResultSet getDetails(String qry, String param, ConnDetails connDeets){      	
+        	
+            try
+	        {
+	        	Connection conn = connecting.CreateConnection(conDeets);
+	        	PreparedStatement st2 =conn.prepareStatement(qry + param);
+	 //       	rs2 = st2.executeQuery();
+	        	
+	//        	Connection conn = connecting.CreateConnection(connDeets);
+	//        	PreparedStatement st =conn.prepareStatement(qry);	
+	        	qryResults = st2.executeQuery();
+	        	if (qryResults==null){
+	    			System.out.println("null query");
+	        	//	getResults(0, conDeets);
+	        	}
+	        }
+	        catch(Exception ex)
+	        { 
+	        JOptionPane.showMessageDialog(null, ex.toString());
+	        }
+        		return qryResults;       		            
+        }
         
         
+  /*      
         public ResultSet getTableData(){
         	if (results==null){
         //		System.out.println("getResults(0, conDeets)");
@@ -153,5 +191,5 @@ public class PermitPane extends JPanel
         		return results;
         	}       	
         }
-               
+               */
 }
