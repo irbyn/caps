@@ -2,7 +2,6 @@ package Main;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Font;
 
 import javax.swing.JFrame;
@@ -51,16 +50,18 @@ public class LoginWindow extends JFrame{
         lblUsername.setBounds(98, 64, 74, 14);
         logPanel.add(lblUsername);
         
-        lblPassword = new JLabel("Password:");
-        lblPassword.setBounds(98, 113, 86, 14);
-        logPanel.add(lblPassword);
-	  	
-	  	txtBxUsername = new JTextField();
+        //preetered data needs to be deleted
+        txtBxUsername = new JTextField("Khgv92367hdkfug9");
 	  	txtBxUsername.setBounds(194, 61, 123, 20);
 	  	txtBxUsername.setColumns(10);
 	  	logPanel.add(txtBxUsername);
 	  	
-	  	txtBxPassword = new JPasswordField();
+        lblPassword = new JLabel("Password:");
+        lblPassword.setBounds(98, 113, 86, 14);
+        logPanel.add(lblPassword);
+	  	
+        //preetered data needs to be deleted
+	  	txtBxPassword = new JPasswordField("Locei02h84b5KJUVaW");
 	  	txtBxPassword.setBounds(194, 110, 123, 20);
 	  	logPanel.add(txtBxPassword);
         
@@ -71,11 +72,14 @@ public class LoginWindow extends JFrame{
         loginBtn = new JButton("Login");
         loginBtn.setBounds(231, 164, 86, 24);
         logPanel.add(loginBtn);
-
+        
         //Action listeners for each button
         loginBtn.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent e) { 
-        		homescreen = new Homescreen();
+        	public void actionPerformed(ActionEvent e) {
+        		//Getting password and username from the text boxes
+        		String user=txtBxUsername.getText();
+        		String pwd = new String(txtBxPassword.getPassword());
+        		homescreen = new Homescreen(user, pwd);
         		homescreen.setVisible(true);
         		setVisible(false); //Make the screen invisible
         		dispose();//Close the login window
@@ -92,12 +96,9 @@ public class LoginWindow extends JFrame{
         pack();
     }
     
-    
     public static void main(String[] arguments) {
         // creating JFrame object and setting it visible
         LoginWindow frame = new LoginWindow();
         frame.setVisible(true);
-        
-
     }
 }
