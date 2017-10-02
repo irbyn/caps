@@ -53,6 +53,8 @@ public class PermitPane extends JPanel
 	private CCCApprovedPanel cccApproved;
 	private CCCToClientPanel cccToClient;
 	
+	private Boolean lockForm;
+	
 	// Stored procedures to fill tables (Triggered by tab selection)
 	private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.p_PermitsRequired", // procedure[0]
 												"EXEC AWS_WCH_DB.dbo.p_PermitsReceived", // procedure[1]
@@ -65,7 +67,7 @@ public class PermitPane extends JPanel
         public PermitPane(ConnDetails conDeets)
         {   
 
-
+        	lockForm = false;
     		
   		  connecting = new CreateConnection();
         	
@@ -73,7 +75,7 @@ public class PermitPane extends JPanel
     		JTabbedPane permitP = new JTabbedPane();
     		permitP.setPreferredSize(new Dimension(1070, 610));
  
-    		permitReq = new PermitsReqPanel(conDeets, this);
+    		permitReq = new PermitsReqPanel(lockForm, conDeets, this);
     		permitRecv = new RecvPermitPanel(conDeets, this);
     		prodStmnt = new ProdStatementPanel(conDeets, this);
     		cccToCouncil = new CCCToCounPanel(conDeets, this);
@@ -102,6 +104,7 @@ public class PermitPane extends JPanel
                 @Override
                 public void stateChanged(ChangeEvent e) {
                     if (e.getSource() instanceof JTabbedPane) {
+                  //  	if(!lockForm){
                     	
                         JTabbedPane pane = (JTabbedPane) e.getSource();
                         tabIndex = pane.getSelectedIndex();
@@ -124,14 +127,21 @@ public class PermitPane extends JPanel
                             	 int[] colWidths = new int[]{30, 100, 120, 80, 40, 40, 40, 40, 40};   
                             	 spaceHeader(colWidths, tcm);
                          }else {
-                        	 int[] colWidths = new int[]{30, 100, 120, 80, 30, 30, 40, 40, 40, 30, 30};    
+                        	 int[] colWidths = new int[]{20, 80, 100, 80, 30, 30, 40, 40, 60, 30, 30};    
                         	 spaceHeader(colWidths, tcm);
                          }
                     }
-                }
+                    }
+//                }
             });   		
         }
         
+	    public void setFormsLocked() {
+	    	lockForm = true;
+	  }	    
+	    public void setFormsUnLocked() {
+	    	lockForm = false;
+	  }	  
         
         private void spaceHeader(int[] widths, TableColumnModel tcm){
         	int cols = tcm.getColumnCount();
