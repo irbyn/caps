@@ -472,7 +472,7 @@ class PermitsReqPanel extends JPanel {
         	if (sqex.getErrorCode() == 547){
         		JOptionPane.showMessageDialog(null, "Fire ID NOT IN SYSTEM!");
         	}else {
-        	JOptionPane.showMessageDialog(null, sqex.getErrorCode());
+        	JOptionPane.showMessageDialog(null, sqex);
         	}
         }
         catch(Exception ex)
