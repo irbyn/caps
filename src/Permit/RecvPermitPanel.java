@@ -2,14 +2,18 @@ package Permit;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -19,9 +23,11 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SpinnerDateModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -39,10 +45,11 @@ import Main.*;
 class RecvPermitPanel extends JPanel {
 	
 	private String qry = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
-	private String qry2 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+//	private String qry2 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String param = "";  
 	private ResultSet rs;
 	private ResultSet rs2;
+	private Boolean rowSelected;
 	
 //	private CreateConnection connecting;
 	
@@ -61,18 +68,19 @@ class RecvPermitPanel extends JPanel {
 	private JLabel receivedLbl;
 	private JCheckBox receivedChk;
 	
+	private JLabel receivedDateLbl;
+	private JSpinner receivedDate;
+	
 	private JButton cancelPermitReqBtn; 
 	private JButton savePermitReqBtn; 
 	
-/*	private String user = "";
-	private String pass = "";
-	private String dbURL = "";*/
-	
+	private Boolean lockForm;
 	private ConnDetails conDeets;
 	private PermitPane pp;
 
-	  public RecvPermitPanel(ConnDetails conDetts, PermitPane ppn)
+	  public RecvPermitPanel(Boolean lockForm, ConnDetails conDetts, PermitPane ppn)
       {   
+		  this.lockForm = lockForm;
 		  this.conDeets = conDetts;
 		  this.pp = ppn;
       	//Get User connection details
@@ -110,19 +118,31 @@ class RecvPermitPanel extends JPanel {
 	        infoPanel.add(detailsTxtArea);
 	        
 	        consentLbl = new JLabel("Consent:");
-	        consentLbl.setBounds(825, 20, 70, 20);
+	        consentLbl.setBounds(825, 80, 70, 20);
 	        infoPanel.add(consentLbl);
 	        consentTxtBx = new JTextField(10);
-	        consentTxtBx.setBounds(895, 20, 150, 20);
+	        consentTxtBx.setBounds(895, 80, 150, 20);
 	        infoPanel.add(consentTxtBx);
 	        
-	        receivedLbl = new JLabel("Wetback:");
-	        receivedLbl.setBounds(825, 110, 70, 20);
-	        infoPanel.add(receivedLbl);
+	        receivedLbl = new JLabel("Permit Issued:");
+	        receivedLbl.setBounds(800, 110, 95, 20);
+	        infoPanel.add(receivedLbl);			
 	        receivedChk = new JCheckBox("");
 	        receivedChk.setSelected(false);
 	        receivedChk.setBounds(895, 110, 150, 20);
 	        infoPanel.add(receivedChk);
+	        
+	        receivedDateLbl = new JLabel("Date Issued:");
+	        receivedDateLbl.setVisible(false);
+	        receivedDateLbl.setBounds(800, 140, 95, 20);
+	        infoPanel.add(receivedDateLbl);
+	        
+	        SimpleDateFormat psModel = new SimpleDateFormat("dd.MMM.yyyy");
+	        receivedDate = new JSpinner(new SpinnerDateModel());
+	        receivedDate.setVisible(false);
+	        receivedDate.setEditor(new JSpinner.DateEditor(receivedDate, psModel.toPattern()));
+	        receivedDate.setBounds(895, 140, 150, 20);
+			infoPanel.add(receivedDate);
 	        
 	        cancelPermitReqBtn = new JButton("Cancel");
 	        cancelPermitReqBtn.setBounds(720, 260, 150, 25);
@@ -137,12 +157,67 @@ class RecvPermitPanel extends JPanel {
 	        this.add(infoPanel);
 	        
 		  	tablePanel.add(scrollPane, BorderLayout.CENTER);
-		  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);        
+		  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);      
 		  	
+		  	savePermitReqBtn.addActionListener( new ActionListener()
+		  	{
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+			        { 	// Check a Customer has been selected
+			        	if (rowSelected){
+			        		if (getReceived()){
+				        		if (getConsentNum().length() == 0){
+				        			JOptionPane.showMessageDialog(null, "Consent Number must be entered!");
+				        		}else {
+				        			JOptionPane.showMessageDialog(null, "Validate/transform Consent number, then update with received timestamp");
+				        		}
+				        		
+			        		} else {
+			        			JOptionPane.showMessageDialog(null, "Validate/transform, then update Consent number");
+			        		}
+
+			        			
+			        		
+			        		
+
+			        	}else {	//	No Customer selected
+			        		JOptionPane.showMessageDialog(null, "No details to Save");			        		
+			        	}
+				    }					
+				}
+		  	});
+
+		  	cancelPermitReqBtn.addActionListener( new ActionListener()
+		  	{
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+			        { 
+			        	clearFields();
+				    }					
+				}
+		  	});
+		  	
+		  	receivedChk.addActionListener(new ActionListener() {
+
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	            	if (getReceived()){
+	            		receivedDate.setVisible(true);
+	            		receivedDateLbl.setVisible(true);
+	            	}else {
+	            		receivedDate.setVisible(false);
+	            		receivedDateLbl.setVisible(false);
+	            	}
+	            	
+	            }
+	        });
+	        
 		  	permitsTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 				@Override
 				public void valueChanged(ListSelectionEvent arg0) {
 					if (!arg0.getValueIsAdjusting()){
+						rowSelected=true;
+			//			pp.setFormsLocked();
 						try{
 						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
 			        	updatePermitDetails(param);
@@ -152,14 +227,50 @@ class RecvPermitPanel extends JPanel {
 					}
 				}
 		  	});
+		  	
 	  }
 	  
 	  
 	  
 	    
-	    public JTable getPermitsTbl(){
-	    	return permitsTbl;
-	    }
+	public String getConsentNum() {
+		return consentTxtBx.getText();
+	}
+    public Boolean getReceived(){
+    	if (receivedChk.isSelected()){
+    		return true;
+    	}
+    	else{
+	    	return false;	    		
+    	}
+    }
+    public String getReceivedDate(){
+    	return receivedDate.toString();
+    }
+    
+    
+	public JTable getPermitsTbl(){
+	    return permitsTbl;
+	}
+		
+	private void clearFields(){
+			  
+	permitsTbl.clearSelection();
+	rowSelected=false;
+	for(Component control : infoPanel.getComponents())
+		{
+	   		if(control instanceof JTextField)
+	      	{
+	      	  	JTextField ctrl = (JTextField) control;
+	      	  	ctrl.setText("");
+	    	}
+	   		else if (control instanceof JComboBox)
+	      	{
+	      	 	JComboBox ctrl = (JComboBox) control;
+	      	 	ctrl.setSelectedIndex(0);
+	      	}
+		}
+	}
 		
 	private void updatePermitDetails(String parameter) {
 		
@@ -167,91 +278,36 @@ class RecvPermitPanel extends JPanel {
 		
         	 try {
 	        	 while(rs2.next()){
-	        		 
-	        		 detailsTxtArea.setText("\n INVOICE:\t" + param + "\n");
-	        		 detailsTxtArea.append( " CLIENT:\t" + rs2.getString("CustomerName") + "\n\n");
-	        		 detailsTxtArea.append( " SITE:\t" + rs2.getString("StreetAddress") + "\n");
-	        		 detailsTxtArea.append( "\t" + rs2.getString("Suburb") + "\n\n");
-	        		 detailsTxtArea.append( " POSTAL:\t" + rs2.getString("CustomerAddress") + "\n");
-	        		 detailsTxtArea.append( "\t" + rs2.getString("CustomerSuburb") + "\n");
-	        		 detailsTxtArea.append( "\t" + rs2.getString("CustomerPostCode") + "\n\n");
-	        		 detailsTxtArea.append( " PHONE:\t" + rs2.getString("CustomerPhone") + "\n");
-	        		 detailsTxtArea.append( " MOBILE:\t" + rs2.getString("CustomerMobile") + "\n\n");
-	        		 detailsTxtArea.append( " EMAIL:\t" + rs2.getString("CustomerEmail") + "\n");
-
-/*	    	        lotTxtBx.setText(rs2.getString("Lot"));
-	    	        dpTxtBx.setText(rs2.getString("DP"));
-	    	        consentTxtBx.setText(rs2.getString("Consent"));
-	    	        buildingTxtBx.setText(rs2.getString("Building"));
-	    	        valueTxtBx.setText(rs2.getString("Unit_Level"));
-	    	        yearTxtBx.setText(rs2.getString("YearConstructed"));
-	    	        locationTxtBx.setText(rs2.getString("Fire_Location"));
-	    	        valueTxtBx.setText(rs2.getString("Value"));	                
-*/	        	 					 }
+	        									    					
+	        	String invoice 			= rs2.getString("Invoice");
+	        	String customerName 	= rs2.getString("CustomerName");
+	        	String customerAddress 	= rs2.getString("CustomerAddress");
+	        	String customerSuburb 	= rs2.getString("CustomerSuburb");
+	        	String customerPostCode= rs2.getString("CustomerPostCode");
+	        	String customerPhone 	= rs2.getString("CustomerPhone");
+	        	String customerMobile 	= rs2.getString("CustomerMobile");
+	        	String customerEmail 	= rs2.getString("CustomerEmail");
+	        	String streetAddress 	= rs2.getString("StreetAddress");
+	        	String suburb 			= rs2.getString("Suburb");					
+	        							
+	        	String sb = " INVOICE: " + param + "\n" +
+	        				" CLIENT:\t" + customerName + "\n\n" + 
+	        				" SITE:\t" + streetAddress + "\n" +
+	        				"\t" + suburb + "\n\n" + 
+	        				" POSTAL:\t" + customerAddress + "\n" +
+	        				"\t" + customerSuburb + "\n" + 
+	        				"\t" + customerPostCode + "\n\n" +
+	        				" PHONE:\t" + customerPhone + "\n" + 
+	   					 	" MOBILE:\t" + customerMobile + "\n\n" +
+	        				" EMAIL:\t" + customerEmail + "\n";
+	        	detailsTxtArea.setText(sb);
+	        							 						        	 					 }
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 	        	 
-	/*        	 
-		        	PreparedStatement st3 =conn.prepareStatement(result3 + parameter);
-		        	
-		        	ResultSet rs3 = null;
-		        	rs3 = st3.executeQuery();
-		    
-		        	 while(rs3.next()){
-	*//*	        		 
-		        	if (!rs3.getString("FireID").equals(parameter)){
-		                //Retrieve by column name
-		        		fireIDTxtBx.setText("");
-		        		makeTxtBx.setText("");
-		        		makeTxtBx.setText("");
-		        		modelTxtBx.setText("");
-		    	        ecanTxtBx.setText("");
-		    	        nelsonTxtBx.setText("");
-		    	        lifeTxtBx.setText("");
-		    	        fireCmbo.setSelectedIndex(0);
-		    	        fireCmbo.setSelectedIndex(0);
-		        	
-		        		fireIDTxtBx.setText(rs3.getString("FireID"));
-		        		makeTxtBx.setText(rs3.getString("Make"));
-		        		makeTxtBx.setText(rs3.getString("Make"));
-		        		modelTxtBx.setText(rs3.getString("Model"));
-		    	        ecanTxtBx.setText(rs3.getString("ECAN"));
-		    	        nelsonTxtBx.setText(rs3.getString("Nelson"));
-		   // 	        lifeTxtBx.setText(rs2.getString("Life"));
-		    	        
-		    	        String ft = rs3.getString("FireType");
-		    	        if (ft.equals("FS")){
-		    	        	fireCmbo.setSelectedIndex(0);
-		    	        } else if(ft.equals("IS")){
-		    	        	fireCmbo.setSelectedIndex(1);
-		    	        } else if(ft.equals("IB")){
-		    	        	fireCmbo.setSelectedIndex(2);
-		    	        } else{
-		    	        	fireCmbo.setSelectedIndex(3);
-		    	        }
-		    	        
-		    	        String fl = rs3.getString("Fuel");
-		    	        if (fl.equals("Wood")){
-		    	        	fireCmbo.setSelectedIndex(0);
-		    	        } else if(fl.equals("Pellet")){
-		    	        	fireCmbo.setSelectedIndex(1);
-		    	        } else if(fl.equals("Oil")){
-		    	        	fireCmbo.setSelectedIndex(2);
-		    	        } else{
-		    	        	fireCmbo.setSelectedIndex(3);
-		    	        }
-		        	 }
-		        } 
-		        
-	        	conn.close();	
-	        }
-	        catch(Exception ex)
-	        { 
-	        JOptionPane.showMessageDialog(null, ex.toString());
-	        }	
-*/
+	
  	}	
 		
 }

@@ -50,6 +50,9 @@ class PermitsReqPanel extends JPanel {
 	
 	private int [] columnWidth = {20, 150, 150, 100, 100, 100};
 	private String upConsent = "EXEC AWS_WCH_DB.dbo.p_PermitUpdateConsent ";
+	private String upSent = "EXEC AWS_WCH_DB.dbo.p_PermitUpdateSent ";
+	private String upFire = "EXEC AWS_WCH_DB.dbo.p_PermitUpdateFire ";
+	
 	private String qry = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
 	private String qry2 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String param = "";  
@@ -60,9 +63,9 @@ class PermitsReqPanel extends JPanel {
 	private Boolean validEntries = true;	
 	private String msg ="";
 	
-	private JTextField ctrl;
+//	private JTextField ctrl;
 	
-	private String[] doctype = {"NONE","Rates Notice","Certificate of Title", "Lease Agreement", "Sale & Purchase", "Other"};
+	private String[] doctype = {"NONE","[Rates Notice]","[Certificate of Title]", "[Lease Agreement]", "[Sale & Purchase]", "Other"};
 	private String[] firestyle = {"FS","IS", "IB","Other"};
 	private String[] fueltype = {"Wood","Pellet", "Oil","Other"};
 	
@@ -75,8 +78,7 @@ class PermitsReqPanel extends JPanel {
 	private JTable permitsTbl;
 	private DefaultTableModel model1;
 	
-	private JTextArea detailsTxtArea;
-	
+	private JTextArea detailsTxtArea;	
 	private JLabel lotLbl;
 	private JTextField lotTxtBx;
 	private JLabel dpLbl;
@@ -125,11 +127,7 @@ class PermitsReqPanel extends JPanel {
 	private JButton cancelPermitReqBtn; 
 	private JButton savePermitReqBtn; 
 	private JButton saveFireBtn; 
-	
-	private String user = "";
-	private String pass = "";
-	private String dbURL = "";
-	
+
 	private Boolean lockForm;
 	private ConnDetails conDeets;
 	private PermitPane pp;
@@ -140,8 +138,8 @@ class PermitsReqPanel extends JPanel {
 		  this.conDeets = conDetts;
 		  this.pp = ppn;
 
-  		  connecting = new CreateConnection();
-		  infoFields = new JTextField[14];
+  		  connecting = new CreateConnection();	// 
+		  infoFields = new JTextField[14];		// Array to hold user JTextField names 
 		  rowSelected = false;
 		  
 		    model1 = new DefaultTableModel();  
@@ -172,6 +170,7 @@ class PermitsReqPanel extends JPanel {
 	        detailsTxtArea.setEditable(false);
 	        infoPanel.add(detailsTxtArea);
      	        
+// User entry fields
 	        lotLbl = new JLabel("Lot:");
 	        lotLbl.setBounds(305, 20, 70, 20);
 	        infoPanel.add(lotLbl);
@@ -318,22 +317,8 @@ class PermitsReqPanel extends JPanel {
 	        fuelCmbo.setBackground(Color.WHITE);
 	        fuelCmbo.setBounds(895, 200, 150, 20);
 	        infoPanel.add(fuelCmbo);
-/*	        int i;
-	        for (i = 0; i<infoFields.length; i++){
-	        	infoFields[i].addFocusListener(new FocusListener() {
-					@Override
-					public void focusGained(FocusEvent e) {
-						infoFields[i].selectAll();						
-					}
-
-					@Override
-					public void focusLost(FocusEvent e) {
-						infoFields[i].select(0,0);
-					}
-	        });
-	        }
-*/
 	        
+//	Form Buttons
 	        prntConsentBtn = new JButton("Print Consent");
 	        prntConsentBtn.setBounds(545, 260, 150, 25);
 	        infoPanel.add(prntConsentBtn);
@@ -349,6 +334,7 @@ class PermitsReqPanel extends JPanel {
 	        saveFireBtn = new JButton("Save Fire Details");
 	        saveFireBtn.setBounds(375, 200, 150, 25);
 	        infoPanel.add(saveFireBtn);
+
 
 	        this.setLayout(null);
 	        this.add(tablePanel); 
@@ -380,19 +366,18 @@ class PermitsReqPanel extends JPanel {
 		  	{
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-			        { 
+			        { 	// Check a Customer has been selected
 			        	if (rowSelected){
-			        		validator val = new validator();
-			        		val.validatePermit(infoFields);
-			        		if (!val.getValidEntries()){
+			        		validator val = new validator();	
+			        		val.validatePermit(infoFields);		// validate/transform user data
+			        		if (!val.getValidEntries()){		// display errors
 			        			JOptionPane.showMessageDialog(null, val.getmsg());
 			        		}
-			        		else {
-			        			updateConsent(param);
+			        		else {	// update database
+			        			updateConsent();
 			        		}
-			        	}else {
-			        		JOptionPane.showMessageDialog(null, "No details to Save");
-			        		
+			        	}else {	//	No Customer selected
+			        		JOptionPane.showMessageDialog(null, "No details to Save");			        		
 			        	}
 				    }					
 				}
@@ -411,76 +396,90 @@ class PermitsReqPanel extends JPanel {
 	        prntConsentBtn.addActionListener( new ActionListener()
 		  	{
 				@Override
-				public void actionPerformed(ActionEvent arg0) {
-			        { 
-				        JOptionPane.showMessageDialog(null, "Sorry... Printing not enabled");
-				    }					
+				public void actionPerformed(ActionEvent arg0) 
+			    { 
+			        // Check a Customer has been selected
+			        if (rowSelected){
+			        		        	
+			        	int input = JOptionPane.showConfirmDialog(null,"Mark Consent as Printed and Sent to Council?\n "
+			        			+ "This Customer will no longer display on this page!",  "Mark Consent Sent?", JOptionPane.YES_NO_OPTION);
+			        	if (input == 0){
+
+			        		updateAsSent();		        		
+					        JOptionPane.showMessageDialog(null, "Sorry... Printing not enabled");		        		
+
+			        	}
+		        	}else {	//	No Customer selected
+		        		JOptionPane.showMessageDialog(null, "No details to Print");			        				      
+			       	}
+			        
 				}
 		  	});
+		  	
 	
 		  	saveFireBtn.addActionListener( new ActionListener()
 		  	{
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-			        { 
-				        JOptionPane.showMessageDialog(null, "Sorry... Saving Fire is not enabled");
+			        { 			       
+			        		validator val = new validator();	
+			        		 JOptionPane.showMessageDialog(null, "Validation not running!");
+			        		 
+			        		 //CHECK 
+			        		 
+//			        		val.validateFire(infoFields);		// validate/transform user data
+//			        		if (!val.getValidEntries()){		// display errors
+//			        			JOptionPane.showMessageDialog(null, val.getmsg());
+//			        		}
+//			        		else {	// update database
+			        			updateFire();
+//			        		}
+	
 				    }					
 				}
 		  	});
 
-		  	
+// PRE-LOAD Table data for first tab		  	
 		  	rs = pp.getResults(0, conDeets);		
-		  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs));  	
-		  	spaceHeader();  	
+		  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+		  	spaceHeader();  
+		  	
 	  }
 	  
+/*
+ *  
+ * @param parameter
+ */
+		protected void updateConsent() {
+			
+			String update = upConsent + param + ", " + getLot() + ", " + getDP() + ", " + 
+	        		getConsent() + ", " + getBuilding() + ", " + getLevel() + ", " + 
+	        		getValue() + ", " + getYear() + ", " + getFireLocation() + ", " + 
+	        		getOwnership() + ", " + getWet() + ", " + getFireCode(); 
+			
+			 JOptionPane.showMessageDialog(null, update );
 
-	protected void updateConsent(String parameter) {
+			pp.updatePermit(update, param, conDeets);
+		}
+		
+		protected void updateAsSent() {
+			
+			String update = upSent + param; 
+			
+			 JOptionPane.showMessageDialog(null, update );
 
-        JOptionPane.showMessageDialog(null, "Trying to update P = " + param);
-        
-        Statement stmt = null;
-        Connection conn = null;    
-        ResultSet rs = null; 
-        
-    	conn = connecting.CreateConnection(conDeets);	
-    	
-    	if(conn== null){
-    		JOptionPane.showMessageDialog(null, "conn = null");
-    	}      
-        
-        
-        try
-        {
-        	conn = connecting.CreateConnection(conDeets);	
-        	
-        	if(conn== null){
-        		JOptionPane.showMessageDialog(null, "conn = null");
-        	}
-        	
-            stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);  
-            stmt.execute(upConsent + param + ", " + getLot() + ", " + getDP() + ", " + 
-            		getConsent() + ", " + getBuilding() + ", " + getLevel() + ", " + 
-            		getValue() + ", " + getYear() + ", " + getFireLocation() + ", " + 
-            		getOwnership() + ", " + getWet() + ", " + getFireCode() ); 
+			pp.updatePermit(update, param, conDeets);
+		}
+		
+		protected void updateFire() {
+			
+			String update = upFire + getFireCode() + ", " + getFireType() + ", " + getMake() + ", " + 
+			getModel() + ", " + getFuel() + ", " + getEcan() + ", " + getNelson()  + ", " + getLifeTime(); 
+			
+			 JOptionPane.showMessageDialog(null, update );
 
-            
-            JOptionPane.showMessageDialog(null, "updated row");
-       }
-        catch (SQLServerException sqex)
-        {
-        	if (sqex.getErrorCode() == 547){
-        		JOptionPane.showMessageDialog(null, "Fire ID NOT IN SYSTEM!");
-        	}else {
-        	JOptionPane.showMessageDialog(null, sqex);
-        	}
-        }
-        catch(Exception ex)
-        { 
-        JOptionPane.showMessageDialog(null, "CAUGHT UPDATE");
-        JOptionPane.showMessageDialog(null, ex.toString());
-        }
-	}
+			pp.updatePermit(update, param, conDeets);
+		}
 
 
 	private void clearFields(){
@@ -532,7 +531,8 @@ class PermitsReqPanel extends JPanel {
 						 String value 			= rs2.getString("Value");						 
 						 String fire_Location 	= rs2.getString("Fire_Location");						
 						
-						 String sb =" CLIENT:\t" + customerName + "\n\n" + 
+				        String sb = " INVOICE: " + param + "\n" +
+			        				" CLIENT:\t" + customerName + "\n\n" + 
 								 	" SITE:\t" + streetAddress + "\n" +
 								 	"\t" + suburb + "\n\n" + 
 								 	" POSTAL:\t" + customerAddress + "\n" +
@@ -551,6 +551,7 @@ class PermitsReqPanel extends JPanel {
 						 valueTxtBx.setText(value);
 						 yearTxtBx.setText(yearConstructed);
 						 locationTxtBx.setText(fire_Location);
+						 fireIDTxtBx.setText(fireID);
 					
 						 if (wetback == false){
 						 	wetChk.setSelected(false); 
@@ -567,7 +568,7 @@ class PermitsReqPanel extends JPanel {
 					    	ownerCmbo.setSelectedIndex(2); 
 					    } else if(ownershipDoc == "Lease Agreement"){
 					    	ownerCmbo.setSelectedIndex(3); 
-					    } else if(ownershipDoc == "Sale & Purchase€"){
+					    } else if(ownershipDoc == "Sale & Purchase"){
 					    	ownerCmbo.setSelectedIndex(4); 
 					    }else
 					    	ownerCmbo.setSelectedIndex(5);                
@@ -577,21 +578,18 @@ class PermitsReqPanel extends JPanel {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-	        	 updateFireDetails(param);
+	        	 updateFireDetails(fireIDTxtBx.getText());
 		}        	 
 	        
 		
-		private void updateFireDetails(String parameter) {
+		private void updateFireDetails(String fireCode) {
 			
-			rs3 = pp.getDetails(qry2, param, conDeets);
+			rs3 = pp.getDetails(qry2, fireCode, conDeets);
 
 			 try {
 		    
 		        	 while(rs3.next()){
-		        		 
-		        	if (!rs3.getString("FireID").equals(parameter)){
 		        		        		
-						 String fireID	 		= rs3.getString("FireID");
 						 String make 			= rs3.getString("Make");
 						 String model 			= rs3.getString("Model");
 						 String fireType 		= rs3.getString("FireType");
@@ -601,17 +599,6 @@ class PermitsReqPanel extends JPanel {
 						 String life 			= rs3.getString("Life");
 		        		
 		                //Retrieve by column name
-		        		fireIDTxtBx.setText("");
-		        		makeTxtBx.setText("");
-		        		makeTxtBx.setText("");
-		        		modelTxtBx.setText("");
-		    	        ecanTxtBx.setText("");
-		    	        nelsonTxtBx.setText("");
-		    	        lifeTxtBx.setText("");
-		    	        fireCmbo.setSelectedIndex(0);
-		    	        fireCmbo.setSelectedIndex(0);
-		    	        
-		        		fireIDTxtBx.setText(fireID);
 		        		makeTxtBx.setText(make);
 		        		modelTxtBx.setText(model);
 		    	        ecanTxtBx.setText(ecan);
@@ -619,27 +606,26 @@ class PermitsReqPanel extends JPanel {
 		    	        lifeTxtBx.setText(life);
 		    	        
 		    	        String ft = rs3.getString("FireType");
-		    	        if (ft.equals("FS")){
+		    	        if (ft.equals("[FS]")){
 		    	        	fireCmbo.setSelectedIndex(0);
-		    	        } else if(ft.equals("IS")){
+		    	        } else if(ft.equals("[IS]")){
 		    	        	fireCmbo.setSelectedIndex(1);
-		    	        } else if(ft.equals("IB")){
+		    	        } else if(ft.equals("[IB]")){
 		    	        	fireCmbo.setSelectedIndex(2);
 		    	        } else{
 		    	        	fireCmbo.setSelectedIndex(3);
 		    	        }
 		    	        
 		    	        String fl = rs3.getString("Fuel");
-		    	        if (fl.equals("Wood")){
+		    	        if (fl.equals("[Wood]")){
 		    	        	fireCmbo.setSelectedIndex(0);
-		    	        } else if(fl.equals("Pellet")){
+		    	        } else if(fl.equals("[Pellet]")){
 		    	        	fireCmbo.setSelectedIndex(1);
-		    	        } else if(fl.equals("Oil")){
+		    	        } else if(fl.equals("[Oil]")){
 		    	        	fireCmbo.setSelectedIndex(2);
 		    	        } else{
 		    	        	fireCmbo.setSelectedIndex(3);
 		    	        }
-		        	}
 		        	 }
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
@@ -698,7 +684,7 @@ class PermitsReqPanel extends JPanel {
 	    		locationTxtBx.setText(null);
 	    		
 	    	}
-	    	return "["+locationTxtBx.getText()+"]";
+	    	return locationTxtBx.getText();
 	    }
 	    public String getOwnership(){
 	    	String owner = ownerCmbo.getSelectedItem().toString();
@@ -720,7 +706,31 @@ class PermitsReqPanel extends JPanel {
 	    		fireIDTxtBx.setText(null);
 	    		return fireIDTxtBx.getText();
 	    	}
-	    	return "["+fireIDTxtBx.getText()+"]";
+	    	return fireIDTxtBx.getText();
+	    }
+	    
+	    public String getMake(){
+	    	return makeTxtBx.getText();
+	    }
+	    public String getModel(){
+	    	return modelTxtBx.getText();
+	    }
+	    public String getLifeTime(){
+	    	return lifeTxtBx.getText();
+	    }
+	    public String getEcan(){
+	    	return ecanTxtBx.getText();
+	    }
+	    public String getNelson(){
+	    	return nelsonTxtBx.getText();
+	    }    
+	    public String getFireType(){
+	    	String ft = fireCmbo.getSelectedItem().toString();
+	    	return ft;
+	    }
+	    public String getFuel(){
+	    	String fl = fuelCmbo.getSelectedItem().toString();
+	    	return fl;
 	    }
 
 

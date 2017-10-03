@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Enumeration;
 
 import javax.swing.JFrame;
@@ -20,6 +21,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import Main.*;
 import DB_Comms.*;
@@ -76,7 +79,7 @@ public class PermitPane extends JPanel
     		permitP.setPreferredSize(new Dimension(1070, 610));
  
     		permitReq = new PermitsReqPanel(lockForm, conDeets, this);
-    		permitRecv = new RecvPermitPanel(conDeets, this);
+    		permitRecv = new RecvPermitPanel(lockForm, conDeets, this);
     		prodStmnt = new ProdStatementPanel(conDeets, this);
     		cccToCouncil = new CCCToCounPanel(conDeets, this);
     		cccApproved = new CCCApprovedPanel(conDeets, this);
@@ -174,7 +177,7 @@ public class PermitPane extends JPanel
             try
 	        {
 	        	Connection conn = connecting.CreateConnection(connDeets);
-	        	PreparedStatement st2 =conn.prepareStatement(qry + param);	
+	        	PreparedStatement st2 =conn.prepareStatement(qry + param);	    	
 	        	qryResults = st2.executeQuery();
 	        	if (qryResults==null){
 	    			System.out.println("null query");
@@ -186,6 +189,32 @@ public class PermitPane extends JPanel
 	        }
         		return qryResults;       		            
         }
-        
+ 
+               
+    	protected void updatePermit(String update, String param, ConnDetails connDeets) {
+
+    		JOptionPane.showMessageDialog(null, update);
+            try	// Attempt update
+            {
+            	Connection conn = connecting.CreateConnection(connDeets);	        	   	
+            	Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);           	
+    //Create Update String
+                stmt.execute(update); 
+
+                JOptionPane.showMessageDialog(null, "Permit "+ param + " Updated successfully");
+           }
+            catch (SQLServerException sqex)
+            {
+  //          	if (sqex.getErrorCode() == 547){
+  //          		JOptionPane.showMessageDialog(null, "Fire ID NOT IN SYSTEM!");
+   //         	}else {
+            	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+  //          	}
+            }
+            catch(Exception ex)
+            { 
+            JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+            }
+    	}
 
 }
