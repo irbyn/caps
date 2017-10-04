@@ -1,119 +1,202 @@
 package Sales;
 
+import java.awt.BorderLayout;
 import java.awt.Choice;
+import java.awt.Dimension;
+import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.Date;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SpinnerDateModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+
+import DB_Comms.CreateConnection;
+import Main.ConnDetails;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 
 class SiteCheckPanel extends JPanel {
+	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
+	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+	private String param = "";  
+	private ResultSet rs;
+	
+	private CreateConnection connecting;
+	
+	private JTableHeader header;
+	private TableColumnModel columnModel;
+	private JPanel tablePanel;
+	private JPanel infoPanel;
+	private JTable salesTbl;
+	private DefaultTableModel model1;
+	
+	private ConnDetails conDets;
+	
 	private JTable table;
 
-	public SiteCheckPanel() {
+	public SiteCheckPanel(ConnDetails conDeets, SalesPane sp) {
 		
-		setLayout(null);
+		 conDets = conDeets;
+
+
+		  connecting = new CreateConnection();
+	  	 		  	
+		    model1 = new DefaultTableModel();  
+		    model1.setRowCount(0);
+	        salesTbl = new JTable(model1);
+	        salesTbl.setPreferredSize(new Dimension(0, 300));
+	        salesTbl.setAutoCreateRowSorter(true);
+	        
+	        JScrollPane scrollPane = new JScrollPane(salesTbl);
+		  
+	        header= salesTbl.getTableHeader();
+	        columnModel = header.getColumnModel();
+	        add(header); 
+	             
+	        //Panel for the table
+	        tablePanel = new JPanel();
+	        tablePanel.setBounds(20, 20, 1025, 260);  //setPreferredSize(new Dimension(0, 300));      
+	        tablePanel.setLayout(new BorderLayout());
+	        
+	        //Content panel
+	        infoPanel = new JPanel();
+	        infoPanel.setBounds(0, 280, 1077, 289);  //setPreferredSize(new Dimension(0, 300));
+	        infoPanel.setLayout(null);
+			
+			JTextArea txtAreaCustInfo = new JTextArea();
+			txtAreaCustInfo.setEditable(false);
+			txtAreaCustInfo.setBounds(23, 24, 382, 237);
+			infoPanel.add(txtAreaCustInfo);
 		
-		JTable table = new JTable(new DefaultTableModel(null, new Object[]{"Name", "Site Address", "Phone number"}));
-		table.setShowGrid(false);
-		DefaultTableModel model = (DefaultTableModel) table.getModel();
-		//I don't know how to display the column names 
-		model.addRow(new Object[]{"Name", "Site Address", "Phone number"});
-		//Sample data
-		model.addRow(new Object[]{"Ben Smith", "123 Sesame Street", "0225698531"});
-		
-		//Make table scrollable
-		
-		table.setBounds(37, 26, 1004, 251);
-		add(table);
-		
-		
-		JLabel lblName = new JLabel("Name:");
-		lblName.setBounds(31, 304, 104, 14);
-		add(lblName);
-		
-		JLabel lblSAddr = new JLabel("Site Address:");
-		lblSAddr.setBounds(31, 329, 104, 14);
-		add(lblSAddr);
-		
-		JLabel lblSSuburb = new JLabel("Suburb:");
-		lblSSuburb.setBounds(31, 354, 104, 14);
-		add(lblSSuburb);
-		
-		JLabel lblPostalAddress = new JLabel("Postal Address:");
-		lblPostalAddress.setBounds(31, 379, 104, 14);
-		add(lblPostalAddress);
-		
-		JLabel lblPhoneNumber = new JLabel("Phone Number:");
-		lblPhoneNumber.setBounds(31, 429, 104, 14);
-		add(lblPhoneNumber);
-		
-		JLabel lblPAddress = new JLabel("Suburb:");
-		lblPAddress.setBounds(31, 404, 104, 14);
-		add(lblPAddress);
-		
-		JLabel lblEmail = new JLabel("Email:");
-		lblEmail.setBounds(31, 454, 104, 14);
-		add(lblEmail);
-		
-		JLabel lblFire = new JLabel("Fire:");
-		lblFire.setBounds(31, 479, 46, 14);
-		add(lblFire);
-		
-		JLabel lblInstType = new JLabel("Install Type:");
-		lblInstType.setBounds(31, 497, 104, 14);
-		add(lblInstType);
-		
-		JLabel lblEstTotal = new JLabel("Estimate Total:");
-		lblEstTotal.setBounds(31, 522, 104, 14);
-		add(lblEstTotal);
-		
-		JTextArea txtAreaCustInfo = new JTextArea();
+	/*	JTextArea txtAreaCustInfo = new JTextArea();
 		txtAreaCustInfo.setEditable(false);
 		txtAreaCustInfo.setBounds(165, 299, 382, 237);
-		add(txtAreaCustInfo);
+		infoPanel.add(txtAreaCustInfo);*/
 		
 		
 		
 		JLabel lblSChkBooking = new JLabel("Site Check Booking:");
-		lblSChkBooking.setBounds(601, 361, 128, 14);
-		add(lblSChkBooking);
+		lblSChkBooking.setBounds(478, 68, 128, 14);
+		infoPanel.add(lblSChkBooking);
 		
 		JSpinner spnTimeDate = new JSpinner();
 		spnTimeDate.setModel(new SpinnerDateModel(new Date(1505908800000L), null, null, Calendar.DAY_OF_YEAR));
-		spnTimeDate.setBounds(757, 358, 284, 20);
-		add(spnTimeDate);
+		spnTimeDate.setBounds(634, 65, 284, 20);
+		infoPanel.add(spnTimeDate);
 		
 		Choice drpBxSChkDoneBy = new Choice();
-		drpBxSChkDoneBy.setBounds(757, 411, 284, 20);
-		add(drpBxSChkDoneBy);
+		drpBxSChkDoneBy.setBounds(634, 118, 284, 20);
+		infoPanel.add(drpBxSChkDoneBy);
 		
 		JLabel lblSiteCheckBy = new JLabel("Site Check By:");
-		lblSiteCheckBy.setBounds(601, 411, 128, 14);
-		add(lblSiteCheckBy);
+		lblSiteCheckBy.setBounds(478, 118, 128, 14);
+		infoPanel.add(lblSiteCheckBy);
 		
 		JCheckBox chckbxSChkComp = new JCheckBox("Site Check Completed");
-		chckbxSChkComp.setBounds(757, 452, 180, 23);
-		add(chckbxSChkComp);
+		chckbxSChkComp.setBounds(634, 159, 180, 23);
+		infoPanel.add(chckbxSChkComp);
 		
 		JButton btnCancel = new JButton("Cancel");
-		btnCancel.setBounds(601, 502, 148, 23);
-		add(btnCancel);
+		btnCancel.setBounds(478, 209, 148, 23);
+		infoPanel.add(btnCancel);
 		
 		JButton btnSave = new JButton("Save Details");
-		btnSave.setBounds(893, 502, 148, 23);
-		add(btnSave);
+		btnSave.setBounds(770, 209, 148, 23);
+		infoPanel.add(btnSave);
+
+		 this.setLayout(null);
+	        this.add(tablePanel); 
+	        this.add(infoPanel);
+
+	  tablePanel.add(scrollPane, BorderLayout.CENTER);
+	  tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
+	  	
+	  	
+	 // 	rs = sp.getResults(1, conDeets);		
+	  //	salesTbl.setModel(DbUtils.resultSetToTableModel(rs));  	
+	  	//spaceHeader();  
+	  	
+//	  	this.add(infoPanel, BorderLayout.SOUTH);
+	  	
+/*	  	salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent arg0) {
+				if (!arg0.getValueIsAdjusting()){
+					try{
+					param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
+		        	updatePermitDetails(param);
+					} catch (IndexOutOfBoundsException e){
+						//
+					}
+				}
+			}
+	  	});*/
+}
+
+public JTable getSalesTbl(){
+	return salesTbl;
+}
+
+	
+	/*private void updatePermitDetails(String parameter) {
+   try
+   {
+   	Connection conn = connecting.CreateConnection(conDets);
+   	PreparedStatement st2 =conn.prepareStatement(result2 + parameter);
+   	ResultSet rs2 = st2.executeQuery();
+
+           //Retrieve by column name
+   	 while(rs2.next()){
+   		 
+   		 txtAreaCustInfo.setText("\n INVOICE:\t" + param + "\n");
+   		 txtAreaCustInfo.append( " CLIENT:\t" + rs2.getString("CustomerName") + "\n\n");
+   		 txtAreaCustInfo.append( " SITE:\t" + rs2.getString("StreetAddress") + "\n");
+   		 txtAreaCustInfo.append( "\t" + rs2.getString("Suburb") + "\n\n");
+   		 txtAreaCustInfo.append( " POSTAL:\t" + rs2.getString("CustomerAddress") + "\n");               
+   	 }
+   	 
+   	 
+	        	PreparedStatement st3 =conn.prepareStatement(result3 + parameter);
+	        	
+	        	ResultSet rs3 = null;
+	        	rs3 = st3.executeQuery();
+	    
+	        	 while(rs3.next()){
+	        		 
+	        	if (!rs3.getString("FireID").equals(parameter)){
+	                //Retrieve by column name
+
+	    	        nelsonTxtBx.setText("");
+
+	    	        nelsonTxtBx.setText(rs3.getString("Nelson"));
+	        	 }
+	        } 
+	        
+   	conn.close();	
+   }
+   catch(Exception ex)
+   { 
+   JOptionPane.showMessageDialog(null, ex.toString());
+   }	  	
+	}	*/
+}
+
+	//}
+
+
 		
-		
-		
+	/*	
 	}
 }
+*/

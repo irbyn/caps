@@ -14,10 +14,13 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JCheckBox;
 import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -27,15 +30,17 @@ import javax.swing.table.TableColumnModel;
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Permit.PermitPane;
+//import Permit.PermitsReqPanel;
+import net.proteanit.sql.DbUtils;
 
 import javax.swing.JComboBox;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JPasswordField;
 
 public class AdminPanel extends JFrame {
 
-	//------------------JTable----------------------------------------------
 	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
 	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String param = "";  
@@ -50,27 +55,17 @@ public class AdminPanel extends JFrame {
 	private JTable permitsTbl;
 	private DefaultTableModel model1;
 	private JTextArea detailsTxtArea;
-	private JLabel nelsonLbl;
 	private JTextField nelsonTxtBx;
-	private JButton prntConsentBtn; 
-	private JButton cancelPermitReqBtn; 
-	private JButton savePermitReqBtn; 
 	private CreateConnection conn;
 	private ConnDetails conDets;
-	//------------------JTable----------------------------------------------
 
-	private JTextField txtBxUsername;
-	private JTextField txtBxNZHHANum;
 	private JTextField fNameTxtBx;
 	private JTextField lNameTxtBx;
 	private JTextField phoneTxtBx;
-	private JTextField emailtxtbx;
-	private JTextField sAddrtxtbx;
-	private JTextField sSuburbtxtbx;
-	private JTextField sAreaCodetxtbx;
-	private JTextField pAddrtxtbx;
+	private JTextField emailtxtBx;
+	private JTextField pAddrtxtBx;
 	private JTextField pSuburbtxtbx;
-	private JTextField pAreaCodetxtbx;
+	private JTextField pAreaCodetxtBx;
 	private JLabel contactlbl;
 	private JLabel fNameLbl;
 	private JLabel lNameLbl;
@@ -79,18 +74,37 @@ public class AdminPanel extends JFrame {
 	private JLabel pAddrlbl;
 	private JLabel pSuburblbl;
 	private JLabel pAreaCodelbl;
-	private JLabel siteAddrLbl;
-	private JLabel postAddrlbl; 
-	private JLabel sSuburblbl;
-	private JLabel sAddrlbl;
-	private JCheckBox pAddChbx;
-	private JButton searchCustBtn;
+	private JLabel reesNumLbl;
+	private JLabel userlbl;
+	private JLabel passLbl;
+	private JLabel rePassLbl;
+	private JButton modifyUserBtn;
 	private JButton cancelBtn;
-	private JButton createCustBtn;
+	private JButton createUserBtn;
 	private JButton logOutBtn;
 	private JTextField NZHHANumTxtBx;
 	private static String user;
 	private static String pass;
+	private JTextField usertxtBx;
+	private JPasswordField passtxtBx;
+	private JPasswordField reConnPasstxtBx;
+	private JTextField councNumtxtBx;
+	private JTextField reeseNumbtxtBx;
+	private JCheckBox chckbxAccAct;
+	
+//---------------------
+	
+	private ConnDetails conDeets;
+	
+	private ResultSet results;
+	private ResultSet qryResults;
+	private int tabIndex = 0;
+	//private PermitsReqPanel permitReq;
+	
+	// Stored procedures to fill tables (Triggered by tab selection)
+	private String procedure = new String("EXEC AWS_WCH_DB.dbo.a_userList");// procedure to call in the db
+
+	
 
 	public AdminPanel(String User, String Pass){
 
@@ -100,18 +114,13 @@ public class AdminPanel extends JFrame {
 		//PASS THE LOGIN DETAILS TO Class connectionDetails
 		ConnDetails conDeets = new ConnDetails(user, pass);
 
+		//permitReq = new PermitsReqPanel(conDeets, this);
+		//JTable[] tablez = new JTable[]{permitReq.getPermitsTbl()};//ued to feed in the different table so they can be updated. 
 		
 		getContentPane().setLayout(null);
 		setPreferredSize(new Dimension(1100, 700));
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-
-
-		//-----JTable----------------------------------------------------------------
-
-
-		//public CCCApprovedPanel(ConnDetails conDeets, PermitPane pp) {
 
 		conDets = conDeets;
 		connecting = new CreateConnection();
@@ -119,7 +128,7 @@ public class AdminPanel extends JFrame {
 		model1 = new DefaultTableModel();  
 		model1.setRowCount(0);
 		permitsTbl = new JTable(model1);
-		permitsTbl.setPreferredSize(new Dimension(0, 250));
+		permitsTbl.setPreferredSize(new Dimension(0, 300));
 		permitsTbl.setAutoCreateRowSorter(true);
 
 		JScrollPane scrollPane = new JScrollPane(permitsTbl);
@@ -129,155 +138,211 @@ public class AdminPanel extends JFrame {
 		getContentPane().add(header); 
 
 		tablePanel = new JPanel();
-		tablePanel.setBounds(29, 44, 1025, 236);  //setPreferredSize(new Dimension(0, 300));      
+		tablePanel.setBounds(29, 44, 1025, 279);  //setPreferredSize(new Dimension(0, 300));      
 		tablePanel.setLayout(new BorderLayout());
 
 		infoPanel = new JPanel();
-		infoPanel.setBounds(0, 280, 1100, 380);  //setPreferredSize(new Dimension(0, 300));
+		infoPanel.setBounds(10, 334, 1100, 326);  //setPreferredSize(new Dimension(0, 300));
 		infoPanel.setLayout(null);
-
 
 		getContentPane().setLayout(null);
 		getContentPane().add(tablePanel); 
 		getContentPane().add(infoPanel);
-		//-----JTable^^^^^^^^^^^^^^^^^^^^----------------------------------------------------------------
 
-		JLabel lblUsername = new JLabel("Username:");
-		lblUsername.setBounds(549, 199, 73, 14);
-		infoPanel.add(lblUsername);
+		userlbl = new JLabel("Username:");
+		userlbl.setBounds(359, 177, 73, 14);
+		infoPanel.add(userlbl);
 
-		JLabel lblRole = new JLabel("Role:");
-		lblRole.setBounds(10, 298, 46, 14);
-		infoPanel.add(lblRole);
+		JLabel lblAbilities = new JLabel("Abilities:");
+		lblAbilities.setBounds(734, 227, 63, 14);
+		infoPanel.add(lblAbilities);
 
 		JCheckBox chckbxSCheck = new JCheckBox("Site Check");
-		chckbxSCheck.setBounds(91, 294, 85, 23);
+		chckbxSCheck.setBounds(830, 223, 85, 23);
 		infoPanel.add(chckbxSCheck);
 
 		JCheckBox chckbxInstaller = new JCheckBox("Installer");
-		chckbxInstaller.setBounds(242, 294, 73, 23);
+		chckbxInstaller.setBounds(992, 223, 73, 23);
 		infoPanel.add(chckbxInstaller);
 
 		JCheckBox chckbxSales = new JCheckBox("Sales");
-		chckbxSales.setBounds(178, 294, 62, 23);
+		chckbxSales.setBounds(917, 223, 73, 23);
 		infoPanel.add(chckbxSales);
 
 		JLabel lblNZHHANumb = new JLabel("NZHHA Number:");
-		lblNZHHANumb.setBounds(10, 250, 85, 14);
+		lblNZHHANumb.setBounds(734, 177, 109, 14);
 		infoPanel.add(lblNZHHANumb);
 
 		//Personal Customer Information
-		contactlbl = new JLabel("Contact Information");
-		contactlbl.setBounds(23, 30, 201, 20);
+		contactlbl = new JLabel("User Information");
+		contactlbl.setBounds(26, 22, 201, 20);
 		infoPanel.add(contactlbl);
 		contactlbl.setFont(new Font("Arial", Font.BOLD, 20));
 
 		fNameLbl = new JLabel("First Name:");
-		fNameLbl.setBounds(10, 77, 79, 14);
+		fNameLbl.setBounds(26, 127, 85, 14);
 		infoPanel.add(fNameLbl);
 
 		fNameTxtBx = new JTextField();
-		fNameTxtBx.setBounds(105, 77, 201, 20);
+		fNameTxtBx.setBounds(121, 127, 201, 24);
 		infoPanel.add(fNameTxtBx);
 		fNameTxtBx.setColumns(10);
 
 		lNameLbl = new JLabel("Last Name:");
-		lNameLbl.setBounds(10, 120, 102, 15);
+		lNameLbl.setBounds(26, 177, 85, 15);
 		infoPanel.add(lNameLbl);
 
 		lNameTxtBx = new JTextField();
-		lNameTxtBx.setBounds(105, 120, 201, 20);
+		lNameTxtBx.setBounds(121, 177, 201, 24);
 		infoPanel.add(lNameTxtBx);
 		lNameTxtBx.setColumns(10);
 
 		lblPhone = new JLabel("Phone Number:");
-		lblPhone.setBounds(10, 148, 85, 15);
+		lblPhone.setBounds(26, 227, 109, 15);
 		infoPanel.add(lblPhone);
 
 		phoneTxtBx = new JTextField();
-		phoneTxtBx.setBounds(105, 151, 201, 20);
+		phoneTxtBx.setBounds(121, 227, 201, 24);
 		infoPanel.add(phoneTxtBx);
 		phoneTxtBx.setColumns(10);
 
 		emaillbl = new JLabel("Email:");
-		emaillbl.setBounds(10, 184, 79, 15);
+		emaillbl.setBounds(25, 277, 46, 15);
 		infoPanel.add(emaillbl);
 
-		emailtxtbx = new JTextField();
-		emailtxtbx.setBounds(105, 199, 201, 20);
-		infoPanel.add(emailtxtbx);
-		emailtxtbx.setColumns(10);
-
-		//Postal Address Information
-		postAddrlbl = new JLabel("Postal Address");
-		postAddrlbl.setBounds(357, 28, 201, 20);
-		infoPanel.add(postAddrlbl);
-		postAddrlbl.setFont(new Font("Arial", Font.BOLD, 20));
+		emailtxtBx = new JTextField();
+		emailtxtBx.setBounds(121, 277, 201, 24);
+		infoPanel.add(emailtxtBx);
+		emailtxtBx.setColumns(10);
 
 		pAddrlbl = new JLabel("Postal Street Address:");
-		pAddrlbl.setBounds(357, 75, 118, 15);
+		pAddrlbl.setBounds(359, 28, 134, 15);
 		infoPanel.add(pAddrlbl);
 
-		pAddrtxtbx = new JTextField();
-		pAddrtxtbx.setBounds(486, 72, 201, 20);
-		infoPanel.add(pAddrtxtbx);
-		pAddrtxtbx.setColumns(10);
+		pAddrtxtBx = new JTextField();
+		pAddrtxtBx.setBounds(496, 22, 201, 24);
+		infoPanel.add(pAddrtxtBx);
+		pAddrtxtBx.setColumns(10);
 
 		pSuburblbl = new JLabel("Postal Suburb:");
-		pSuburblbl.setBounds(357, 118, 118, 15);
+		pSuburblbl.setBounds(359, 74, 118, 15);
 		infoPanel.add(pSuburblbl);
 
 		pSuburbtxtbx = new JTextField();
-		pSuburbtxtbx.setBounds(486, 115, 201, 20);
+		pSuburbtxtbx.setBounds(496, 72, 201, 24);
 		infoPanel.add(pSuburbtxtbx);
 		pSuburbtxtbx.setColumns(10);
 
-		pAreaCodelbl = new JLabel("Post Code");
-		pAreaCodelbl.setBounds(357, 146, 118, 15);
+		pAreaCodelbl = new JLabel("Post Code:");
+		pAreaCodelbl.setBounds(359, 127, 118, 15);
 		infoPanel.add(pAreaCodelbl);
 
-		pAreaCodetxtbx = new JTextField();
-		pAreaCodetxtbx.setBounds(486, 143, 201, 20);
-		infoPanel.add(pAreaCodetxtbx);
-		pAreaCodetxtbx.setColumns(10);
-
-		//Site Address Information
-
-		siteAddrLbl = new JLabel("Site Address");
-		siteAddrLbl.setBounds(743, 30, 201, 20);
-		infoPanel.add(siteAddrLbl);
-		siteAddrLbl.setFont(new java.awt.Font("Arial", Font.BOLD, 20));
-
-		pAddChbx = new JCheckBox("Postal Address is Site Address");
-		pAddChbx.setBounds(743, 73, 222, 23);
-		infoPanel.add(pAddChbx);
-
-		sAddrlbl = new JLabel("Site Street Address:");
-		sAddrlbl.setBounds(743, 120, 135, 15);
-		infoPanel.add(sAddrlbl);
-
-		sAddrtxtbx = new JTextField();
-		sAddrtxtbx.setBounds(860, 117, 201, 20);
-		infoPanel.add(sAddrtxtbx);
-		sAddrtxtbx.setColumns(10);
-
-		sSuburblbl = new JLabel("Site Suburb:");
-		sSuburblbl.setBounds(743, 154, 135, 15);
-		infoPanel.add(sSuburblbl);
-
-		sSuburbtxtbx = new JTextField();
-		sSuburbtxtbx.setBounds(860, 151, 201, 20);
-		infoPanel.add(sSuburbtxtbx);
-		sSuburbtxtbx.setColumns(10);
+		pAreaCodetxtBx = new JTextField();
+		pAreaCodetxtBx.setBounds(496, 122, 201, 24);
+		infoPanel.add(pAreaCodetxtBx);
+		pAreaCodetxtBx.setColumns(10);
 		
 		NZHHANumTxtBx = new JTextField();
-		NZHHANumTxtBx.setBounds(105, 250, 201, 20);
+		NZHHANumTxtBx.setBounds(853, 172, 201, 24);
 		infoPanel.add(NZHHANumTxtBx);
 		NZHHANumTxtBx.setColumns(10);
+		
+		passLbl = new JLabel("Password:");
+		passLbl.setBounds(359, 227, 73, 14);
+		infoPanel.add(passLbl);
+		
+		usertxtBx = new JTextField();
+		usertxtBx.setBounds(496, 172, 201, 24);
+		infoPanel.add(usertxtBx);
+		usertxtBx.setColumns(10);
+		
+		passtxtBx = new JPasswordField();
+		passtxtBx.setBounds(496, 222, 201, 24);
+		infoPanel.add(passtxtBx);
+		
+		reConnPasstxtBx = new JPasswordField();
+		reConnPasstxtBx.setBounds(496, 272, 201, 24);
+		infoPanel.add(reConnPasstxtBx);
+		
+		rePassLbl = new JLabel("Re Confirm Password:");
+		rePassLbl.setBounds(359, 277, 134, 14);
+		infoPanel.add(rePassLbl);
+		
+		JLabel councNumblbl = new JLabel("Council Number:");
+		councNumblbl.setBounds(734, 78, 95, 14);
+		infoPanel.add(councNumblbl);
+		
+		councNumtxtBx = new JTextField();
+		councNumtxtBx.setBounds(853, 73, 201, 24);
+		infoPanel.add(councNumtxtBx);
+		councNumtxtBx.setColumns(10);
+		
+	    reesNumLbl = new JLabel("Rees Number:");
+		reesNumLbl.setBounds(734, 127, 108, 14);
+		infoPanel.add(reesNumLbl);
+		
+		reeseNumbtxtBx = new JTextField();
+		reeseNumbtxtBx.setColumns(10);
+		reeseNumbtxtBx.setBounds(853, 122, 201, 24);
+		infoPanel.add(reeseNumbtxtBx);
+		
+		chckbxAccAct = new JCheckBox("Active Account");
+		chckbxAccAct.setBounds(26, 70, 134, 23);
+		infoPanel.add(chckbxAccAct);
+		
+		modifyUserBtn = new JButton("Modify");
+		modifyUserBtn.setBounds(718, 273, 102, 23);
+		infoPanel.add(modifyUserBtn);
+		
+		cancelBtn = new JButton("Cancel");
+		cancelBtn.setBounds(830, 273, 102, 23);
+		infoPanel.add(cancelBtn);
+		
+		createUserBtn= new JButton("Create New User");
+		createUserBtn.setBounds(942, 273, 127, 23);
+		infoPanel.add(createUserBtn);
 
 		tablePanel.add(scrollPane, BorderLayout.CENTER);
-		tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);        
-		//	  	this.add(infoPanel, BorderLayout.SOUTH);
+		tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);
+		
+		//Adding JPanels to the 
+		JTabbedPane adminP = new JTabbedPane();
+		adminP.setPreferredSize(new Dimension(1070, 610));
+		
+		adminP.addChangeListener(new ChangeListener() {
+
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (e.getSource() instanceof JTabbedPane) {
+                	
+                    JTabbedPane pane = (JTabbedPane) e.getSource();
+                    tabIndex = pane.getSelectedIndex();
+                    
+                    getResults(tabIndex, conDeets); 
+             //       ResultSet r1 = results;
+                    
+                   /* // add ResultSet into Selected Tab JTable.
+                    tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));               
+                    TableColumnModel tcm = tablez[tabIndex].getColumnModel();
+                     int cols = tcm.getColumnCount();
+
+                     if (cols == 6){
+                    	 int[] colWidths = new int[]{20, 150, 150, 100, 100, 100}; 
+                    	 spaceHeader(colWidths, tcm);
+                     } else if (cols == 7){
+                    	 int[] colWidths = new int[]{20, 150, 150, 100, 100, 100, 100};   
+                    	 spaceHeader(colWidths, tcm);                         
+                     } else if (cols == 9){
+                        	 int[] colWidths = new int[]{30, 100, 120, 80, 40, 40, 40, 40, 40};   
+                        	 spaceHeader(colWidths, tcm);
+                     }else {
+                    	 int[] colWidths = new int[]{30, 100, 120, 80, 30, 30, 40, 40, 40, 30, 30};    
+                    	 spaceHeader(colWidths, tcm);
+                     }*/
+                }
+            }
+        });   		
+    
 
 		permitsTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
@@ -301,11 +366,27 @@ public class AdminPanel extends JFrame {
 
 	}
 
-	//-----JTable----------------------------------------------------------------
-
 	public JTable getPermitsTbl(){
 		return permitsTbl;
 	}
+	
+	 public ResultSet getResults(int ind, ConnDetails connDeets){      	
+     	
+         try
+	        {
+	        	Connection conn = connecting.CreateConnection(connDeets);
+	        	//PreparedStatement st =conn.prepareStatement(procedure[ind]);	//ind]);
+	        	//results = st.executeQuery();
+	        	if (results==null){
+	        		getResults(0, conDeets);
+	        	}
+	        }
+	        catch(Exception ex)
+	        { 
+	        JOptionPane.showMessageDialog(null, ex.toString());
+	        }
+     		return results;       		            
+     }
 
 
 	private void updatePermitDetails(String parameter) {

@@ -2,8 +2,13 @@ package Sales;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JTable;
+
 import java.awt.GridBagLayout;
 import javax.swing.JTextField;
+
+import Main.ConnDetails;
+import Permit.PermitPane;
 
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -39,7 +44,7 @@ class CustomerPanel extends JPanel {
 	private JButton cancelBtn;
 	private JButton createCustBtn;
 
-	  public CustomerPanel() {
+	  public CustomerPanel(ConnDetails conDeets, SalesPane sp) {
 	  	setLayout(null);
 	  	
 	  	//Personal Customer Information
@@ -157,6 +162,5 @@ class CustomerPanel extends JPanel {
 	  	createCustBtn = new JButton("Create Customer");
 	  	createCustBtn.setBounds(735, 489, 135, 25);
 	  	add(createCustBtn);
-	  	
 	  }
 }
