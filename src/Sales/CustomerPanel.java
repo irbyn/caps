@@ -2,14 +2,23 @@ package Sales;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
 import java.awt.GridBagLayout;
-import javax.swing.JTextField;
+import java.sql.ResultSet;
 
+import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumnModel;
+
+import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Permit.PermitPane;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import javax.swing.JLabel;
@@ -17,6 +26,22 @@ import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 
 class CustomerPanel extends JPanel {
+	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
+	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+	private String param = "";  
+	private ResultSet rs;
+	
+	private CreateConnection connecting;
+	
+	private JTableHeader header;
+	private TableColumnModel columnModel;
+	private JPanel tablePanel;
+	private JPanel infoPanel;
+	private JTable salesTbl;
+	private DefaultTableModel model1;
+	
+	private ConnDetails conDets;
+	
 	private JTextField fNameTxtBx;
 	private JTextField lNameTxtBx;
 	private JTextField phoneTxtBx;
@@ -45,7 +70,29 @@ class CustomerPanel extends JPanel {
 	private JButton createCustBtn;
 
 	  public CustomerPanel(ConnDetails conDeets, SalesPane sp) {
-	  	setLayout(null);
+			 conDets = conDeets;
+
+			  connecting = new CreateConnection();
+		  	 		  	
+			    model1 = new DefaultTableModel();  
+			    model1.setRowCount(0);
+		        salesTbl = new JTable(model1);
+		        salesTbl.setPreferredSize(new Dimension(0, 0));
+		        salesTbl.setAutoCreateRowSorter(true);
+		        
+		        JScrollPane scrollPane = new JScrollPane(salesTbl);
+			  
+		        header= salesTbl.getTableHeader();
+		        columnModel = header.getColumnModel();
+		        add(header); 
+		             
+		        //Delete
+		        /*//Panel for the table
+		        tablePanel = new JPanel();
+		        tablePanel.setBounds(0, 0, 0, 0);  //setPreferredSize(new Dimension(0, 300));      
+		        tablePanel.setLayout(new BorderLayout());
+		        tablePanel.isVisible();
+	 */ 	setLayout(null);
 	  	
 	  	//Personal Customer Information
 	  	contactlbl = new JLabel("Contact Information");
@@ -162,5 +209,88 @@ class CustomerPanel extends JPanel {
 	  	createCustBtn = new JButton("Create Customer");
 	  	createCustBtn.setBounds(735, 489, 135, 25);
 	  	add(createCustBtn);
-	  }
+/*	  }
+}*/
+        this.setLayout(null);
+        //this.add(tablePanel); 
+      //  this.add(infoPanel);
+	  
+        //Delete
+  	  /*tablePanel.add(scrollPane, BorderLayout.CENTER);
+  	  tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
+  	*/
+  	 // 	rs = sp.getResults(1, conDeets);		
+	  //	salesTbl.setModel(DbUtils.resultSetToTableModel(rs));  	
+	  	//spaceHeader();  
+	  	
+//	  	this.add(infoPanel, BorderLayout.SOUTH);
+	  	
+/*	  	salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent arg0) {
+				if (!arg0.getValueIsAdjusting()){
+					try{
+					param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
+		        	updatePermitDetails(param);
+					} catch (IndexOutOfBoundsException e){
+						//
+					}
+				}
+			}
+	  	});*/
 }
+  
+  public JTable getSalesTbl(){
+  	return salesTbl;
+  }
+  
+	
+	/*private void updatePermitDetails(String parameter) {
+      try
+      {
+      	Connection conn = connecting.CreateConnection(conDets);
+      	PreparedStatement st2 =conn.prepareStatement(result2 + parameter);
+      	ResultSet rs2 = st2.executeQuery();
+  
+              //Retrieve by column name
+      	 while(rs2.next()){
+      		 
+      		 txtAreaCustInfo.setText("\n INVOICE:\t" + param + "\n");
+      		 txtAreaCustInfo.append( " CLIENT:\t" + rs2.getString("CustomerName") + "\n\n");
+      		 txtAreaCustInfo.append( " SITE:\t" + rs2.getString("StreetAddress") + "\n");
+      		 txtAreaCustInfo.append( "\t" + rs2.getString("Suburb") + "\n\n");
+      		 txtAreaCustInfo.append( " POSTAL:\t" + rs2.getString("CustomerAddress") + "\n");               
+      	 }
+      	 
+      	 
+	        	PreparedStatement st3 =conn.prepareStatement(result3 + parameter);
+	        	
+	        	ResultSet rs3 = null;
+	        	rs3 = st3.executeQuery();
+	    
+	        	 while(rs3.next()){
+	        		 
+	        	if (!rs3.getString("FireID").equals(parameter)){
+	                //Retrieve by column name
+
+	    	        nelsonTxtBx.setText("");
+
+	    	        nelsonTxtBx.setText(rs3.getString("Nelson"));
+	        	 }
+	        } 
+	        
+      	conn.close();	
+      }
+      catch(Exception ex)
+      { 
+      JOptionPane.showMessageDialog(null, ex.toString());
+      }	  	
+	}	*/
+}
+
+	//}
+
+/*	
+	}
+}
+*/
