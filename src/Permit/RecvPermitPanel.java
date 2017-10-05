@@ -177,11 +177,8 @@ class RecvPermitPanel extends JPanel {
 				        		}else {
 				        			JOptionPane.showMessageDialog(null, "Validate/transform Consent number, then update with received timestamp");
 				        			updateReceived();
-				        			clearFields();
 				        			
-				        			ResultSet rs = pp.getResults(1,  conDeets);
-				        		  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
-				        		  	spaceHeader(); 				        			
+				        			resetTable();				        			
 				        		}			        		
 			        		} else {
 			        			JOptionPane.showMessageDialog(null, "Validate/transform, then update Consent number");
@@ -198,7 +195,7 @@ class RecvPermitPanel extends JPanel {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 			        { 
-			        	clearFields();
+			        	resetTable();
 				    }					
 				}
 		  	});
@@ -224,7 +221,7 @@ class RecvPermitPanel extends JPanel {
 			//			pp.setFormsLocked();
 						try{
 						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
-						updateClientDetails(param);
+						displayClientDetails(param);
 						} catch (IndexOutOfBoundsException e){
 							//
 						}
@@ -235,6 +232,24 @@ class RecvPermitPanel extends JPanel {
 	  }
 
 	
+		protected void resetTable() {
+			clearFields();
+			
+			ResultSet rs = pp.getResults(1,  conDeets);
+		  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+		  	spaceHeader();
+		  	
+			rowSelected=false;
+			param = "";
+			detailsTxtArea.setText("");
+			consentTxtBx.setText("");
+			receivedChk.setSelected(false);
+			receivedDate.setVisible(false);
+			receivedDateLbl.setVisible(false); 
+		
+	}
+
+
 		protected void updateNumber() {
 			
 			CallableStatement pm = null;
@@ -312,7 +327,7 @@ class RecvPermitPanel extends JPanel {
   }
 
     
-	private void updateClientDetails(String parameter) {
+	private void displayClientDetails(String parameter) {
 		
 		rs2 = pp.getDetails(qry, param, conDeets);
 				

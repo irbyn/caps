@@ -354,7 +354,7 @@ class PermitsReqPanel extends JPanel {
 						try{
 						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
 						
-						updateClientDetails(param);
+						displayClientDetails(param);
 						
 						} catch (IndexOutOfBoundsException e){
 							//Ignoring IndexOutOfBoundsExceptions!
@@ -390,7 +390,7 @@ class PermitsReqPanel extends JPanel {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 			        { 
-			        	clearFields();
+			        	resetTable();
 				    }					
 				}
 		  	});
@@ -410,11 +410,11 @@ class PermitsReqPanel extends JPanel {
 			        		updateAsSent();		        		
 					        JOptionPane.showMessageDialog(null, "Sorry... Printing not enabled");		        		
 
+					        resetTable();
 			        	}
 		        	}else {	//	No Customer selected
 		        		JOptionPane.showMessageDialog(null, "No details to Print");			        				      
-			       	}
-			        
+			       	}			        
 				}
 		  	});
 		  	
@@ -440,15 +440,41 @@ class PermitsReqPanel extends JPanel {
 		  	});
 
 // PRE-LOAD Table data for first tab		  	
-		  	rs = pp.getResults(0, conDeets);		
-		  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
-		  	spaceHeader();  
+		  	resetTable();
 		  	
 	  }
 	
 
 		
 	  
+		protected void resetTable() {
+			
+			ResultSet rs = pp.getResults(1,  conDeets);
+		  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 
+		  	
+		  	spaceHeader();
+		  	
+			param = "";  
+	      	permitsTbl.clearSelection();
+			rowSelected=false;
+	      	for(Component control : infoPanel.getComponents())
+	      	{
+	      	    if(control instanceof JTextField)
+	      	    {
+	      	        JTextField ctrl = (JTextField) control;
+	      	        ctrl.setText("");
+	      	    }
+	      	    else if (control instanceof JComboBox)
+	      	    {
+	      	        JComboBox ctrl = (JComboBox) control;
+	      	        ctrl.setSelectedIndex(0);
+	      	    }
+	      	}
+	}
+
+
+
+
 		protected void updateConsent() {
 						
 		    CallableStatement pm = null;
@@ -546,27 +572,8 @@ class PermitsReqPanel extends JPanel {
 	            }
 		}
 
-
-	private void clearFields(){
-		param = "";  
-      	permitsTbl.clearSelection();
-		rowSelected=false;
-      	for(Component control : infoPanel.getComponents())
-      	{
-      	    if(control instanceof JTextField)
-      	    {
-      	        JTextField ctrl = (JTextField) control;
-      	        ctrl.setText("");
-      	    }
-      	    else if (control instanceof JComboBox)
-      	    {
-      	        JComboBox ctrl = (JComboBox) control;
-      	        ctrl.setSelectedIndex(0);
-      	    }
-      	}
-	  }
       	
-		private void updateClientDetails(String parameter) {
+		private void displayClientDetails(String parameter) {
 			
 			rs2 = pp.getDetails(qry, param, conDeets);
 			

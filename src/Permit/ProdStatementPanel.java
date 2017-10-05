@@ -61,12 +61,16 @@ import net.proteanit.sql.DbUtils;
 
 class ProdStatementPanel extends JPanel {
 
-	private int [] columnWidth = {20, 150, 150, 100, 100, 100};
+	private int [] columnWidth = {20, 80, 100, 80, 30, 30, 40, 40, 60, 30, 30};
 	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsCCC] ";
+	private String upPS3 = "call AWS_WCH_DB.dbo.p_PermitUpdateReceived ";
 
 	private String param = "";  
 	private ResultSet rs;
 	private Boolean rowSelected = false;
+	
+	private String ps3 = "//C:/pdfs/Invoice/ps3.pdf"; 
+	private String file = "//C:/pdfs/Invoice/ps3"; 
 	
 	private CreateConnection connecting;
 	
@@ -186,7 +190,7 @@ class ProdStatementPanel extends JPanel {
 						try{
 						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
 						
-						updateClientDetails(param);
+						displayClientDetails(param);
 						
 						} catch (IndexOutOfBoundsException e){
 							//Ignoring IndexOutOfBoundsExceptions!
@@ -232,7 +236,7 @@ class ProdStatementPanel extends JPanel {
 			        		
 
 						fillPS3();
-
+						updatePS3();
 		     	        		
  JOptionPane.showMessageDialog(null, "UPDATE DB!\n reset table");		        		
 
@@ -249,10 +253,10 @@ JOptionPane.showMessageDialog(null, "View only");
 
 	  
 	  protected void fillPS3()   {
-		  String formTemplate = "//C:/pdfs/Invoice/ps3.pdf";
-		  String filledForm = "//C:/pdfs/Invoice/ps3OUT.pdf";	  
+	//	  String formTemplate = "//C:/pdfs/Invoice/ps3.pdf";
+	//	  String filledForm = "//C:/pdfs/Invoice/ps3OUT.pdf";	  
 	        
-	        try (PDDocument pdfDocument = PDDocument.load(new File(formTemplate)))
+	        try (PDDocument pdfDocument = PDDocument.load(new File(ps3)))
 	        {
 	            // get the document catalog
 	            PDAcroForm acroForm = pdfDocument.getDocumentCatalog().getAcroForm();
@@ -277,16 +281,15 @@ JOptionPane.showMessageDialog(null, "View only");
 	                field.setValue(fire);
 	                field = (PDTextField) acroForm.getField( "date" );
 	                field.setValue(getPSDate());
-
 	            }
 	            
 	            // Save and close the filled out form.
-	            pdfDocument.save(filledForm);
+	            pdfDocument.save(file+param+".pdf");
 	            
 
 		      if (Desktop.isDesktopSupported()) {
 		    	    try {
-		    	        File myFile = new File(filledForm);
+		    	        File myFile = new File(file+param+".pdf");
 		    	        Desktop.getDesktop().open(myFile);
 		    	    } catch (IOException ex) {
 		    	        // no application registered for PDFs
@@ -302,14 +305,15 @@ JOptionPane.showMessageDialog(null, "View only");
 			e.printStackTrace();
 		}
 }
+
 	  
-/*		protected void updateReceived() {
+		protected void updatePS3() {
 			
 			CallableStatement pm = null;
 
 			try {
 					
-				String update = "{" + upReceived +"(?,?,?)}";	
+				String update = "{" + upPS3 +"(?,?,?)}";	
 			    Connection conn = connecting.CreateConnection(conDeets);	        	   	
 			
 			    pm = conn.prepareCall(update);
@@ -340,7 +344,7 @@ JOptionPane.showMessageDialog(null, "View only");
 
 		    
 			
-	private void updateClientDetails(String parameter) {
+	private void displayClientDetails(String parameter) {
 		try
 		    {
 		        Connection conn = connecting.CreateConnection(conDets);
