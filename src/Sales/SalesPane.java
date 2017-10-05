@@ -43,11 +43,11 @@ public class SalesPane extends JPanel
 	private Boolean lockForm;
 
 	// Stored procedures to fill tables (Triggered by tab selection)
-	private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.s_Customer", // procedure[0]
-			"EXEC AWS_WCH_DB.dbo.s_Estimation", // procedure[1]
-			"EXEC AWS_WCH_DB.dbo.s_SiteCheck", // procedure[2]
-			"EXEC AWS_WCH_DB.dbo.s_Quote", // procedure[3]
-			"EXEC AWS_WCH_DB.dbo.s_FollowUp"};// procedure[4]
+	private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.s_SalesCustomer", // procedure[0]
+			"EXEC AWS_WCH_DB.dbo.s_SalesEstimation", // procedure[1]
+			"EXEC AWS_WCH_DB.dbo.s_SalesSiteCheck", // procedure[2]
+			"EXEC AWS_WCH_DB.dbo.s_SalesQuote", // procedure[3]
+			"EXEC AWS_WCH_DB.dbo.s_SalesFollowUp"};// procedure[4]
 
 	public SalesPane(ConnDetails conDeets)
 	{
@@ -94,7 +94,6 @@ public class SalesPane extends JPanel
 					getResults(tabIndex, conDeets); 
 					//       ResultSet r1 = results;
 
-					System.out.println(tablez.length);
 					// add ResultSet into Selected Tab JTable.
 					tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));               
 					TableColumnModel tcm = tablez[tabIndex].getColumnModel();
