@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -14,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -27,6 +29,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerDateModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
@@ -36,6 +39,8 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import com.microsoft.sqlserver.jdbc.SQLServerException;
+
 import net.proteanit.sql.DbUtils;
 import DB_Comms.CreateConnection;
 import Main.*;
@@ -43,15 +48,20 @@ import Main.*;
 
 
 class RecvPermitPanel extends JPanel {
+
 	
+	private int [] columnWidth = {20, 150, 150, 100, 100, 100};
 	private String qry = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
-//	private String qry2 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+
+	private String upNumber = "call AWS_WCH_DB.dbo.p_PermitUpdateNumber ";
+	private String upReceived = "call AWS_WCH_DB.dbo.p_PermitUpdateReceived ";
+	
 	private String param = "";  
 	private ResultSet rs;
 	private ResultSet rs2;
 	private Boolean rowSelected;
 	
-//	private CreateConnection connecting;
+	private CreateConnection connecting;
 	
 	private JTableHeader header;
 	private TableColumnModel columnModel;
@@ -83,17 +93,13 @@ class RecvPermitPanel extends JPanel {
 		  this.lockForm = lockForm;
 		  this.conDeets = conDetts;
 		  this.pp = ppn;
-      	//Get User connection details
- // 		user = conDeets.getUser();
- // 		pass = conDeets.getPass();
-  //		dbURL = conDeets.getURL();
-  			  
-//		  connecting = new CreateConnection();
+
+		  connecting = new CreateConnection();
 	  	 		  	
 		    model2 = new DefaultTableModel();  
 		    model2.setRowCount(0);
 		    permitsTbl = new JTable(model2);
-	        permitsTbl.setPreferredSize(new Dimension(0, 300));
+	        permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	        permitsTbl.setAutoCreateRowSorter(true);
 	        
 	        JScrollPane scrollPane = new JScrollPane(permitsTbl);
@@ -137,10 +143,10 @@ class RecvPermitPanel extends JPanel {
 	        receivedDateLbl.setBounds(800, 140, 95, 20);
 	        infoPanel.add(receivedDateLbl);
 	        
-	        SimpleDateFormat psModel = new SimpleDateFormat("dd.MMM.yyyy");
+	        SimpleDateFormat dt = new SimpleDateFormat("dd.MMM.yyyy");
 	        receivedDate = new JSpinner(new SpinnerDateModel());
 	        receivedDate.setVisible(false);
-	        receivedDate.setEditor(new JSpinner.DateEditor(receivedDate, psModel.toPattern()));
+	        receivedDate.setEditor(new JSpinner.DateEditor(receivedDate, dt.toPattern()));
 	        receivedDate.setBounds(895, 140, 150, 20);
 			infoPanel.add(receivedDate);
 	        
@@ -162,7 +168,7 @@ class RecvPermitPanel extends JPanel {
 		  	savePermitReqBtn.addActionListener( new ActionListener()
 		  	{
 				@Override
-				public void actionPerformed(ActionEvent arg0) {
+				public void actionPerformed(ActionEvent arg0) 
 			        { 	// Check a Customer has been selected
 			        	if (rowSelected){
 			        		if (getReceived()){
@@ -170,20 +176,20 @@ class RecvPermitPanel extends JPanel {
 				        			JOptionPane.showMessageDialog(null, "Consent Number must be entered!");
 				        		}else {
 				        			JOptionPane.showMessageDialog(null, "Validate/transform Consent number, then update with received timestamp");
-				        		}
-				        		
+				        			updateReceived();
+				        			clearFields();
+				        			
+				        			ResultSet rs = pp.getResults(1,  conDeets);
+				        		  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+				        		  	spaceHeader(); 				        			
+				        		}			        		
 			        		} else {
 			        			JOptionPane.showMessageDialog(null, "Validate/transform, then update Consent number");
+			        			updateNumber() ;
 			        		}
-
-			        			
-			        		
-			        		
-
 			        	}else {	//	No Customer selected
 			        		JOptionPane.showMessageDialog(null, "No details to Save");			        		
-			        	}
-				    }					
+			        	}				    				
 				}
 		  	});
 
@@ -198,7 +204,6 @@ class RecvPermitPanel extends JPanel {
 		  	});
 		  	
 		  	receivedChk.addActionListener(new ActionListener() {
-
 	            @Override
 	            public void actionPerformed(ActionEvent e) {
 	            	if (getReceived()){
@@ -207,8 +212,7 @@ class RecvPermitPanel extends JPanel {
 	            	}else {
 	            		receivedDate.setVisible(false);
 	            		receivedDateLbl.setVisible(false);
-	            	}
-	            	
+	            	}	            	
 	            }
 	        });
 	        
@@ -220,7 +224,7 @@ class RecvPermitPanel extends JPanel {
 			//			pp.setFormsLocked();
 						try{
 						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
-			        	updatePermitDetails(param);
+						updateClientDetails(param);
 						} catch (IndexOutOfBoundsException e){
 							//
 						}
@@ -229,53 +233,89 @@ class RecvPermitPanel extends JPanel {
 		  	});
 		  	
 	  }
-	  
-	  
-	  
-	    
-	public String getConsentNum() {
-		return consentTxtBx.getText();
-	}
-    public Boolean getReceived(){
-    	if (receivedChk.isSelected()){
-    		return true;
-    	}
-    	else{
-	    	return false;	    		
-    	}
-    }
-    public String getReceivedDate(){
-    	return receivedDate.toString();
-    }
-    
-    
-	public JTable getPermitsTbl(){
-	    return permitsTbl;
-	}
+
+	
+		protected void updateNumber() {
+			
+			CallableStatement pm = null;
+
+			try {
+					
+				String update = "{" + upNumber +"(?,?)}";	
+			    Connection conn = connecting.CreateConnection(conDeets);	        	   	
+			
+			    pm = conn.prepareCall(update);
+				
+			    pm.setString(1, param);
+			    pm.setString(2, getConsentNum());
+				
+			    pm.executeUpdate();
+			    }
+		        catch (SQLServerException sqex)
+		        {
+		           	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		        }
+		        catch(Exception ex)
+		        { 
+		           JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		        }			
+		}
+		
+		protected void updateReceived() {
+			
+			CallableStatement pm = null;
+
+			try {
+					
+				String update = "{" + upReceived +"(?,?,?)}";	
+			    Connection conn = connecting.CreateConnection(conDeets);	        	   	
+			
+			    pm = conn.prepareCall(update);
+				
+			    pm.setString(1, param);
+			    pm.setString(2, getConsentNum());
+			    pm.setString(3, getReceivedDate());
+				
+			    pm.executeUpdate();
+			    }
+		        catch (SQLServerException sqex)
+		        {
+		           	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		        }
+		        catch(Exception ex)
+		        { 
+		           JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		        }			
+		}
 		
 	private void clearFields(){
 			  
 	permitsTbl.clearSelection();
 	rowSelected=false;
-	for(Component control : infoPanel.getComponents())
-		{
-	   		if(control instanceof JTextField)
-	      	{
-	      	  	JTextField ctrl = (JTextField) control;
-	      	  	ctrl.setText("");
-	    	}
-	   		else if (control instanceof JComboBox)
-	      	{
-	      	 	JComboBox ctrl = (JComboBox) control;
-	      	 	ctrl.setSelectedIndex(0);
-	      	}
-		}
+	param = "";
+	detailsTxtArea.setText("");
+	consentTxtBx.setText("");
+	receivedChk.setSelected(false);
+	receivedDate.setVisible(false);
+	receivedDateLbl.setVisible(false);
 	}
-		
-	private void updatePermitDetails(String parameter) {
+
+	  
+    public void spaceHeader() {
+        int i;
+        TableColumn tabCol = columnModel.getColumn(0);
+        for (i=0; i<columnWidth.length; i++){
+             tabCol = columnModel.getColumn(i);
+            tabCol.setPreferredWidth(columnWidth[i]);
+        }
+        header.repaint();
+  }
+
+    
+	private void updateClientDetails(String parameter) {
 		
 		rs2 = pp.getDetails(qry, param, conDeets);
-		
+				
         	 try {
 	        	 while(rs2.next()){
 	        									    					
@@ -288,7 +328,8 @@ class RecvPermitPanel extends JPanel {
 	        	String customerMobile 	= rs2.getString("CustomerMobile");
 	        	String customerEmail 	= rs2.getString("CustomerEmail");
 	        	String streetAddress 	= rs2.getString("StreetAddress");
-	        	String suburb 			= rs2.getString("Suburb");					
+	        	String suburb 			= rs2.getString("Suburb");	
+	        	String consent			= rs2.getString("Consent");
 	        							
 	        	String sb = " INVOICE: " + param + "\n" +
 	        				" CLIENT:\t" + customerName + "\n\n" + 
@@ -301,13 +342,38 @@ class RecvPermitPanel extends JPanel {
 	   					 	" MOBILE:\t" + customerMobile + "\n\n" +
 	        				" EMAIL:\t" + customerEmail + "\n";
 	        	detailsTxtArea.setText(sb);
+	        	
+	        	consentTxtBx.setText(consent);
+	        	
 	        							 						        	 					 }
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
-	        	 
-	
+				}     	 
  	}	
+	
+	public String getConsentNum() {
+		return consentTxtBx.getText();
+	}
+    public Boolean getReceived(){
+    	if (receivedChk.isSelected()){
+    		return true;
+    	}
+    	else{
+	    	return false;	    		
+    	}
+    }
+    
+    public String getReceivedDate(){  	
+    	Date dte = (Date) receivedDate.getValue(); 
+       	SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+    	String dt = sdf1.format(dte);
+    	return dt;
+    }  
+    
+	public JTable getPermitsTbl(){
+	    return permitsTbl;
+	}
+
 		
 }

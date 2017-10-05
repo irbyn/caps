@@ -40,7 +40,7 @@ public class PermitPane extends JPanel
 	private String user = "";
 	private String pass = "";
 	private String dbURL = "";
-	private CreateConnection connecting;
+	CreateConnection connecting;
 	
 	private ConnDetails conDeets;
 	
@@ -52,7 +52,7 @@ public class PermitPane extends JPanel
 	private PermitsReqPanel permitReq;
 	private RecvPermitPanel permitRecv;
 	private ProdStatementPanel prodStmnt;
-	private CCCToCounPanel cccToCouncil;
+//	private CCCToCounPanel cccToCouncil;
 	private CCCApprovedPanel cccApproved;
 	private CCCToClientPanel cccToClient;
 	
@@ -62,7 +62,7 @@ public class PermitPane extends JPanel
 	private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.p_PermitsRequired", // procedure[0]
 												"EXEC AWS_WCH_DB.dbo.p_PermitsReceived", // procedure[1]
 												"EXEC AWS_WCH_DB.dbo.p_PermitsProdStat", // procedure[2]
-												"EXEC AWS_WCH_DB.dbo.p_PermitsCCC_Council", // procedure[3]
+											//	"EXEC AWS_WCH_DB.dbo.p_PermitsCCC_Council", // procedure[3]
 												"EXEC AWS_WCH_DB.dbo.p_PermitsCCC_Apprvd", // procedure[4]
 												"EXEC AWS_WCH_DB.dbo.p_PermitsCCC_Client"};// procedure[5]
 
@@ -81,21 +81,21 @@ public class PermitPane extends JPanel
     		permitReq = new PermitsReqPanel(lockForm, conDeets, this);
     		permitRecv = new RecvPermitPanel(lockForm, conDeets, this);
     		prodStmnt = new ProdStatementPanel(conDeets, this);
-    		cccToCouncil = new CCCToCounPanel(conDeets, this);
+   // 		cccToCouncil = new CCCToCounPanel(conDeets, this);
     		cccApproved = new CCCApprovedPanel(conDeets, this);
     		cccToClient = new CCCToClientPanel(conDeets, this);
     		
     		 JTable[] tablez = new JTable[]{permitReq.getPermitsTbl(), 
     				 						permitRecv.getPermitsTbl(), 
     				 						prodStmnt.getPermitsTbl(), 
-    				 						cccToCouncil.getPermitsTbl(), 
+  //  				 						cccToCouncil.getPermitsTbl(), 
     				 						cccApproved.getPermitsTbl(), 
     				 						cccToClient.getPermitsTbl()};
     
     		permitP.addTab("Permits Required", permitReq);
     		permitP.addTab("Receive Permits", permitRecv);
     		permitP.addTab("Producer Statement", prodStmnt);
-    		permitP.addTab("CCC to Council", cccToCouncil);
+  //  		permitP.addTab("CCC to Council", cccToCouncil);
     		permitP.addTab("CCC Approved", cccApproved);
     		permitP.addTab("CCC to Client", cccToClient);
     		add(permitP); 
@@ -180,7 +180,8 @@ public class PermitPane extends JPanel
 	        	PreparedStatement st2 =conn.prepareStatement(qry + param);	    	
 	        	qryResults = st2.executeQuery();
 	        	if (qryResults==null){
-	    			System.out.println("null query");
+
+	    			  JOptionPane.showMessageDialog(null, "null query");
 	        	}
 	        }
 	        catch(Exception ex)

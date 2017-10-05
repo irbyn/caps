@@ -11,6 +11,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.awt.event.ActionEvent;
 
 public class LoginWindow extends JFrame{
@@ -96,7 +97,7 @@ public class LoginWindow extends JFrame{
         pack();
     }
     
-    public static void main(String[] arguments) {
+    public static void main(String[] arguments) throws IOException {
         // creating JFrame object and setting it visible
         LoginWindow frame = new LoginWindow();
         frame.setVisible(true);
