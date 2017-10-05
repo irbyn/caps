@@ -5,10 +5,11 @@
 	<classpathentry kind="lib" path="src/Resources/fontbox-2.0.7.jar"/>
 	<classpathentry kind="lib" path="src/Resources/jempbox-1.8.13.jar"/>
 	<classpathentry kind="lib" path="src/Resources/mssql-jdbc-6.2.1.jre8.jar"/>
-	<classpathentry kind="lib" path="src/Resources/pdfbox-2.0.7.jar"/>
+	<classpathentry kind="lib" path="src/Resources/pdfbox-2.0.7.jar" sourcepath="C:/Users/jason/AppData/Local/Temp/.org.sf.feeling.decompiler1507062418943/source/pdfbox-2.0.7-sources.jar"/>
 	<classpathentry kind="lib" path="src/Resources/pdfbox-tools-2.0.7.jar"/>
 	<classpathentry kind="lib" path="src/Resources/preflight-2.0.7.jar"/>
 	<classpathentry kind="lib" path="src/Resources/rs2xml.jar"/>
 	<classpathentry kind="lib" path="src/Resources/xmpbox-2.0.7.jar"/>
+	<classpathentry kind="lib" path="src/Resources/commons-logging-1.1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

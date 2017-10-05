@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -49,12 +50,15 @@ import Main.*;
 class PermitsReqPanel extends JPanel {
 	
 	private int [] columnWidth = {20, 150, 150, 100, 100, 100};
-	private String upConsent = "EXEC AWS_WCH_DB.dbo.p_PermitUpdateConsent ";
-	private String upSent = "EXEC AWS_WCH_DB.dbo.p_PermitUpdateSent ";
-	private String upFire = "EXEC AWS_WCH_DB.dbo.p_PermitUpdateFire ";
-	
 	private String qry = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
 	private String qry2 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+	
+	private String upConsent = "call AWS_WCH_DB.dbo.p_PermitUpdateConsent ";
+	private String upSent = "call AWS_WCH_DB.dbo.p_PermitUpdateSent ";
+	private String upFire = "call AWS_WCH_DB.dbo.p_PermitUpdateFire";
+	
+	private CreateConnection connecting;
+	
 	private String param = "";  
 	private ResultSet rs;
 	private ResultSet rs2;
@@ -68,8 +72,6 @@ class PermitsReqPanel extends JPanel {
 	private String[] doctype = {"NONE","[Rates Notice]","[Certificate of Title]", "[Lease Agreement]", "[Sale & Purchase]", "Other"};
 	private String[] firestyle = {"FS","IS", "IB","Other"};
 	private String[] fueltype = {"Wood","Pellet", "Oil","Other"};
-	
-	private CreateConnection connecting;
 	
 	private JTableHeader header;
 	private TableColumnModel columnModel;
@@ -138,14 +140,14 @@ class PermitsReqPanel extends JPanel {
 		  this.conDeets = conDetts;
 		  this.pp = ppn;
 
-  		  connecting = new CreateConnection();	// 
+  		  connecting = new CreateConnection();	//
+  		  
 		  infoFields = new JTextField[14];		// Array to hold user JTextField names 
 		  rowSelected = false;
 		  
 		    model1 = new DefaultTableModel();  
 		    model1.setRowCount(0);
 	        permitsTbl = new JTable(model1);
-	        permitsTbl.setPreferredSize(new Dimension(0, 300));
 	        permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	        permitsTbl.setAutoCreateRowSorter(true);
 	        
@@ -352,7 +354,7 @@ class PermitsReqPanel extends JPanel {
 						try{
 						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
 						
-						updatePermitDetails(param);
+						updateClientDetails(param);
 						
 						} catch (IndexOutOfBoundsException e){
 							//Ignoring IndexOutOfBoundsExceptions!
@@ -425,16 +427,14 @@ class PermitsReqPanel extends JPanel {
 			        		validator val = new validator();	
 			        		 JOptionPane.showMessageDialog(null, "Validation not running!");
 			        		 
-			        		 //CHECK 
-			        		 
+			        		 //CHECK 			        		 
 //			        		val.validateFire(infoFields);		// validate/transform user data
 //			        		if (!val.getValidEntries()){		// display errors
 //			        			JOptionPane.showMessageDialog(null, val.getmsg());
 //			        		}
 //			        		else {	// update database
 			        			updateFire();
-//			        		}
-	
+//			        		}	
 				    }					
 				}
 		  	});
@@ -445,45 +445,110 @@ class PermitsReqPanel extends JPanel {
 		  	spaceHeader();  
 		  	
 	  }
-	  
-/*
- *  
- * @param parameter
- */
-		protected void updateConsent() {
-			
-			String update = upConsent + param + ", " + getLot() + ", " + getDP() + ", " + 
-	        		getConsent() + ", " + getBuilding() + ", " + getLevel() + ", " + 
-	        		getValue() + ", " + getYear() + ", " + getFireLocation() + ", " + 
-	        		getOwnership() + ", " + getWet() + ", " + getFireCode(); 
-			
-			 JOptionPane.showMessageDialog(null, update );
+	
 
-			pp.updatePermit(update, param, conDeets);
-		}
 		
+	  
+		protected void updateConsent() {
+						
+		    CallableStatement pm = null;
+
+		    try {
+				
+			String updateConsent = "{" + upConsent +"(?,?,?,?,?,?,?,?,?,?,?,?)}";	
+        	Connection conn = connecting.CreateConnection(conDeets);	        	   	
+		
+        	pm = conn.prepareCall(updateConsent);
+        	
+        	pm.setString(1, param);
+        	pm.setString(2, getLot());
+        	pm.setString(3, getDP());
+        	pm.setString(4, getConsent());
+        	pm.setString(5, getBuilding());
+        	pm.setString(6, getLevel());
+        	pm.setString(7, getValue());
+        	pm.setString(8, getYear()); 
+        	pm.setString(9, getFireLocation()); 
+        	pm.setString(10, getOwnership()); 
+        	pm.setBoolean(11, getWet()); 
+        	pm.setString(12, getFireCode()); 
+			
+        	pm.executeUpdate();
+        	
+		    }
+	           catch (SQLServerException sqex)
+	            {
+	            	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+	            }
+	            catch(Exception ex)
+	            { 
+	            JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+	            }
+	}
+		
+    	
 		protected void updateAsSent() {
 			
-			String update = upSent + param; 
-			
-			 JOptionPane.showMessageDialog(null, update );
+		    CallableStatement pm = null;
 
-			pp.updatePermit(update, param, conDeets);
+		    try {
+				
+		    	String updateSent = "{" + upSent +"(?)}";	
+		    	Connection conn = connecting.CreateConnection(conDeets);	        	   	
+		
+		    	pm = conn.prepareCall(updateSent);
+			
+		    	pm.setString(1, param);
+			
+		    	pm.executeUpdate();
+		    	}
+	           catch (SQLServerException sqex)
+	            {
+	            	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+	            }
+	            catch(Exception ex)
+	            { 
+	            JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+	            }			
 		}
+		
+		
 		
 		protected void updateFire() {
 			
-			String update = upFire + getFireCode() + ", " + getFireType() + ", " + getMake() + ", " + 
-			getModel() + ", " + getFuel() + ", " + getEcan() + ", " + getNelson()  + ", " + getLifeTime(); 
-			
-			 JOptionPane.showMessageDialog(null, update );
+		    CallableStatement pm = null;
 
-			pp.updatePermit(update, param, conDeets);
+		    try {
+				
+			String updateFire = "{" + upFire +"(?,?,?,?,?,?,?,?)}";	
+        	Connection conn = connecting.CreateConnection(conDeets);	        	   	
+		
+        	pm = conn.prepareCall(updateFire);
+			
+        	pm.setString(1, getFireCode());
+        	pm.setString(2, getFireType());
+        	pm.setString(3, getMake());
+        	pm.setString(4, getModel());
+        	pm.setString(5, getFuel());
+        	pm.setString(6, getEcan());
+        	pm.setString(7, getNelson());
+        	pm.setInt	(8, getLifeTime()); 
+			
+        	pm.executeUpdate();
+		    }
+	           catch (SQLServerException sqex)
+	            {
+	            	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+	            }
+	            catch(Exception ex)
+	            { 
+	            JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+	            }
 		}
 
 
 	private void clearFields(){
-		  
+		param = "";  
       	permitsTbl.clearSelection();
 		rowSelected=false;
       	for(Component control : infoPanel.getComponents())
@@ -501,7 +566,7 @@ class PermitsReqPanel extends JPanel {
       	}
 	  }
       	
-		private void updatePermitDetails(String parameter) {
+		private void updateClientDetails(String parameter) {
 			
 			rs2 = pp.getDetails(qry, param, conDeets);
 			
@@ -584,7 +649,7 @@ class PermitsReqPanel extends JPanel {
 		
 		private void updateFireDetails(String fireCode) {
 			
-			rs3 = pp.getDetails(qry2, fireCode, conDeets);
+			rs3 = pp.getDetails(qry2, "[" + fireCode + "]", conDeets);
 
 			 try {
 		    
@@ -606,22 +671,22 @@ class PermitsReqPanel extends JPanel {
 		    	        lifeTxtBx.setText(life);
 		    	        
 		    	        String ft = rs3.getString("FireType");
-		    	        if (ft.equals("[FS]")){
+		    	        if (ft.equals("FS")){
 		    	        	fireCmbo.setSelectedIndex(0);
-		    	        } else if(ft.equals("[IS]")){
+		    	        } else if(ft.equals("IS")){
 		    	        	fireCmbo.setSelectedIndex(1);
-		    	        } else if(ft.equals("[IB]")){
+		    	        } else if(ft.equals("IB")){
 		    	        	fireCmbo.setSelectedIndex(2);
 		    	        } else{
 		    	        	fireCmbo.setSelectedIndex(3);
 		    	        }
 		    	        
 		    	        String fl = rs3.getString("Fuel");
-		    	        if (fl.equals("[Wood]")){
+		    	        if (fl.equals("Wood")){
 		    	        	fireCmbo.setSelectedIndex(0);
-		    	        } else if(fl.equals("[Pellet]")){
+		    	        } else if(fl.equals("Pellet")){
 		    	        	fireCmbo.setSelectedIndex(1);
-		    	        } else if(fl.equals("[Oil]")){
+		    	        } else if(fl.equals("Oil")){
 		    	        	fireCmbo.setSelectedIndex(2);
 		    	        } else{
 		    	        	fireCmbo.setSelectedIndex(3);
@@ -653,38 +718,40 @@ class PermitsReqPanel extends JPanel {
 	    	if (lotTxtBx.getText() == null){
 	    		lotTxtBx.setText("");
 	    	}
-	    	return lotTxtBx.getText();
+	    	return lotTxtBx.getText().toString();
 	    }
 	    public String getDP(){
 	    	if (dpTxtBx.getText() == null){
 	    		dpTxtBx.setText("");
 	    	}
-	    	return dpTxtBx.getText();
+	    	return dpTxtBx.getText().toString();
 	    }
 	    public String getConsent(){
 	    	if (consentTxtBx.getText() == null){
 	    		consentTxtBx.setText("");
 	    	}
-	    	return consentTxtBx.getText();
+	    	return consentTxtBx.getText().toString();
 	    }
 	    public String getBuilding(){
-	    	return buildingTxtBx.getText();
+	    	String build = buildingTxtBx.getText();
+	    	System.out.println(build);
+	    	return buildingTxtBx.getText().toString();
 	    }
 	    public String getLevel(){
-	    	return levelTxtBx.getText();
+	    	return levelTxtBx.getText().toString();
 	    }
 	    public String getValue(){
-	    	return valueTxtBx.getText();
+	    	return valueTxtBx.getText().toString();
 	    }
 	    public String getYear(){
-	    	return yearTxtBx.getText();
+	    	return yearTxtBx.getText().toString();
 	    }
 	    public String getFireLocation(){
 	    	if (locationTxtBx.getText().length() == 0){
 	    		locationTxtBx.setText(null);
 	    		
 	    	}
-	    	return locationTxtBx.getText();
+	    	return locationTxtBx.getText().toString();
 	    }
 	    public String getOwnership(){
 	    	String owner = ownerCmbo.getSelectedItem().toString();
@@ -701,28 +768,29 @@ class PermitsReqPanel extends JPanel {
 	    }
 	    
 	    public String getFireCode(){
-	    	if (fireIDTxtBx.getText().length() == 0){
-	    		System.out.println("sfdfdefdf");
-	    		fireIDTxtBx.setText(null);
-	    		return fireIDTxtBx.getText();
-	    	}
-	    	return fireIDTxtBx.getText();
+
+	    	return fireIDTxtBx.getText().toString();
 	    }
 	    
 	    public String getMake(){
-	    	return makeTxtBx.getText();
+	    	return makeTxtBx.getText().toString();
 	    }
 	    public String getModel(){
-	    	return modelTxtBx.getText();
+	    	return modelTxtBx.getText().toString();
 	    }
-	    public String getLifeTime(){
-	    	return lifeTxtBx.getText();
+	    public int getLifeTime(){
+	    	try{
+	    		int life = Integer.parseInt(lifeTxtBx.getText());
+	    		return life;
+	    		}catch (NumberFormatException nfe){
+	    			return 0;
+	    		}
 	    }
 	    public String getEcan(){
-	    	return ecanTxtBx.getText();
+	    	return ecanTxtBx.getText().toString();
 	    }
 	    public String getNelson(){
-	    	return nelsonTxtBx.getText();
+	    	return nelsonTxtBx.getText().toString();
 	    }    
 	    public String getFireType(){
 	    	String ft = fireCmbo.getSelectedItem().toString();
