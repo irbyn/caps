@@ -7,12 +7,13 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import Main.ConnDetails;
 import Schedule.TimeTablePanel;
 
 public class SchedulePane extends JPanel
 {
 
-	public SchedulePane() {	
+	public SchedulePane(ConnDetails conDeets, JFrame fr) {	
 		
 		//Adding Jpanels to the SAles panel area 
         JTabbedPane scheduleP = new JTabbedPane();

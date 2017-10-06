@@ -8,10 +8,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -34,6 +36,8 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import com.microsoft.sqlserver.jdbc.SQLServerException;
+
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import net.proteanit.sql.DbUtils;
@@ -44,8 +48,8 @@ class CCCApprovedPanel extends JPanel {
 	private int [] columnWidth = {30, 100, 120, 80, 40, 40, 40, 40, 40}; 
 	private int [] colWidth = {30, 100, 120, 80}; 
 	private String[] colNames = {"Invoice", "Customer", "Address", "Consent"};
-	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
-	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+	private String upCCCApp = "{Call AWS_WCH_DB.dbo.[p_PermitUpdateCCCApprove] (?,?,?)}";
+
 	
 	private Boolean rowSelected = false;
 	private String param = "";  
@@ -180,6 +184,7 @@ class CCCApprovedPanel extends JPanel {
 				public void actionPerformed(ActionEvent arg0) {
 				   { 
 					   resetTable();
+					   pp.showMessage("Saving...khsdfkhd dkh cjhd vjhdx dxz");
 					}					
 				}
 			});
@@ -188,7 +193,7 @@ class CCCApprovedPanel extends JPanel {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 				   { 
-					   resetTable();
+					   getCCCApproved();
 					}					
 				}
 			});
@@ -203,12 +208,18 @@ class CCCApprovedPanel extends JPanel {
 					}					
 				}
 			});
+			 
 			remCCCBtn.addActionListener( new ActionListener()
 			{
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 				   { 
-					   resetTable();
+					   int rw = cccTbl.getSelectedRow();
+					   if (rw != -1){
+						   model2.removeRow(rw);
+					   }else{
+						   JOptionPane.showMessageDialog(null, "No Row Selected to Remove");
+					   }
 					}					
 				}
 			});
@@ -239,9 +250,57 @@ class CCCApprovedPanel extends JPanel {
 		  	         }		  	      
 		  	    }
 		  	});
+		  	cccTbl.addMouseListener(new MouseAdapter() {
+		  	    @Override
+		  	    public void mouseClicked(MouseEvent evt) {
+		  	        if (evt.getClickCount() == 2) {
+		  	        	model2.removeRow(cccTbl.rowAtPoint(evt.getPoint()));			  	  
+		  	         }		  	      
+		  	    }
+		  	});
 		  	
 	  }
 	
+	protected void updateCCCApproved(String invoice) {
+		
+		CallableStatement pm = null;
+
+		try {
+				
+			String update = upCCCApp;	
+		    Connection conn = connecting.CreateConnection(conDeets);	        	   	
+		
+		    pm = conn.prepareCall(update);
+			
+		    pm.setString(1, invoice);
+		    pm.setString(2, "CCCok");		    
+		    pm.setString(3, getCCCDate());
+			
+		    pm.executeUpdate();
+		    }
+	        catch (SQLServerException sqex)
+	        {
+	           	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+	        }
+	        catch(Exception ex)
+	        { 
+	           JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+	        }			
+	}
+	
+	protected void getCCCApproved() {
+		int upD = model2.getRowCount();
+		
+		if (upD > 0){
+			for (int i = 0 ; i< upD ; i++){
+				String st = permitsTbl.getValueAt( i, 0).toString();
+				
+				updateCCCApproved(st);		
+			}			
+			resetTable();
+		}
+	}
+
 	private void moveRow(int row){
 		
 		String[] rowData = new String[]{permitsTbl.getValueAt(row, 0).toString(),
@@ -251,7 +310,6 @@ class CCCApprovedPanel extends JPanel {
 				permitsTbl.getValueAt(row, 6).toString()};
 		
 		model2.addRow(rowData);
-	//    JOptionPane.showMessageDialog(null, ccc);
 	}
 	
 	public void spaceHeader(TableColumnModel colM, int[] colW) {
@@ -273,57 +331,26 @@ class CCCApprovedPanel extends JPanel {
 		rowSelected=false;
 		param = "";
 		detailsTxtArea.setText("");
-//		cccTxtArea.setText("");
+		int cccRows = model2.getRowCount();
+		for (int i = 0;i<cccRows;i++){
+			model2.removeRow(0);
+		}
 }		
-	
-	
+    
+		private void displayClientDetails(String parameter) {
+			 detailsTxtArea.setText(pp.DisplayClientDetails(param));
+		}
+
 	    
 	    public JTable getPermitsTbl(){
 	    	return permitsTbl;
 	    }
-	    
-		private void displayClientDetails(String parameter) {
-			 detailsTxtArea.setText(pp.DisplayClientDetails(param));
-		}
-		
-		private void updatePermitDetails(String parameter) {
-	        try
-	        {
-	        	Connection conn = connecting.CreateConnection(conDeets);
-	        	PreparedStatement st2 =conn.prepareStatement(result2 + parameter);
-	        	ResultSet rs2 = st2.executeQuery();
-	    
-	                //Retrieve by column name
-	        	 while(rs2.next()){
-	        		 
-	        		 detailsTxtArea.setText("\n INVOICE:\t" + param + "\n");
-	        		 detailsTxtArea.append( " CLIENT:\t" + rs2.getString("CustomerName") + "\n\n");
-	        		 detailsTxtArea.append( " SITE:\t" + rs2.getString("StreetAddress") + "\n");
-	        		 detailsTxtArea.append( "\t" + rs2.getString("Suburb") + "\n\n");
-	        		 detailsTxtArea.append( " POSTAL:\t" + rs2.getString("CustomerAddress") + "\n");               
-	        	 }
-	        	 
-	        	 
-		        	PreparedStatement st3 =conn.prepareStatement(result3 + parameter);
-		        	
-		        	ResultSet rs3 = null;
-		        	rs3 = st3.executeQuery();
-		    
-		        	 while(rs3.next()){
-		        		 
-		        	if (!rs3.getString("FireID").equals(parameter)){
-		                //Retrieve by column name
-
-
-		        	 }
-		        } 
-		        
-	        	conn.close();	
-	        }
-	        catch(Exception ex)
-	        { 
-	        JOptionPane.showMessageDialog(null, ex.toString());
-	        }	  	
- 	}	
-		
+	      
+	    public String getCCCDate(){  	
+	    	Date dte = (Date) CCCDate.getValue(); 
+	       	SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+	    	String dt = sdf1.format(dte);
+	    	return dt;
+	    } 	    
+    
 }

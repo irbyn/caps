@@ -6,8 +6,10 @@ import java.awt.EventQueue;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
@@ -23,7 +25,7 @@ import javax.swing.JLabel;
 
 public class Homescreen extends JFrame {
 
-	//private JFrame frame;
+	private JFrame frame;
 	private JLabel lblUser;
 	private JButton scheduleBtn;
 	private JButton salesBtn;
@@ -171,10 +173,10 @@ public class Homescreen extends JFrame {
 		getContentPane().add(contentPanel);
 
 		// creating new panel objects from the panel classes containing their content
-		schedulePanel = new SchedulePane(); 
+		schedulePanel = new SchedulePane(conDeets, this); 
 		salesPanel = new SalesPane(conDeets);  
-		installPanel = new InstallsPane();
-		permitPanel = new PermitPane(conDeets);
+		installPanel = new InstallsPane(conDeets, this);
+		permitPanel = new PermitPane(conDeets, this);
 		
 
 		//Making the schedule the first view the user sees.  
@@ -183,12 +185,22 @@ public class Homescreen extends JFrame {
 		pack();
 	}
 
-
-	public static void main(String[] arguments) {
-		// creating JFrame object and setting it visible
-		Homescreen frame = new Homescreen(user, pass);
-		frame.setVisible(true);
-
-
+	public void showMsg(String st){
+		  //      JFrame f = new JFrame();
+		        final JDialog msgDialog = new JDialog(frame, st);
+            	msgDialog.setLocationRelativeTo(this);
+            	msgDialog.pack();
+            	msgDialog.setSize(new Dimension(300, 0));
+            	msgDialog.setResizable(true);       
+		        
+		        Timer timer = new Timer(2000, new ActionListener() {
+		            public void actionPerformed(ActionEvent e) {
+		            	msgDialog.setVisible(false);
+		            	msgDialog.dispose();
+		           }
+		        });
+		        timer.setRepeats(false);
+		        timer.start();
+		        msgDialog.setVisible(true);
 	}
 }

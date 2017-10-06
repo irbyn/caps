@@ -26,6 +26,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -38,6 +39,7 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerDateModel;
+import javax.swing.Timer;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -64,7 +66,7 @@ class ProdStatementPanel extends JPanel {
 
 	private int [] columnWidth = {20, 80, 100, 80, 30, 30, 40, 40, 60, 30, 30};
 	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsCCC] ";
-	private String upPS3 = "call AWS_WCH_DB.dbo.p_PermitUpdatePS3 ";
+	private String upPS3 = "{call AWS_WCH_DB.dbo.p_PermitUpdatePS3 (?,?)}";
 
 	private String param = "";  
 	private ResultSet rs;
@@ -223,6 +225,7 @@ class ProdStatementPanel extends JPanel {
 				public void actionPerformed(ActionEvent arg0) {
 				   { 
 					   resetTable();
+				//	   pp.showMessage("HI!");
 					}					
 				}
 			});
@@ -312,7 +315,7 @@ class ProdStatementPanel extends JPanel {
 
 			try {
 					
-				String update = "{" + upPS3 +"(?,?)}";	
+				String update = upPS3;	
 			    Connection conn = connecting.CreateConnection(conDeets);	        	   	
 			
 			    pm = conn.prepareCall(update);

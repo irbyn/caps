@@ -4,6 +4,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,11 +14,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Enumeration;
 
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.TableColumn;
@@ -39,6 +43,7 @@ public class PermitPane extends JPanel
 {	
 	public CreateConnection connecting;
 	
+	private Homescreen hs;
 	private ConnDetails conDeets;
 	
 	private ResultSet results;
@@ -65,8 +70,9 @@ public class PermitPane extends JPanel
 												"EXEC AWS_WCH_DB.dbo.p_PermitsCCC_Client"};// procedure[5]
 
 	
-        public PermitPane(ConnDetails conDeets)
+        public PermitPane(ConnDetails conDeets, Homescreen hs)
         {   
+        	this.hs = hs;
         	this.conDeets = conDeets;
         	lockForm = false;
     		
@@ -143,6 +149,10 @@ public class PermitPane extends JPanel
 	    public void setFormsUnLocked() {
 	    	lockForm = false;
 	  }	  
+	    
+	    public void showMessage(String msg) {
+	    	hs.showMsg(msg);
+	    }
         
         private void spaceHeader(int[] widths, TableColumnModel tcm){
         	int cols = tcm.getColumnCount();
