@@ -333,29 +333,9 @@ class RecvPermitPanel extends JPanel {
         	 try {
 	        	 while(rs2.next()){
 	        									    					
-	        	String invoice 			= rs2.getString("Invoice");
-	        	String customerName 	= rs2.getString("CustomerName");
-	        	String customerAddress 	= rs2.getString("CustomerAddress");
-	        	String customerSuburb 	= rs2.getString("CustomerSuburb");
-	        	String customerPostCode= rs2.getString("CustomerPostCode");
-	        	String customerPhone 	= rs2.getString("CustomerPhone");
-	        	String customerMobile 	= rs2.getString("CustomerMobile");
-	        	String customerEmail 	= rs2.getString("CustomerEmail");
-	        	String streetAddress 	= rs2.getString("StreetAddress");
-	        	String suburb 			= rs2.getString("Suburb");	
 	        	String consent			= rs2.getString("Consent");
-	        							
-	        	String sb = " INVOICE: " + param + "\n" +
-	        				" CLIENT:\t" + customerName + "\n\n" + 
-	        				" SITE:\t" + streetAddress + "\n" +
-	        				"\t" + suburb + "\n\n" + 
-	        				" POSTAL:\t" + customerAddress + "\n" +
-	        				"\t" + customerSuburb + "\n" + 
-	        				"\t" + customerPostCode + "\n\n" +
-	        				" PHONE:\t" + customerPhone + "\n" + 
-	   					 	" MOBILE:\t" + customerMobile + "\n\n" +
-	        				" EMAIL:\t" + customerEmail + "\n";
-	        	detailsTxtArea.setText(sb);
+
+				 detailsTxtArea.setText(pp.DisplayClientDetails(param));
 	        	
 	        	consentTxtBx.setText(consent);
 	        	

@@ -36,11 +36,8 @@ import java.sql.SQLException;
 
 
 public class PermitPane extends JPanel
-{
-	private String user = "";
-	private String pass = "";
-	private String dbURL = "";
-	CreateConnection connecting;
+{	
+	public CreateConnection connecting;
 	
 	private ConnDetails conDeets;
 	
@@ -57,6 +54,7 @@ public class PermitPane extends JPanel
 	private CCCToClientPanel cccToClient;
 	
 	private Boolean lockForm;
+	private String custDetails = "EXEC AWS_WCH_DB.dbo.p_CustomerDetails";
 	
 	// Stored procedures to fill tables (Triggered by tab selection)
 	private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.p_PermitsRequired", // procedure[0]
@@ -69,10 +67,10 @@ public class PermitPane extends JPanel
 	
         public PermitPane(ConnDetails conDeets)
         {   
-
+        	this.conDeets = conDeets;
         	lockForm = false;
     		
-  		  connecting = new CreateConnection();
+  		  	connecting = new CreateConnection();
         	
     		//Adding Jpanels to the SAles panel area 
     		JTabbedPane permitP = new JTabbedPane();
@@ -80,9 +78,9 @@ public class PermitPane extends JPanel
  
     		permitReq = new PermitsReqPanel(lockForm, conDeets, this);
     		permitRecv = new RecvPermitPanel(lockForm, conDeets, this);
-    		prodStmnt = new ProdStatementPanel(conDeets, this);
+    		prodStmnt = new ProdStatementPanel(lockForm, conDeets, this);
    // 		cccToCouncil = new CCCToCounPanel(conDeets, this);
-    		cccApproved = new CCCApprovedPanel(conDeets, this);
+    		cccApproved = new CCCApprovedPanel(lockForm, conDeets, this);
     		cccToClient = new CCCToClientPanel(conDeets, this);
     		
     		 JTable[] tablez = new JTable[]{permitReq.getPermitsTbl(), 
@@ -152,6 +150,62 @@ public class PermitPane extends JPanel
            	 tcm.getColumn(i).setPreferredWidth(widths[i]);
             }
         }
+        
+        public String DisplayClientDetails(String parameter){
+        	
+            try
+	        {
+	        	Connection conn = connecting.CreateConnection(conDeets);
+	        	PreparedStatement st2 =conn.prepareStatement(custDetails + ' ' +  parameter);	    	
+	        	qryResults = st2.executeQuery();
+	        	if (qryResults==null){
+
+	    			  JOptionPane.showMessageDialog(null, "null query");
+	        	}
+	        	else{
+					while(qryResults.next()){
+    					
+			        	String invoice 			= qryResults.getString("Invoice");
+			        	String rees				= qryResults.getString("Rees");
+						 String customerName 	= qryResults.getString("CustomerName");
+						 String customerAddress = qryResults.getString("CustomerAddress");
+						 String customerSuburb 	= qryResults.getString("CustomerSuburb");
+						 String customerPostCode= qryResults.getString("CustomerPostCode");
+						 String customerPhone 	= qryResults.getString("CustomerPhone");
+						 String customerMobile 	= qryResults.getString("CustomerMobile");
+						 String customerEmail 	= qryResults.getString("CustomerEmail");
+						 String streetAddress 	= qryResults.getString("StreetAddress");
+						 String suburb 			= qryResults.getString("Suburb");
+											
+				        String str = " INVOICE:\t" + parameter + "\n" +
+				        		     " REES CODE:\t" + rees +"\n" +
+			        				 " CLIENT:\t" + customerName + "\n\n" + 
+								 	 " SITE:\t" + streetAddress + "\n" +
+								 	 "\t" + suburb + "\n\n" + 
+								 	 " POSTAL:\t" + customerAddress + "\n" +
+								 	 "\t" + customerSuburb + "\n" + 
+								 	 "\t" + customerPostCode + "\n\n" +
+								 	 " PHONE:\t" + customerPhone + "\n" + 
+								 	 " MOBILE:\t" + customerMobile + "\n\n" +
+								 	 " EMAIL:\t" + customerEmail + "\n";	        		
+	        		return str;
+					}
+	        	}
+	        }
+	        catch(Exception ex)
+	        { 
+	        JOptionPane.showMessageDialog(null, ex.toString());
+	        }      		            
+			return "";
+        }
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
         
         
         public ResultSet getResults(int ind, ConnDetails connDeets){      	

@@ -112,7 +112,7 @@ class ProdStatementPanel extends JPanel {
 
 	private CreateConnection conn;
 
-	  public ProdStatementPanel(ConnDetails conDetts, PermitPane ppn) {
+	  public ProdStatementPanel(Boolean lockForm, ConnDetails conDetts, PermitPane ppn) {
 		  			
 		  this.lockForm = lockForm;
 		  this.conDeets = conDetts;
@@ -238,16 +238,12 @@ class ProdStatementPanel extends JPanel {
 			        			+ "This Customer will no longer display on this page!",  "Mark Consent Sent?", JOptionPane.YES_NO_OPTION);
 			        	if (input == 0){
 			        		
-
 						fillPS3();
 						updatePS3();
-						resetTable();
-		     	        		
- JOptionPane.showMessageDialog(null, "UPDATE DB!\n reset table");		        		
+						resetTable();	        		
 
 			        	} else{
 							fillPS3();
-JOptionPane.showMessageDialog(null, "View only");	
 			        	}
 		        	}else {	//	No Customer selected
 		        		JOptionPane.showMessageDialog(null, "No details to Print");			        				      
@@ -369,16 +365,16 @@ JOptionPane.showMessageDialog(null, "View only");
 		        while(rs2.next()){
 				                        
 				String invoice 		= rs2.getString("Invoice");
-				String customerName 	= rs2.getString("CustomerName");					//4
-				String customerAddress = rs2.getString("CustomerAddress");					//5a
-				String customerSuburb 	= rs2.getString("CustomerSuburb");					//5b
-				String customerPostCode= rs2.getString("CustomerPostCode");				//6
-				String customerPhone 	= rs2.getString("CustomerPhone");					//
-				String customerMobile 	= rs2.getString("CustomerMobile");					//
-				String customerEmail 	= rs2.getString("CustomerEmail");					//
-				String streetAddress 	= rs2.getString("StreetAddress");					//3a
-				String suburb 			= rs2.getString("Suburb");							//3b
-				String consent 			= rs2.getString("Consent");							//1		2=DATE GRANTED!		
+				String customerName 	= rs2.getString("CustomerName");					
+//				String customerAddress = rs2.getString("CustomerAddress");					
+//				String customerSuburb 	= rs2.getString("CustomerSuburb");					
+//				String customerPostCode= rs2.getString("CustomerPostCode");				
+//				String customerPhone 	= rs2.getString("CustomerPhone");					
+//				String customerMobile 	= rs2.getString("CustomerMobile");					
+//				String customerEmail 	= rs2.getString("CustomerEmail");					
+				String streetAddress 	= rs2.getString("StreetAddress");					
+				String suburb 			= rs2.getString("Suburb");							
+				String consent 			= rs2.getString("Consent");									
 				Date consentDate		= rs2.getDate("ConsentDate");
 				String lot 				= rs2.getString("Lot");
 				String dP				= rs2.getString("DP"); 
@@ -403,19 +399,8 @@ JOptionPane.showMessageDialog(null, "View only");
 		       	SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
 				String cnst = sdf.format(consentDate);
 				String inst = sdf.format(installDate);
-						
-				String sb =	" CLIENT:\t" + customerName + "\n\n" + 
-							" SITE:\t" + streetAddress + "\n" +
-							"\t" + suburb + "\n\n" + 
-							" POSTAL:\t" + customerAddress + "\n" +
-							"\t" + customerSuburb + "\n" + 
-							"\t" + customerPostCode + "\n\n" +
-							" PHONE:\t" + customerPhone + "\n" + 
-							" MOBILE:\t" + customerMobile + "\n\n" +
-							" EMAIL:\t" + customerEmail+ "\n\n" +
-							" Consent:\t" + consentDate;
 
-						 detailsTxtArea.setText(sb);
+				 detailsTxtArea.setText(pp.DisplayClientDetails(param));
 						 
 						 pSDate.setValue(installDate);
 						 

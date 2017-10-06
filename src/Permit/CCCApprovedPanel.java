@@ -4,9 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -17,9 +22,11 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SpinnerDateModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -34,43 +41,54 @@ import net.proteanit.sql.DbUtils;
 
 class CCCApprovedPanel extends JPanel {
 
+	private int [] columnWidth = {30, 100, 120, 80, 40, 40, 40, 40, 40}; 
+	private int [] colWidth = {30, 100, 120, 80}; 
+	private String[] colNames = {"Invoice", "Customer", "Address", "Consent"};
 	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
 	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+	
+	private Boolean rowSelected = false;
 	private String param = "";  
 	private ResultSet rs;
 	
 	private CreateConnection connecting;
 	
+	private JTable permitsTbl;
 	private JTableHeader header;
 	private TableColumnModel columnModel;
+	private DefaultTableModel model1;	
+	
+	private JTable cccTbl;
+	private JTableHeader hd;
+	private TableColumnModel cm;
+	private DefaultTableModel model2;
+	
 	private JPanel tablePanel;
 	private JPanel infoPanel;
-	private JTable permitsTbl;
-	private DefaultTableModel model1;
+	private JPanel cccPanel;
 	
 	private JTextArea detailsTxtArea;
-	
 
-	private JLabel nelsonLbl;
-	private JTextField nelsonTxtBx;
+	private JLabel cccLbl;
+	private JSpinner CCCDate;
 	
-	private JButton prntConsentBtn; 
 	private JButton cancelPermitReqBtn; 
-	private JButton savePermitReqBtn; 
-	
-	private String user = "";
-	private String pass = "";
-	private String dbURL = "";
+	private JButton savePermitReqBtn;
+	private JButton addCCCBtn; 
+	private JButton remCCCBtn;
 	
 	private CreateConnection conn;
 	
-	private ConnDetails conDets;
+	private Boolean lockForm;
+	private ConnDetails conDeets;
+	private PermitPane pp;
 
 	
-	public CCCApprovedPanel(ConnDetails conDeets, PermitPane pp) {
+	public CCCApprovedPanel(Boolean lockForm, ConnDetails conDetts, PermitPane ppn) {
 
-		  conDets = conDeets;
-
+		  this.lockForm = lockForm;
+		  this.conDeets = conDetts;
+		  this.pp = ppn;
 
 		  connecting = new CreateConnection();
 	  	 		  	
@@ -79,7 +97,7 @@ class CCCApprovedPanel extends JPanel {
 	        permitsTbl = new JTable(model1);
 	        permitsTbl.setPreferredSize(new Dimension(0, 300));
 	        permitsTbl.setAutoCreateRowSorter(true);
-	        
+
 	        JScrollPane scrollPane = new JScrollPane(permitsTbl);
 		  
 	        header= permitsTbl.getTableHeader();
@@ -87,31 +105,56 @@ class CCCApprovedPanel extends JPanel {
 	        add(header); 
 	                	        
 	        tablePanel = new JPanel();
-	        tablePanel.setBounds(20, 20, 1025, 260);  //setPreferredSize(new Dimension(0, 300));      
+	        tablePanel.setBounds(20, 20, 1025, 260);     
 	        tablePanel.setLayout(new BorderLayout());
 	        
 	        infoPanel = new JPanel();
-	        infoPanel.setBounds(0, 280, 1100, 300);  //setPreferredSize(new Dimension(0, 300));
+	        infoPanel.setBounds(0, 280, 1100, 300);  
 	        infoPanel.setLayout(null);
 	        
+	        cccPanel = new JPanel();
+	        cccPanel.setBounds(290, 20, 580, 100);  
+	        cccPanel.setBackground(Color.BLUE);
+	        cccPanel.setLayout(new BorderLayout());
+	        
 	        detailsTxtArea = new JTextArea("");
-	        detailsTxtArea.setBounds(20, 20, 1025, 140);
+	        detailsTxtArea.setBounds(20, 20, 250, 260);
 	        detailsTxtArea.setBorder(BorderFactory.createLineBorder(Color.black));
 	        detailsTxtArea.setLineWrap(true);
 	        detailsTxtArea.setEditable(false);
 	        infoPanel.add(detailsTxtArea);
+
+		    model2 = new DefaultTableModel(colNames,0);
+	        cccTbl = new JTable(model2);
+	        cccTbl.setPreferredSize(new Dimension(0, 300));
+	        cccTbl.setAutoCreateRowSorter(true);
 	        
-	        nelsonLbl = new JLabel("Nelson:");
-	        nelsonLbl.setBounds(825, 170, 70, 20);
-	        infoPanel.add(nelsonLbl);
-	        nelsonTxtBx = new JTextField(10);
-	        nelsonTxtBx.setBounds(895, 170, 150, 20);
-	        infoPanel.add(nelsonTxtBx);
+	        JScrollPane sp = new JScrollPane(cccTbl);
+		  
+	        hd= cccTbl.getTableHeader();
 	        
-	        prntConsentBtn = new JButton("Print Consent");
-	        prntConsentBtn.setBounds(545, 260, 150, 25);
-	        infoPanel.add(prntConsentBtn);
+	        cm = hd.getColumnModel();
+		  	spaceHeader(cm, colWidth);
+	        add(hd);
 	        
+		    cccLbl = new JLabel("Date for CCC:");
+		    cccLbl.setBounds(800, 170, 95, 20);
+		    infoPanel.add(cccLbl);
+
+		    SimpleDateFormat psModel = new SimpleDateFormat("dd.MMM.yyyy");
+		    CCCDate = new JSpinner(new SpinnerDateModel());
+			CCCDate.setEditor(new JSpinner.DateEditor(CCCDate, psModel.toPattern()));
+			CCCDate.setBounds(895, 170, 150, 20);
+			infoPanel.add(CCCDate);  
+	        
+			addCCCBtn = new JButton("Add Consent");
+			addCCCBtn.setBounds(895, 20, 150, 25);
+	        infoPanel.add(addCCCBtn);
+	        
+	        remCCCBtn = new JButton("Remove Consent");
+	        remCCCBtn.setBounds(895, 50, 150, 25);
+	        infoPanel.add(remCCCBtn);
+			
 	        cancelPermitReqBtn = new JButton("Cancel");
 	        cancelPermitReqBtn.setBounds(720, 260, 150, 25);
 	        infoPanel.add(cancelPermitReqBtn);
@@ -122,36 +165,131 @@ class CCCApprovedPanel extends JPanel {
 
 	        this.setLayout(null);
 	        this.add(tablePanel); 
+	        infoPanel.add(cccPanel);
 	        this.add(infoPanel);
 	        
-		  	tablePanel.add(scrollPane, BorderLayout.CENTER);
-		  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);        
-	//	  	this.add(infoPanel, BorderLayout.SOUTH);
+		  	cccPanel.add(sp, BorderLayout.CENTER);
+		  	cccPanel.add(cccTbl.getTableHeader(), BorderLayout.NORTH); 
 		  	
+		  	tablePanel.add(scrollPane, BorderLayout.CENTER);
+		  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH); 
+		  	
+			cancelPermitReqBtn.addActionListener( new ActionListener()
+			{
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+				   { 
+					   resetTable();
+					}					
+				}
+			});
+			savePermitReqBtn.addActionListener( new ActionListener()
+			{
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+				   { 
+					   resetTable();
+					}					
+				}
+			});
+			addCCCBtn.addActionListener( new ActionListener()
+			{
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+				   { 
+					   if(rowSelected){
+						   moveRow(permitsTbl.getSelectedRow());
+					   }
+					}					
+				}
+			});
+			remCCCBtn.addActionListener( new ActionListener()
+			{
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+				   { 
+					   resetTable();
+					}					
+				}
+			});
+			
 		  	permitsTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 				@Override
 				public void valueChanged(ListSelectionEvent arg0) {
 					if (!arg0.getValueIsAdjusting()){
+						rowSelected=true;
+			//			pp.setFormsLocked();
 						try{
 						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
-			        	updatePermitDetails(param);
+						
+						displayClientDetails(param);
+						
 						} catch (IndexOutOfBoundsException e){
-							//
+							//Ignoring IndexOutOfBoundsExceptions!
+						}
 						}
 					}
-				}
+			  	});
+
+		  	permitsTbl.addMouseListener(new MouseAdapter() {
+		  	    @Override
+		  	    public void mouseClicked(MouseEvent evt) {
+		  	        if (evt.getClickCount() == 2) {
+			  	        moveRow(permitsTbl.rowAtPoint(evt.getPoint()));				  	  
+		  	         }		  	      
+		  	    }
 		  	});
+		  	
 	  }
+	
+	private void moveRow(int row){
+		
+		String[] rowData = new String[]{permitsTbl.getValueAt(row, 0).toString(),
+				permitsTbl.getValueAt(row, 1).toString(),
+				permitsTbl.getValueAt(row, 2).toString() + ", " + 
+				permitsTbl.getValueAt(row, 3).toString(),
+				permitsTbl.getValueAt(row, 6).toString()};
+		
+		model2.addRow(rowData);
+	//    JOptionPane.showMessageDialog(null, ccc);
+	}
+	
+	public void spaceHeader(TableColumnModel colM, int[] colW) {
+	    int i;
+	   	TableColumn tabCol = colM.getColumn(0);
+	   	for (i=0; i<colW.length; i++){
+	      	tabCol = colM.getColumn(i);
+	      	tabCol.setPreferredWidth(colW[i]);
+	   	}
+	  	header.repaint();
+	  }      
+
+	protected void resetTable() {
+		
+		ResultSet rs = pp.getResults(3,  conDeets);
+	  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+	  	spaceHeader(columnModel, columnWidth);
+	  	
+		rowSelected=false;
+		param = "";
+		detailsTxtArea.setText("");
+//		cccTxtArea.setText("");
+}		
+	
+	
 	    
 	    public JTable getPermitsTbl(){
 	    	return permitsTbl;
 	    }
 	    
+		private void displayClientDetails(String parameter) {
+			 detailsTxtArea.setText(pp.DisplayClientDetails(param));
+		}
 		
 		private void updatePermitDetails(String parameter) {
 	        try
 	        {
-	        	Connection conn = connecting.CreateConnection(conDets);
+	        	Connection conn = connecting.CreateConnection(conDeets);
 	        	PreparedStatement st2 =conn.prepareStatement(result2 + parameter);
 	        	ResultSet rs2 = st2.executeQuery();
 	    
@@ -176,9 +314,7 @@ class CCCApprovedPanel extends JPanel {
 		        	if (!rs3.getString("FireID").equals(parameter)){
 		                //Retrieve by column name
 
-		    	        nelsonTxtBx.setText("");
 
-		    	        nelsonTxtBx.setText(rs3.getString("Nelson"));
 		        	 }
 		        } 
 		        

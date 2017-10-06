@@ -449,7 +449,7 @@ class PermitsReqPanel extends JPanel {
 	  
 		protected void resetTable() {
 			
-			ResultSet rs = pp.getResults(1,  conDeets);
+			ResultSet rs = pp.getResults(0,  conDeets);
 		  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 
 		  	
 		  	spaceHeader();
@@ -580,7 +580,8 @@ class PermitsReqPanel extends JPanel {
 	        	 try {
 					while(rs2.next()){
 								    					
-						 String invoice 		= rs2.getString("Invoice");
+/*			        	String invoice 			= rs2.getString("Invoice");
+			        	String rees				= rs2.getString("Rees");
 						 String customerName 	= rs2.getString("CustomerName");
 						 String customerAddress = rs2.getString("CustomerAddress");
 						 String customerSuburb 	= rs2.getString("CustomerSuburb");
@@ -590,7 +591,7 @@ class PermitsReqPanel extends JPanel {
 						 String customerEmail 	= rs2.getString("CustomerEmail");
 						 String streetAddress 	= rs2.getString("StreetAddress");
 						 String suburb 			= rs2.getString("Suburb");
-						 String status 			= rs2.getString("PermitStatus");
+*/						 String status 			= rs2.getString("PermitStatus");
 						 String consent 		= rs2.getString("Consent");						 						
 						 String lot 			= rs2.getString("Lot");
 						 String dP 				= rs2.getString("DP"); 
@@ -602,18 +603,8 @@ class PermitsReqPanel extends JPanel {
 						 Boolean wetback 		= rs2.getBoolean("Wetback");						 
 						 String value 			= rs2.getString("Value");						 
 						 String fire_Location 	= rs2.getString("Fire_Location");						
-						
-				        String sb = " INVOICE: " + param + "\n" +
-			        				" CLIENT:\t" + customerName + "\n\n" + 
-								 	" SITE:\t" + streetAddress + "\n" +
-								 	"\t" + suburb + "\n\n" + 
-								 	" POSTAL:\t" + customerAddress + "\n" +
-								 	"\t" + customerSuburb + "\n" + 
-								 	"\t" + customerPostCode + "\n\n" +
-								 	" PHONE:\t" + customerPhone + "\n" + 
-								 	" MOBILE:\t" + customerMobile + "\n\n" +
-								 	" EMAIL:\t" + customerEmail + "\n";
-						 detailsTxtArea.setText(sb);
+									        
+						 detailsTxtArea.setText(pp.DisplayClientDetails(param));
 						 						 
 						 lotTxtBx.setText(lot);
 						 dpTxtBx.setText(dP);
