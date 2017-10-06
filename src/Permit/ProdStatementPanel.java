@@ -8,6 +8,7 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -63,7 +64,7 @@ class ProdStatementPanel extends JPanel {
 
 	private int [] columnWidth = {20, 80, 100, 80, 30, 30, 40, 40, 60, 30, 30};
 	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsCCC] ";
-	private String upPS3 = "call AWS_WCH_DB.dbo.p_PermitUpdateReceived ";
+	private String upPS3 = "call AWS_WCH_DB.dbo.p_PermitUpdatePS3 ";
 
 	private String param = "";  
 	private ResultSet rs;
@@ -94,7 +95,7 @@ class ProdStatementPanel extends JPanel {
 	
 	private JButton prntConsentBtn; 
 	private JButton cancelPermitReqBtn; 
-	private JButton savePermitReqBtn; 
+//	private JButton savePermitReqBtn; 
 	
 	private String inst = "";
 	private String auth = "";
@@ -105,14 +106,17 @@ class ProdStatementPanel extends JPanel {
 	private String fire = "";
 	private String dateinst = "";
 	
-	
-	private ConnDetails conDets;
+	private Boolean lockForm;
+	private ConnDetails conDeets;
+	private PermitPane pp;
 
 	private CreateConnection conn;
 
-	  public ProdStatementPanel(ConnDetails conDeets, PermitPane pp) {
+	  public ProdStatementPanel(ConnDetails conDetts, PermitPane ppn) {
 		  			
-			conDets = conDeets;
+		  this.lockForm = lockForm;
+		  this.conDeets = conDetts;
+		  this.pp = ppn;
 	  		
 			connecting = new CreateConnection();
 		  	 		  	
@@ -163,16 +167,16 @@ class ProdStatementPanel extends JPanel {
 			infoPanel.add(pSDate);        
 		       
 		    prntConsentBtn = new JButton("Print Consent");
-		    prntConsentBtn.setBounds(545, 260, 150, 25);
+		    prntConsentBtn.setBounds(895, 260, 150, 25);
 		    infoPanel.add(prntConsentBtn);
 		        
 		    cancelPermitReqBtn = new JButton("Cancel");
 		    cancelPermitReqBtn.setBounds(720, 260, 150, 25);
 		    infoPanel.add(cancelPermitReqBtn);
 		        
-		    savePermitReqBtn = new JButton("Save Permit Details");
-		    savePermitReqBtn.setBounds(895, 260, 150, 25);
-		    infoPanel.add(savePermitReqBtn);
+//		    savePermitReqBtn = new JButton("Save Permit Details");
+//		    savePermitReqBtn.setBounds(895, 260, 150, 25);
+//		    infoPanel.add(savePermitReqBtn);
 
 		    this.setLayout(null);
 		    this.add(tablePanel); 
@@ -199,7 +203,7 @@ class ProdStatementPanel extends JPanel {
 					}
 			  	});
 			  	
-		savePermitReqBtn.addActionListener( new ActionListener()
+/*		savePermitReqBtn.addActionListener( new ActionListener()
 	  	{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -212,13 +216,13 @@ class ProdStatementPanel extends JPanel {
 			    }					
 			}
 	  	});
-
+*/
 		cancelPermitReqBtn.addActionListener( new ActionListener()
 			{
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 				   { 
-				        clearFields();
+					   resetTable();
 					}					
 				}
 			});
@@ -237,6 +241,7 @@ class ProdStatementPanel extends JPanel {
 
 						fillPS3();
 						updatePS3();
+						resetTable();
 		     	        		
  JOptionPane.showMessageDialog(null, "UPDATE DB!\n reset table");		        		
 
@@ -252,9 +257,7 @@ JOptionPane.showMessageDialog(null, "View only");
 	  	}
 
 	  
-	  protected void fillPS3()   {
-	//	  String formTemplate = "//C:/pdfs/Invoice/ps3.pdf";
-	//	  String filledForm = "//C:/pdfs/Invoice/ps3OUT.pdf";	  
+	  protected void fillPS3()   { 
 	        
 	        try (PDDocument pdfDocument = PDDocument.load(new File(ps3)))
 	        {
@@ -281,18 +284,18 @@ JOptionPane.showMessageDialog(null, "View only");
 	                field.setValue(fire);
 	                field = (PDTextField) acroForm.getField( "date" );
 	                field.setValue(getPSDate());
-	            }
-	            
+	            }	            
 	            // Save and close the filled out form.
 	            pdfDocument.save(file+param+".pdf");
 	            
-
 		      if (Desktop.isDesktopSupported()) {
 		    	    try {
 		    	        File myFile = new File(file+param+".pdf");
 		    	        Desktop.getDesktop().open(myFile);
+		    	    } catch (FileNotFoundException f){
+		    	    	
 		    	    } catch (IOException ex) {
-		    	        // no application registered for PDFs
+		    	        // no application registered for PDF		    	    	
 		    	    }
 		      }
 	    } catch (java.lang.NoClassDefFoundError s){
@@ -313,14 +316,13 @@ JOptionPane.showMessageDialog(null, "View only");
 
 			try {
 					
-				String update = "{" + upPS3 +"(?,?,?)}";	
+				String update = "{" + upPS3 +"(?,?)}";	
 			    Connection conn = connecting.CreateConnection(conDeets);	        	   	
 			
 			    pm = conn.prepareCall(update);
 				
 			    pm.setString(1, param);
-			    pm.setString(2, getConsentNum());
-			    pm.setString(3, getReceivedDate());
+			    pm.setString(2, getPSDate());
 				
 			    pm.executeUpdate();
 			    }
@@ -333,21 +335,33 @@ JOptionPane.showMessageDialog(null, "View only");
 		           JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		        }			
 		}
-*/		
-	private void clearFields(){			  
-		permitsTbl.clearSelection();
+		
+	public void spaceHeader() {
+	    int i;
+	   	TableColumn tabCol = columnModel.getColumn(0);
+	   	for (i=0; i<columnWidth.length; i++){
+	      	tabCol = columnModel.getColumn(i);
+	      	tabCol.setPreferredWidth(columnWidth[i]);
+	   	}
+	  	header.repaint();
+	  }      
+
+	protected void resetTable() {
+		
+		ResultSet rs = pp.getResults(2,  conDeets);
+	  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+	  	spaceHeader();
+	  	
 		rowSelected=false;
 		param = "";
 		detailsTxtArea.setText("");
-		 warningLbl.setText("");
-	}	    
-
-		    
+		warningLbl.setVisible(false);
+}		    
 			
 	private void displayClientDetails(String parameter) {
 		try
 		    {
-		        Connection conn = connecting.CreateConnection(conDets);
+		        Connection conn = connecting.CreateConnection(conDeets);
 		        PreparedStatement st2 =conn.prepareStatement(result2 + parameter);
 		        ResultSet rs2 = st2.executeQuery();
 		    
@@ -413,10 +427,7 @@ JOptionPane.showMessageDialog(null, "View only");
 						 }
 						 else {
 							 warningLbl.setVisible(false);
-						 }
-
-
-					 
+						 }					 
 		        	 }
 		        	conn.close();	
 		        }
@@ -426,6 +437,7 @@ JOptionPane.showMessageDialog(null, "View only");
 		        }	  	
 	 	}	
 		
+	
     public String getPSDate(){  	
     	Date dte = (Date) pSDate.getValue(); 
        	SimpleDateFormat sdf1 = new SimpleDateFormat("dd-MMM-yyyy");

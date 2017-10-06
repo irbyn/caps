@@ -245,8 +245,7 @@ class RecvPermitPanel extends JPanel {
 			consentTxtBx.setText("");
 			receivedChk.setSelected(false);
 			receivedDate.setVisible(false);
-			receivedDateLbl.setVisible(false); 
-		
+			receivedDateLbl.setVisible(false); 		
 	}
 
 
