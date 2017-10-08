@@ -173,19 +173,19 @@ class RecvPermitPanel extends JPanel {
 			        	if (rowSelected){
 			        		if (getReceived()){
 				        		if (getConsentNum().length() == 0){
-				        			JOptionPane.showMessageDialog(null, "Consent Number must be entered!");
+				        			pp.showMessage("Consent Number must be entered!");
 				        		}else {
-				        			JOptionPane.showMessageDialog(null, "Validate/transform Consent number, then update with received timestamp");
+				        			pp.showMessage("Updating Consent Received");
 				        			updateReceived();
 				        			
 				        			resetTable();				        			
 				        		}			        		
 			        		} else {
-			        			JOptionPane.showMessageDialog(null, "Validate/transform, then update Consent number");
+			        			pp.showMessage("Updating Consent number");
 			        			updateNumber() ;
 			        		}
 			        	}else {	//	No Customer selected
-			        		JOptionPane.showMessageDialog(null, "No details to Save");			        		
+			        		pp.showMessage("No details to Save");			        		
 			        	}				    				
 				}
 		  	});
@@ -222,6 +222,7 @@ class RecvPermitPanel extends JPanel {
 						try{
 						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
 						displayClientDetails(param);
+						detailsTxtArea.setText(pp.DisplayClientDetails(param));
 						} catch (IndexOutOfBoundsException e){
 							//
 						}
@@ -302,6 +303,24 @@ class RecvPermitPanel extends JPanel {
 		        }			
 		}
 		
+		private void displayClientDetails(String parameter) {
+			
+			rs2 = pp.getDetails(qry, param, conDeets);
+			
+	        	 try {
+					while(rs2.next()){
+								    					
+						 String consent 		= rs2.getString("Consent");						 						
+
+						 consentTxtBx.setText(consent);
+
+					}
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+		} 
 	private void clearFields(){
 			  
 	permitsTbl.clearSelection();
@@ -326,26 +345,6 @@ class RecvPermitPanel extends JPanel {
   }
 
     
-	private void displayClientDetails(String parameter) {
-		
-		rs2 = pp.getDetails(qry, param, conDeets);
-				
-        	 try {
-	        	 while(rs2.next()){
-	        									    					
-	        	String consent			= rs2.getString("Consent");
-
-				 detailsTxtArea.setText(pp.DisplayClientDetails(param));
-	        	
-	        	consentTxtBx.setText(consent);
-	        	
-	        							 						        	 					 }
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}     	 
- 	}	
-	
 	public String getConsentNum() {
 		return consentTxtBx.getText();
 	}

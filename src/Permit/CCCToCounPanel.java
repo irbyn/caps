@@ -136,7 +136,8 @@ class CCCToCounPanel extends JPanel {
 						try{
 						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
 						
-			        	updatePermitDetails(param);
+						//	displayClientDetails(param);
+						detailsTxtArea.setText(pp.DisplayClientDetails(param));
 						} catch (IndexOutOfBoundsException e){
 							//
 						}

@@ -197,6 +197,7 @@ class ProdStatementPanel extends JPanel {
 						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
 						
 						displayClientDetails(param);
+						detailsTxtArea.setText(pp.DisplayClientDetails(param));
 						
 						} catch (IndexOutOfBoundsException e){
 							//Ignoring IndexOutOfBoundsExceptions!
@@ -205,27 +206,12 @@ class ProdStatementPanel extends JPanel {
 					}
 			  	});
 			  	
-/*		savePermitReqBtn.addActionListener( new ActionListener()
-	  	{
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-		        { 
-		        	if (rowSelected){
-		        		
-		        	} else {//	No Customer selected
-		        		JOptionPane.showMessageDialog(null, "No details to Save");			        		
-		        	}
-			    }					
-			}
-	  	});
-*/
 		cancelPermitReqBtn.addActionListener( new ActionListener()
 			{
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 				   { 
 					   resetTable();
-				//	   pp.showMessage("HI!");
 					}					
 				}
 			});
@@ -244,12 +230,12 @@ class ProdStatementPanel extends JPanel {
 						fillPS3();
 						updatePS3();
 						resetTable();	        		
-
+						pp.showMessage("Updating Permit");
 			        	} else{
 							fillPS3();
 			        	}
 		        	}else {	//	No Customer selected
-		        		JOptionPane.showMessageDialog(null, "No details to Print");			        				      
+		        		pp.showMessage("No details to Print");			        				      
 			       	}				
 				}
 			});
@@ -397,13 +383,10 @@ class ProdStatementPanel extends JPanel {
 				owner = customerName;
 				fire = make_model;
 				dateinst = getPSDate();
-				
-					
+									
 		       	SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
 				String cnst = sdf.format(consentDate);
 				String inst = sdf.format(installDate);
-
-				 detailsTxtArea.setText(pp.DisplayClientDetails(param));
 						 
 						 pSDate.setValue(installDate);
 						 

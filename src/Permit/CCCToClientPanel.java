@@ -4,9 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -17,15 +22,20 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SpinnerDateModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
@@ -35,10 +45,13 @@ import net.proteanit.sql.DbUtils;
 
 class CCCToClientPanel extends JPanel {
 
-	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
-	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+	private int [] columnWidth = {30, 100, 120, 80, 40, 40, 40, 40, 40}; 	
+	private String upCCCClient = "{Call AWS_WCH_DB.dbo.[p_PermitUpdateCCCToClient] (?,?)}";
+	
 	private String param = "";  
 	private ResultSet rs;
+	
+	private Boolean rowSelected = false;
 	
 	private CreateConnection connecting;
 	
@@ -51,33 +64,34 @@ class CCCToClientPanel extends JPanel {
 	
 	private JTextArea detailsTxtArea;
 	
-
-	private JLabel nelsonLbl;
-	private JTextField nelsonTxtBx;
+	private JLabel sentLbl;
+	private JCheckBox sentChk;
 	
-	private JButton prntConsentBtn; 
+	private JLabel sentDateLbl;
+	private JSpinner sentDate;
+	
 	private JButton cancelPermitReqBtn; 
 	private JButton savePermitReqBtn; 
 	
-	private String user = "";
-	private String pass = "";
-	private String dbURL = "";
-	
 	private CreateConnection conn;
 	
-	private ConnDetails conDets;
+	private Boolean lockForm;
+	private ConnDetails conDeets;
+	private PermitPane pp;
 
+	
+	public CCCToClientPanel(Boolean lockForm, ConnDetails conDetts, PermitPane ppn) {
 
-	public CCCToClientPanel(ConnDetails conDeets, PermitPane pp) {
-
-		  conDets = conDeets;
+		  this.lockForm = lockForm;
+		  this.conDeets = conDetts;
+		  this.pp = ppn;
   		  
 		  connecting = new CreateConnection();
 	  	 		  	
 		    model1 = new DefaultTableModel();  
 		    model1.setRowCount(0);
 	        permitsTbl = new JTable(model1);
-	        permitsTbl.setPreferredSize(new Dimension(0, 300));
+	        permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	        permitsTbl.setAutoCreateRowSorter(true);
 	        
 	        JScrollPane scrollPane = new JScrollPane(permitsTbl);
@@ -95,22 +109,29 @@ class CCCToClientPanel extends JPanel {
 	        infoPanel.setLayout(null);
 	        
 	        detailsTxtArea = new JTextArea("");
-	        detailsTxtArea.setBounds(20, 20, 1025, 140);
+	        detailsTxtArea.setBounds(20, 20, 250, 260);
 	        detailsTxtArea.setBorder(BorderFactory.createLineBorder(Color.black));
 	        detailsTxtArea.setLineWrap(true);
 	        detailsTxtArea.setEditable(false);
 	        infoPanel.add(detailsTxtArea);
+	        	    	
+	    	sentLbl = new JLabel("Customer Balance Paid:");
+	    	sentLbl.setBounds(800, 110, 150, 20);
+	        infoPanel.add(sentLbl);			
+	        sentChk = new JCheckBox("");
+	        sentChk.setSelected(false);
+	        sentChk.setBounds(950, 110, 95, 20);
+	        infoPanel.add(sentChk);
 	        
-	        nelsonLbl = new JLabel("Nelson:");
-	        nelsonLbl.setBounds(825, 170, 70, 20);
-	        infoPanel.add(nelsonLbl);
-	        nelsonTxtBx = new JTextField(10);
-	        nelsonTxtBx.setBounds(895, 170, 150, 20);
-	        infoPanel.add(nelsonTxtBx);
+	        sentDateLbl = new JLabel("Close Permit:");
+	        sentDateLbl.setBounds(800, 140, 95, 20);
+	        infoPanel.add(sentDateLbl);
 	        
-	        prntConsentBtn = new JButton("Print Consent");
-	        prntConsentBtn.setBounds(545, 260, 150, 25);
-	        infoPanel.add(prntConsentBtn);
+	        SimpleDateFormat dt = new SimpleDateFormat("dd.MMM.yyyy");
+	        sentDate = new JSpinner(new SpinnerDateModel());
+	        sentDate.setEditor(new JSpinner.DateEditor(sentDate, dt.toPattern()));
+	        sentDate.setBounds(895, 140, 150, 20);
+			infoPanel.add(sentDate);
 	        
 	        cancelPermitReqBtn = new JButton("Cancel");
 	        cancelPermitReqBtn.setBounds(720, 260, 150, 25);
@@ -127,67 +148,119 @@ class CCCToClientPanel extends JPanel {
 		  	tablePanel.add(scrollPane, BorderLayout.CENTER);
 		  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);        
 
-		  	
+			cancelPermitReqBtn.addActionListener( new ActionListener()
+			{
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+				   { 
+					   resetTable();
+					}					
+				}
+			});
+			savePermitReqBtn.addActionListener( new ActionListener()
+			{
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+				   { 
+					   if(rowSelected){
+						   if(sentChk.isSelected()){
+					        	int input = JOptionPane.showConfirmDialog(null,"Update database and Close Permit?\n "
+					        			+ "This Customer will no longer display on this page!",  "Close Permit?", JOptionPane.YES_NO_OPTION);
+					        	if (input == 0){
+					        		updateCCCToClient(param);	        		
+					        		pp.showMessage("Updating Consent...");	        		
+							        resetTable();
+					        	}
+						   }else{
+								pp.showMessage("Check Customer Balance Paid before Saving");
+						   }
+					   }else {
+						   pp.showMessage("Select a Customer before Saving");
+					   }
+					}					
+				}
+			});
 		  	permitsTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 				@Override
 				public void valueChanged(ListSelectionEvent arg0) {
 					if (!arg0.getValueIsAdjusting()){
+						rowSelected=true;
+			//			pp.setFormsLocked();
 						try{
 						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
-			        	updatePermitDetails(param);
+						
+						//	displayClientDetails(param);
+						detailsTxtArea.setText(pp.DisplayClientDetails(param));
+						
 						} catch (IndexOutOfBoundsException e){
-							//
+							//Ignoring IndexOutOfBoundsExceptions!
+						}
 						}
 					}
-				}
-		  	});
+			  	});
 	}
-	    
-	    public JTable getPermitsTbl(){
-	    	return permitsTbl;
-	    }
-	    
+	
+	protected void updateCCCToClient(String invoice) {
 		
-		private void updatePermitDetails(String parameter) {
-	        try
+		CallableStatement pm = null;
+
+		try {
+				
+			String update = upCCCClient;	
+		    Connection conn = connecting.CreateConnection(conDeets);	        	   	
+		
+		    pm = conn.prepareCall(update);
+			
+		    pm.setString(1, invoice);
+		    pm.setString(2, getCCCSentDate());
+			
+		    pm.executeUpdate();
+		    }
+	        catch (SQLServerException sqex)
 	        {
-	        	Connection conn = connecting.CreateConnection(conDets);
-	        	PreparedStatement st2 =conn.prepareStatement(result2 + parameter);
-	        	ResultSet rs2 = st2.executeQuery();
-	    
-	                //Retrieve by column name
-	        	 while(rs2.next()){
-	        		 
-	        		 detailsTxtArea.setText("\n INVOICE:\t" + param + "\n");
-	        		 detailsTxtArea.append( " CLIENT:\t" + rs2.getString("CustomerName") + "\n\n");
-	        		 detailsTxtArea.append( " SITE:\t" + rs2.getString("StreetAddress") + "\n");
-	        		 detailsTxtArea.append( "\t" + rs2.getString("Suburb") + "\n\n");
-	        		 detailsTxtArea.append( " POSTAL:\t" + rs2.getString("CustomerAddress") + "\n");               
-	        	 }
-	        	 
-	        	 
-		        	PreparedStatement st3 =conn.prepareStatement(result3 + parameter);
-		        	
-		        	ResultSet rs3 = null;
-		        	rs3 = st3.executeQuery();
-		    
-		        	 while(rs3.next()){
-		        		 
-		        	if (!rs3.getString("FireID").equals(parameter)){
-		                //Retrieve by column name
-
-		    	        nelsonTxtBx.setText("");
-
-		    	        nelsonTxtBx.setText(rs3.getString("Nelson"));
-		        	 }
-		        } 
-		        
-	        	conn.close();	
+	           	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
 	        }
 	        catch(Exception ex)
 	        { 
-	        JOptionPane.showMessageDialog(null, ex.toString());
-	        }	  	
- 	}	
+	           JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+	        }			
+	}
+	
+	public void spaceHeader(TableColumnModel colM, int[] colW) {
+	    int i;
+	   	TableColumn tabCol = colM.getColumn(0);
+	   	for (i=0; i<colW.length; i++){
+	      	tabCol = colM.getColumn(i);
+	      	tabCol.setPreferredWidth(colW[i]);
+	   	}
+	  	header.repaint();
+	  }      
+
+	protected void resetTable() {
 		
+		ResultSet rs = pp.getResults(4,  conDeets);
+	  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+	  	spaceHeader(columnModel, columnWidth);
+	  	sentChk.setSelected(false);
+	  	
+		rowSelected=false;
+		param = "";
+		detailsTxtArea.setText("");
+
+}		
+    
+		private void displayClientDetails(String parameter) {
+			 detailsTxtArea.setText(pp.DisplayClientDetails(param));
+		}
+
+	    public String getCCCSentDate(){  	
+	    	Date dte = (Date) sentDate.getValue(); 
+	       	SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+	    	String dt = sdf1.format(dte);
+	    	return dt;
+	    } 	
+	    
+	    public JTable getPermitsTbl(){
+	    	return permitsTbl;
+	    }		
 }

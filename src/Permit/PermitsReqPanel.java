@@ -52,10 +52,10 @@ class PermitsReqPanel extends JPanel {
 	private int [] columnWidth = {20, 150, 150, 100, 100, 100};
 	private String qry = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
 	private String qry2 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
-	
+								
 	private String upConsent = "call AWS_WCH_DB.dbo.p_PermitUpdateConsent ";
-	private String upSent = "call AWS_WCH_DB.dbo.p_PermitUpdateSent ";
-	private String upFire = "call AWS_WCH_DB.dbo.p_PermitUpdateFire";
+	private String upSent = "{call AWS_WCH_DB.dbo.p_PermitUpdateSent (?)}";
+	private String upFire = "{call AWS_WCH_DB.dbo.p_PermitUpdateFire (?,?,?,?,?,?,?,?)}";
 	
 	private CreateConnection connecting;
 	
@@ -355,6 +355,7 @@ class PermitsReqPanel extends JPanel {
 						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
 						
 						displayClientDetails(param);
+						detailsTxtArea.setText(pp.DisplayClientDetails(param));
 						
 						} catch (IndexOutOfBoundsException e){
 							//Ignoring IndexOutOfBoundsExceptions!
@@ -377,9 +378,10 @@ class PermitsReqPanel extends JPanel {
 			        		}
 			        		else {	// update database
 			        			updateConsent();
+			        			pp.showMessage("Updating Consent...");
 			        		}
 			        	}else {	//	No Customer selected
-			        		JOptionPane.showMessageDialog(null, "No details to Save");			        		
+			        		pp.showMessage("No details to Save");			        		
 			        	}
 				    }					
 				}
@@ -408,12 +410,12 @@ class PermitsReqPanel extends JPanel {
 			        	if (input == 0){
 
 			        		updateAsSent();		        		
-					        JOptionPane.showMessageDialog(null, "Sorry... Printing not enabled");		        		
+			        		pp.showMessage("Sorry... Printing not enabled");		        		
 
 					        resetTable();
 			        	}
 		        	}else {	//	No Customer selected
-		        		JOptionPane.showMessageDialog(null, "No details to Print");			        				      
+		        		pp.showMessage("No details to Print");			        				      
 			       	}			        
 				}
 		  	});
@@ -433,6 +435,7 @@ class PermitsReqPanel extends JPanel {
 //			        			JOptionPane.showMessageDialog(null, val.getmsg());
 //			        		}
 //			        		else {	// update database
+			        		 	pp.showMessage("Updating Fire...");
 			        			updateFire();
 //			        		}	
 				    }					
@@ -519,7 +522,7 @@ class PermitsReqPanel extends JPanel {
 
 		    try {
 				
-		    	String updateSent = "{" + upSent +"(?)}";	
+		    	String updateSent = upSent;	
 		    	Connection conn = connecting.CreateConnection(conDeets);	        	   	
 		
 		    	pm = conn.prepareCall(updateSent);
@@ -546,7 +549,7 @@ class PermitsReqPanel extends JPanel {
 
 		    try {
 				
-			String updateFire = "{" + upFire +"(?,?,?,?,?,?,?,?)}";	
+			String updateFire = upFire;	
         	Connection conn = connecting.CreateConnection(conDeets);	        	   	
 		
         	pm = conn.prepareCall(updateFire);
@@ -602,9 +605,7 @@ class PermitsReqPanel extends JPanel {
 						 String fireID 			= rs2.getString("FireID");						 
 						 Boolean wetback 		= rs2.getBoolean("Wetback");						 
 						 String value 			= rs2.getString("Value");						 
-						 String fire_Location 	= rs2.getString("Fire_Location");						
-									        
-						 detailsTxtArea.setText(pp.DisplayClientDetails(param));
+						 String fire_Location 	= rs2.getString("Fire_Location");			
 						 						 
 						 lotTxtBx.setText(lot);
 						 dpTxtBx.setText(dP);

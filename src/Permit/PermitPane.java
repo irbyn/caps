@@ -87,7 +87,7 @@ public class PermitPane extends JPanel
     		prodStmnt = new ProdStatementPanel(lockForm, conDeets, this);
    // 		cccToCouncil = new CCCToCounPanel(conDeets, this);
     		cccApproved = new CCCApprovedPanel(lockForm, conDeets, this);
-    		cccToClient = new CCCToClientPanel(conDeets, this);
+    		cccToClient = new CCCToClientPanel(lockForm, conDeets, this);
     		
     		 JTable[] tablez = new JTable[]{permitReq.getPermitsTbl(), 
     				 						permitRecv.getPermitsTbl(), 

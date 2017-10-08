@@ -28,6 +28,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerDateModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -46,10 +47,11 @@ import net.proteanit.sql.DbUtils;
 class CCCApprovedPanel extends JPanel {
 
 	private int [] columnWidth = {30, 100, 120, 80, 40, 40, 40, 40, 40}; 
-	private int [] colWidth = {30, 100, 120, 80}; 
+ 
 	private String[] colNames = {"Invoice", "Customer", "Address", "Consent"};
-	private String upCCCApp = "{Call AWS_WCH_DB.dbo.[p_PermitUpdateCCCApprove] (?,?,?)}";
-
+	private int [] colWidth = {30, 100, 120, 80};
+	
+	private String upCCCApp = "{Call AWS_WCH_DB.dbo.[p_PermitUpdateCCCApprove] (?,?)}";
 	
 	private Boolean rowSelected = false;
 	private String param = "";  
@@ -99,7 +101,7 @@ class CCCApprovedPanel extends JPanel {
 		    model1 = new DefaultTableModel();  
 		    model1.setRowCount(0);
 	        permitsTbl = new JTable(model1);
-	        permitsTbl.setPreferredSize(new Dimension(0, 300));
+	        permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	        permitsTbl.setAutoCreateRowSorter(true);
 
 	        JScrollPane scrollPane = new JScrollPane(permitsTbl);
@@ -184,7 +186,6 @@ class CCCApprovedPanel extends JPanel {
 				public void actionPerformed(ActionEvent arg0) {
 				   { 
 					   resetTable();
-					   pp.showMessage("Saving...khsdfkhd dkh cjhd vjhdx dxz");
 					}					
 				}
 			});
@@ -193,7 +194,12 @@ class CCCApprovedPanel extends JPanel {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 				   { 
+					   if (rowSelected){
 					   getCCCApproved();
+					   pp.showMessage("Updating Permit...");
+					   }else {
+						   pp.showMessage("No Customer Selected");
+					   }
 					}					
 				}
 			});
@@ -204,6 +210,8 @@ class CCCApprovedPanel extends JPanel {
 				   { 
 					   if(rowSelected){
 						   moveRow(permitsTbl.getSelectedRow());
+					   }else {
+						   pp.showMessage("No Customer Selected");
 					   }
 					}					
 				}
@@ -218,7 +226,7 @@ class CCCApprovedPanel extends JPanel {
 					   if (rw != -1){
 						   model2.removeRow(rw);
 					   }else{
-						   JOptionPane.showMessageDialog(null, "No Row Selected to Remove");
+						   pp.showMessage("No Row Selected to Remove");
 					   }
 					}					
 				}
@@ -233,8 +241,8 @@ class CCCApprovedPanel extends JPanel {
 						try{
 						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
 						
-						displayClientDetails(param);
-						
+					//	displayClientDetails(param);
+						detailsTxtArea.setText(pp.DisplayClientDetails(param));
 						} catch (IndexOutOfBoundsException e){
 							//Ignoring IndexOutOfBoundsExceptions!
 						}
@@ -257,9 +265,9 @@ class CCCApprovedPanel extends JPanel {
 		  	        	model2.removeRow(cccTbl.rowAtPoint(evt.getPoint()));			  	  
 		  	         }		  	      
 		  	    }
-		  	});
-		  	
+		  	});		  	
 	  }
+
 	
 	protected void updateCCCApproved(String invoice) {
 		
@@ -272,9 +280,8 @@ class CCCApprovedPanel extends JPanel {
 		
 		    pm = conn.prepareCall(update);
 			
-		    pm.setString(1, invoice);
-		    pm.setString(2, "CCCok");		    
-		    pm.setString(3, getCCCDate());
+		    pm.setString(1, invoice);		    
+		    pm.setString(2, getCCCDate());
 			
 		    pm.executeUpdate();
 		    }
@@ -296,7 +303,8 @@ class CCCApprovedPanel extends JPanel {
 				String st = permitsTbl.getValueAt( i, 0).toString();
 				
 				updateCCCApproved(st);		
-			}			
+			}		
+			pp.showMessage("Updating Consent ");
 			resetTable();
 		}
 	}

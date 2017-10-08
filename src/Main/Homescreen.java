@@ -188,9 +188,9 @@ public class Homescreen extends JFrame {
 	public void showMsg(String st){
 		  //      JFrame f = new JFrame();
 		        final JDialog msgDialog = new JDialog(frame, st);
-            	msgDialog.setLocationRelativeTo(this);
             	msgDialog.pack();
-            	msgDialog.setSize(new Dimension(300, 0));
+            	msgDialog.setLocationRelativeTo(this);
+            	msgDialog.setSize(new Dimension(400, 0));
             	msgDialog.setResizable(true);       
 		        
 		        Timer timer = new Timer(2000, new ActionListener() {
