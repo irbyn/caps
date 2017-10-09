@@ -332,7 +332,7 @@ class CCCApprovedPanel extends JPanel {
 
 	protected void resetTable() {
 		
-		ResultSet rs = pp.getResults(3,  conDeets);
+		ResultSet rs = pp.getResults(3);
 	  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 	  	spaceHeader(columnModel, columnWidth);
 	  	

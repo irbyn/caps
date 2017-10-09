@@ -238,7 +238,7 @@ class CCCToClientPanel extends JPanel {
 
 	protected void resetTable() {
 		
-		ResultSet rs = pp.getResults(4,  conDeets);
+		ResultSet rs = pp.getResults(4);
 	  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 	  	spaceHeader(columnModel, columnWidth);
 	  	sentChk.setSelected(false);

@@ -236,7 +236,7 @@ class RecvPermitPanel extends JPanel {
 		protected void resetTable() {
 			clearFields();
 			
-			ResultSet rs = pp.getResults(1,  conDeets);
+			ResultSet rs = pp.getResults(1);
 		  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 		  	spaceHeader();
 		  	
@@ -305,7 +305,7 @@ class RecvPermitPanel extends JPanel {
 		
 		private void displayClientDetails(String parameter) {
 			
-			rs2 = pp.getDetails(qry, param, conDeets);
+			rs2 = pp.getDetails(qry, param);
 			
 	        	 try {
 					while(rs2.next()){

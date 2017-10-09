@@ -343,7 +343,21 @@ class PermitsReqPanel extends JPanel {
 	        this.add(infoPanel);
 	        
 		  	tablePanel.add(scrollPane, BorderLayout.CENTER);
-		  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);        
+		  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);       
+		  	
+		  //Checks & Updates Fire details 
+		  	fireIDTxtBx.addFocusListener(new FocusListener() {
+		        public void focusGained(FocusEvent e) {
+		        };
+		        public void focusLost(FocusEvent e) {
+		          if (!e.isTemporary()) {
+		            String content = fireIDTxtBx.getText();
+		            emptyFire();
+		            updateFireDetails(content);
+		          }
+		        }
+		      });
+
 		  	
 		  	permitsTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 				@Override
@@ -441,6 +455,8 @@ class PermitsReqPanel extends JPanel {
 				    }					
 				}
 		  	});
+		  	
+		  	
 
 // PRE-LOAD Table data for first tab		  	
 		  	resetTable();
@@ -452,7 +468,7 @@ class PermitsReqPanel extends JPanel {
 	  
 		protected void resetTable() {
 			
-			ResultSet rs = pp.getResults(0,  conDeets);
+			ResultSet rs = pp.getResults(0);
 		  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 
 		  	
 		  	spaceHeader();
@@ -475,6 +491,16 @@ class PermitsReqPanel extends JPanel {
 	      	}
 	}
 
+	    protected void emptyFire() {
+			makeTxtBx.setText("");
+			modelTxtBx.setText("");
+			lifeTxtBx.setText("");
+			ecanTxtBx.setText("");
+			nelsonTxtBx.setText("");
+			fireCmbo.setSelectedItem(0);
+			fuelCmbo.setSelectedItem(0);
+		
+	}
 
 
 
@@ -578,7 +604,7 @@ class PermitsReqPanel extends JPanel {
       	
 		private void displayClientDetails(String parameter) {
 			
-			rs2 = pp.getDetails(qry, param, conDeets);
+			rs2 = pp.getDetails(qry, param);
 			
 	        	 try {
 					while(rs2.next()){
@@ -648,7 +674,7 @@ class PermitsReqPanel extends JPanel {
 		
 		private void updateFireDetails(String fireCode) {
 			
-			rs3 = pp.getDetails(qry2, "[" + fireCode + "]", conDeets);
+			rs3 = pp.getDetails(qry2, "[" + fireCode + "]");
 
 			 try {
 		    

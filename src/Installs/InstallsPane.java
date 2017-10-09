@@ -53,7 +53,7 @@ private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.i_InstallsToLoad
 											"EXEC AWS_WCH_DB.dbo.i_InstallsToBook"};// procedure[4]
 
 
-	public InstallsPane(ConnDetails conDeets, JFrame fr)
+	public InstallsPane(ConnDetails conDeets, Homescreen hs)
     {   
     	this.hs = hs;
     	this.conDeets = conDeets;
@@ -216,11 +216,11 @@ private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.i_InstallsToLoad
     		return results;       		            
     }
     
-    public ResultSet getDetails(String qry, String param, ConnDetails connDeets){      	
+    public ResultSet getDetails(String qry, String param){      	
     	
         try
         {
-        	Connection conn = connecting.CreateConnection(connDeets);
+        	Connection conn = connecting.CreateConnection(conDeets);
         	PreparedStatement st2 =conn.prepareStatement(qry + param);	    	
         	qryResults = st2.executeQuery();
         	if (qryResults==null){

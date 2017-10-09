@@ -116,7 +116,7 @@ public class PermitPane extends JPanel
                         JTabbedPane pane = (JTabbedPane) e.getSource();
                         tabIndex = pane.getSelectedIndex();
                         
-                        getResults(tabIndex, conDeets); 
+                        getResults(tabIndex); 
                  //       ResultSet r1 = results;
                         
                         // add ResultSet into Selected Tab JTable.
@@ -218,15 +218,15 @@ public class PermitPane extends JPanel
         	
         
         
-        public ResultSet getResults(int ind, ConnDetails connDeets){      	
+        public ResultSet getResults(int ind){      	
         	
             try
 	        {
-	        	Connection conn = connecting.CreateConnection(connDeets);
+	        	Connection conn = connecting.CreateConnection(conDeets);
 	        	PreparedStatement st =conn.prepareStatement(procedure[ind]);	//ind]);
 	        	results = st.executeQuery();
 	        	if (results==null){
-	        		getResults(0, conDeets);
+	        		getResults(0);
 	        	}
 	        }
 	        catch(Exception ex)
@@ -236,11 +236,11 @@ public class PermitPane extends JPanel
         		return results;       		            
         }
         
-        public ResultSet getDetails(String qry, String param, ConnDetails connDeets){      	
+        public ResultSet getDetails(String qry, String param){      	
         	
             try
 	        {
-	        	Connection conn = connecting.CreateConnection(connDeets);
+	        	Connection conn = connecting.CreateConnection(conDeets);
 	        	PreparedStatement st2 =conn.prepareStatement(qry + param);	    	
 	        	qryResults = st2.executeQuery();
 	        	if (qryResults==null){
@@ -256,7 +256,7 @@ public class PermitPane extends JPanel
         }
  
                
-    	protected void updatePermit(String update, String param, ConnDetails connDeets) {
+/*    	protected void updatePermit(String update, String param, ConnDetails connDeets) {
 
     		JOptionPane.showMessageDialog(null, update);
             try	// Attempt update
@@ -281,5 +281,5 @@ public class PermitPane extends JPanel
             JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
             }
     	}
-
+*/
 }

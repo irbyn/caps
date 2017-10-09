@@ -271,11 +271,11 @@ class ProdStatementPanel extends JPanel {
 	                field.setValue(getPSDate());
 	            }	            
 	            // Save and close the filled out form.
-	            pdfDocument.save(file+param+".pdf");
+	            pdfDocument.save(file+"_"+param+".pdf");
 	            
 		      if (Desktop.isDesktopSupported()) {
 		    	    try {
-		    	        File myFile = new File(file+param+".pdf");
+		    	        File myFile = new File(file+"_"+param+".pdf");
 		    	        Desktop.getDesktop().open(myFile);
 		    	    } catch (FileNotFoundException f){
 		    	    	
@@ -333,7 +333,7 @@ class ProdStatementPanel extends JPanel {
 
 	protected void resetTable() {
 		
-		ResultSet rs = pp.getResults(2,  conDeets);
+		ResultSet rs = pp.getResults(2);
 	  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 	  	spaceHeader();
 	  	
