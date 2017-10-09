@@ -41,7 +41,8 @@ public class SalesPane extends JPanel
 	private SiteCheckPanel siteCheck;
 
 	private Boolean lockForm;
-
+	private String custDetails = "EXEC AWS_WCH_DB.dbo.s_CustomerDetails";
+	
 	// Stored procedures to fill tables (Triggered by tab selection)
 	private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.s_SalesCustomer", // procedure[0]
 			"EXEC AWS_WCH_DB.dbo.s_SalesEstimation", // procedure[1]
@@ -51,6 +52,8 @@ public class SalesPane extends JPanel
 
 	public SalesPane(ConnDetails conDeets)
 	{
+		
+		this.conDeets = conDeets;
 
 		lockForm = false;
 
@@ -62,15 +65,15 @@ public class SalesPane extends JPanel
 
 		customer = new CustomerPanel(conDeets, this);
 		estimation = new EstimationPanel(conDeets, this);
-		followUp = new FollowUpPanel(conDeets, this);
-		quote = new QuotePanel(conDeets, this);
 		siteCheck = new SiteCheckPanel(conDeets, this);
+		quote = new QuotePanel(conDeets, this);
+		followUp = new FollowUpPanel(conDeets, this);
 
 		JTable[] tablez = new JTable[]{customer.getSalesTbl(), 
 										estimation.getSalesTbl(), 
-										followUp.getSalesTbl(), 
+										siteCheck.getSalesTbl(), 
 										quote.getSalesTbl(), 
-										siteCheck.getSalesTbl()};
+										followUp.getSalesTbl()};
 
 		//Adding tabs to the content panel 
 		salesP.addTab("Customer", customer);
@@ -92,10 +95,11 @@ public class SalesPane extends JPanel
 					tabIndex = pane.getSelectedIndex();
 
 					getResults(tabIndex, conDeets); 
-					//       ResultSet r1 = results;
+					//ResultSet r1 = results;
 
 					// add ResultSet into Selected Tab JTable.
-					tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));               
+					tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));
+
 					TableColumnModel tcm = tablez[tabIndex].getColumnModel();
 					int cols = tcm.getColumnCount();
 
@@ -130,16 +134,65 @@ public class SalesPane extends JPanel
             for (int i = 0; i < cols; i++){
            	 tcm.getColumn(i).setPreferredWidth(widths[i]);
             }
-        }
-        
-        
-        public ResultSet getResults(int ind, ConnDetails connDeets){      	
-        	
-            try
+        }      
+	    
+	    public String DisplayClientDetails(String parameter){
+	    	
+	        try
 	        {
+
+	        	Connection conn = connecting.CreateConnection(conDeets);
+	        	PreparedStatement st2 =conn.prepareStatement(custDetails + ' ' +  parameter);	    	
+	        	qryResults = st2.executeQuery();
+
+	        	if (qryResults==null){
+	    			  JOptionPane.showMessageDialog(null, "null query");
+	        	}
+	        	else{
+					while(qryResults.next()){
+//Only displays the first one and not the 
+		        		 //String invoice 		= qryResults.getString("Invoice");
+						 String customerName 	= qryResults.getString("CustomerName");
+						 String customerAddress = qryResults.getString("CustomerAddress");
+						 String customerSuburb 	= qryResults.getString("CustomerSuburb");
+						 String customerPostCode= qryResults.getString("CustomerPostCode");
+						 String customerPhone 	= qryResults.getString("CustomerPhone");
+						// String customerMobile 	= qryResults.getString("CustomerMobile");
+						 String customerEmail 	= qryResults.getString("CustomerEmail");
+						 //String streetAddress 	= qryResults.getString("StreetAddress");
+						 //String suburb 			= qryResults.getString("Suburb");
+						 //String status 			= qryResults.getString("PermitStatus");
+
+						 String str = "INVOICE:\t" + parameter + "\n"
+								 + "CLIENT:\t" + customerName + "\n\n"
+								 + "SITE ADDRESs:\t" + customerAddress + "\n\n"
+								 + "SUBURB:\t" + customerSuburb + "\n\n"
+								 + "POST CODE\t" + customerPostCode + "\n\n"
+								 + "PHONE NUMBER:\t" + customerPhone + "\n\n"
+								 + "EMAIL:\t" + customerEmail;
+						 return str;
+					}
+	        	}
+	        }
+	        catch(Exception ex)
+	        { 
+	        JOptionPane.showMessageDialog(null, ex.toString());
+	        }      		            
+			return "";
+	    }	
+	    
+	    public ResultSet getResults(int ind, ConnDetails connDeets){      	
+	    	
+	        try
+	        {
+	        	//System.out.println("Index: " + ind + " " + connDeets);
 	        	Connection conn = connecting.CreateConnection(connDeets);
+	        	//System.out.println("+++++++++++");
 	        	PreparedStatement st =conn.prepareStatement(procedure[ind]);	//ind]);
+	        	//System.out.println("dddddddddd");
 	        	results = st.executeQuery();
+	        	//System.out.println("sssssssssssssssssss");
+	        	
 	        	if (results==null){
 	        		getResults(0, conDeets);
 	        	}
@@ -148,9 +201,10 @@ public class SalesPane extends JPanel
 	        { 
 	        JOptionPane.showMessageDialog(null, ex.toString());
 	        }
-        		return results;       		            
-        }
-        
+	    		return results;       		            
+	    }
+	    
+        //Get the results set for the customer details
         public ResultSet getDetails(String qry, String param, ConnDetails connDeets){      	
         	
             try
@@ -167,10 +221,7 @@ public class SalesPane extends JPanel
 	        JOptionPane.showMessageDialog(null, ex.toString());
 	        }
         		return qryResults;       		            
-        }
-  
-
-	
+        }	
 }
 
 

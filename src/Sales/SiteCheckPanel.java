@@ -3,6 +3,8 @@ package Sales;
 import java.awt.BorderLayout;
 import java.awt.Choice;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.Date;
@@ -15,6 +17,8 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SpinnerDateModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
@@ -22,13 +26,14 @@ import javax.swing.table.TableModel;
 
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
+import net.proteanit.sql.DbUtils;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 
 class SiteCheckPanel extends JPanel {
-	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
-	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+	//private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
+	//private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String param = "";  
 	private ResultSet rs;
 	
@@ -40,15 +45,22 @@ class SiteCheckPanel extends JPanel {
 	private JPanel infoPanel;
 	private JTable salesTbl;
 	private DefaultTableModel model1;
+	private JTextArea txtAreaCustInfo;
+	private SalesPane sp;
+	private ConnDetails conDeets;
 	
-	private ConnDetails conDets;
-	
+	private JLabel lblSChkBooking;
+	private JSpinner spnTimeDate;
+	private JComboBox comBxSChkDoneBy;
+	private JLabel lblSiteCheckBy;
+	private JCheckBox chckbxSChkComp;
+	private JButton btnCancel;
+	private JButton btnSave;
 	private JTable table;
 
 	public SiteCheckPanel(ConnDetails conDeets, SalesPane sp) {
 		
-		 conDets = conDeets;
-
+		 conDeets = conDeets;
 
 		  connecting = new CreateConnection();
 	  	 		  	
@@ -74,7 +86,7 @@ class SiteCheckPanel extends JPanel {
 	        infoPanel.setBounds(0, 280, 1077, 289);  //setPreferredSize(new Dimension(0, 300));
 	        infoPanel.setLayout(null);
 			
-			JTextArea txtAreaCustInfo = new JTextArea();
+			txtAreaCustInfo = new JTextArea();
 			txtAreaCustInfo.setEditable(false);
 			txtAreaCustInfo.setBounds(23, 24, 382, 237);
 			infoPanel.add(txtAreaCustInfo);
@@ -86,43 +98,73 @@ class SiteCheckPanel extends JPanel {
 		
 		
 		
-		JLabel lblSChkBooking = new JLabel("Site Check Booking:");
+		lblSChkBooking = new JLabel("Site Check Booking:");
 		lblSChkBooking.setBounds(478, 68, 128, 14);
 		infoPanel.add(lblSChkBooking);
 		
-		JSpinner spnTimeDate = new JSpinner();
+		spnTimeDate = new JSpinner();
 		spnTimeDate.setModel(new SpinnerDateModel(new Date(1505908800000L), null, null, Calendar.DAY_OF_YEAR));
 		spnTimeDate.setBounds(634, 65, 284, 20);
 		infoPanel.add(spnTimeDate);
 		
-		Choice drpBxSChkDoneBy = new Choice();
-		drpBxSChkDoneBy.setBounds(634, 118, 284, 20);
-		infoPanel.add(drpBxSChkDoneBy);
+		comBxSChkDoneBy = new JComboBox();
+		comBxSChkDoneBy.setBounds(634, 115, 284, 20);
+		infoPanel.add(comBxSChkDoneBy);
 		
-		JLabel lblSiteCheckBy = new JLabel("Site Check By:");
+		lblSiteCheckBy = new JLabel("Site Check By:");
 		lblSiteCheckBy.setBounds(478, 118, 128, 14);
 		infoPanel.add(lblSiteCheckBy);
 		
-		JCheckBox chckbxSChkComp = new JCheckBox("Site Check Completed");
+		chckbxSChkComp = new JCheckBox("Site Check Completed");
 		chckbxSChkComp.setBounds(634, 159, 180, 23);
 		infoPanel.add(chckbxSChkComp);
 		
-		JButton btnCancel = new JButton("Cancel");
+		btnCancel = new JButton("Cancel");
 		btnCancel.setBounds(478, 209, 148, 23);
 		infoPanel.add(btnCancel);
+		btnCancel.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+			   { 
+				   resetTable();
+				   
+				 //Resetting the other attributes within the tab
+				   spnTimeDate.setValue(null);
+				   comBxSChkDoneBy.setSelectedItem(null);
+				   chckbxSChkComp.setSelected(false);
+				}					
+			}
+		});
 		
-		JButton btnSave = new JButton("Save Details");
+		btnSave = new JButton("Save Details");
 		btnSave.setBounds(770, 209, 148, 23);
 		infoPanel.add(btnSave);
 
 		 this.setLayout(null);
-	        this.add(tablePanel); 
-	        this.add(infoPanel);
+	     this.add(tablePanel); 
+	     this.add(infoPanel);
 
-	  tablePanel.add(scrollPane, BorderLayout.CENTER);
-	  tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
+	     tablePanel.add(scrollPane, BorderLayout.CENTER);
+	     tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
 	  	
-	  	
+	  	salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent arg0) {
+				if (!arg0.getValueIsAdjusting()){
+					//rowSelected=true;
+					try{
+					param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
+					//displayClientDetails(param);
+					txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
+					} catch (IndexOutOfBoundsException e){
+						
+					}
+				}
+			}
+	  	});	
+	  
+	  
 	 // 	rs = sp.getResults(1, conDeets);		
 	  //	salesTbl.setModel(DbUtils.resultSetToTableModel(rs));  	
 	  	//spaceHeader();  
@@ -143,6 +185,19 @@ class SiteCheckPanel extends JPanel {
 			}
 	  	});*/
 }
+	
+	protected void resetTable() {
+		//Fix this little null error 
+		ResultSet rs = sp.getResults(3,  conDeets);
+	  	salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+	  	//spaceHeader(columnModel, columnWidth);
+	  	//sentChk.setSelected(false);
+	  	
+		//rowSelected=false;
+		param = "";
+		txtAreaCustInfo.setText("");
+
+	}	
 
 public JTable getSalesTbl(){
 	return salesTbl;
