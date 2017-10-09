@@ -19,6 +19,8 @@ import Main.ConnDetails;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 class QuotePanel extends JPanel {
 	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
@@ -143,6 +145,24 @@ class QuotePanel extends JPanel {
 				}
 			}
 	  	});*/
+  	  
+  	  
+  	salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+		@Override
+		public void valueChanged(ListSelectionEvent arg0) {
+			if (!arg0.getValueIsAdjusting()){
+				//rowSelected=true;
+				try{
+				param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
+				//displayClientDetails(param);
+				txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
+				} catch (IndexOutOfBoundsException e){
+					
+				}
+			}
+		}
+  	});
+  	  
 }
   
   public JTable getSalesTbl(){

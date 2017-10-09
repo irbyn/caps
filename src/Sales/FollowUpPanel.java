@@ -14,6 +14,8 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SpinnerDateModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
@@ -145,6 +147,22 @@ class FollowUpPanel extends JPanel {
 	  tablePanel.add(scrollPane, BorderLayout.CENTER);
 	  tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
 	  	
+	  
+	  	salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent arg0) {
+				if (!arg0.getValueIsAdjusting()){
+					//rowSelected=true;
+					try{
+					param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
+					//displayClientDetails(param);
+					txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
+					} catch (IndexOutOfBoundsException e){
+						
+					}
+				}
+			}
+	  	});
 	  	
 	 // 	rs = sp.getResults(1, conDeets);		
 	  //	salesTbl.setModel(DbUtils.resultSetToTableModel(rs));  	
