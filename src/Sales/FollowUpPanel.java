@@ -43,7 +43,7 @@ class FollowUpPanel extends JPanel {
 	
 	private ConnDetails conDets;
 
-	private JTextField textField;
+	private JTextField txtBxInvNumb;
 
 	  public FollowUpPanel(ConnDetails conDeets, SalesPane sp) {
 		  conDets = conDeets;
@@ -107,10 +107,10 @@ class FollowUpPanel extends JPanel {
 			rdbtnInvoice.setBounds(563, 55, 109, 23);
 			infoPanel.add(rdbtnInvoice);
 			
-			textField = new JTextField();
-			textField.setBounds(753, 58, 208, 20);
-			infoPanel.add(textField);
-			textField.setColumns(10);
+			txtBxInvNumb = new JTextField();
+			txtBxInvNumb.setBounds(753, 58, 208, 20);
+			infoPanel.add(txtBxInvNumb);
+			txtBxInvNumb.setColumns(10);
 			
 			JRadioButton rdbtnNewRadioButton = new JRadioButton("Sold Elsewhere");
 			rdbtnNewRadioButton.setBounds(563, 83, 109, 23);
@@ -124,17 +124,17 @@ class FollowUpPanel extends JPanel {
 			btnSave.setBounds(855, 204, 148, 23);
 			infoPanel.add(btnSave);
 			
-			JButton btnNewButton = new JButton("Visit Site Check");
-			btnNewButton.setBounds(569, 117, 125, 23);
-			infoPanel.add(btnNewButton);
+			JButton btnViewSC = new JButton("Visit Site Check");
+			btnViewSC.setBounds(569, 117, 125, 23);
+			infoPanel.add(btnViewSC);
 			
-			JButton btnNewButton_1 = new JButton("View Quotation");
-			btnNewButton_1.setBounds(753, 117, 125, 23);
-			infoPanel.add(btnNewButton_1);
+			JButton btnViewQuote = new JButton("View Quotation");
+			btnViewQuote.setBounds(753, 117, 125, 23);
+			infoPanel.add(btnViewQuote);
 			
-			JButton btnNewButton_2 = new JButton("View Photo");
-			btnNewButton_2.setBounds(912, 117, 125, 23);
-			infoPanel.add(btnNewButton_2);
+			JButton btnViewPhoto = new JButton("View Photo");
+			btnViewPhoto.setBounds(912, 117, 125, 23);
+			infoPanel.add(btnViewPhoto);
 			
 	        this.setLayout(null);
 	        this.add(tablePanel); 

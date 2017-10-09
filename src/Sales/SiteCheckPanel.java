@@ -49,7 +49,6 @@ class SiteCheckPanel extends JPanel {
 		
 		 conDets = conDeets;
 
-
 		  connecting = new CreateConnection();
 	  	 		  	
 		    model1 = new DefaultTableModel();  
@@ -95,9 +94,13 @@ class SiteCheckPanel extends JPanel {
 		spnTimeDate.setBounds(634, 65, 284, 20);
 		infoPanel.add(spnTimeDate);
 		
-		Choice drpBxSChkDoneBy = new Choice();
+		JComboBox comBxSChkDoneBy = new JComboBox();
+		comBxSChkDoneBy.setBounds(634, 115, 284, 20);
+		infoPanel.add(comBxSChkDoneBy);
+		
+		/*Choice drpBxSChkDoneBy = new Choice();
 		drpBxSChkDoneBy.setBounds(634, 118, 284, 20);
-		infoPanel.add(drpBxSChkDoneBy);
+		infoPanel.add(drpBxSChkDoneBy);*/
 		
 		JLabel lblSiteCheckBy = new JLabel("Site Check By:");
 		lblSiteCheckBy.setBounds(478, 118, 128, 14);
