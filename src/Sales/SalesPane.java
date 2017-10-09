@@ -134,29 +134,7 @@ public class SalesPane extends JPanel
             for (int i = 0; i < cols; i++){
            	 tcm.getColumn(i).setPreferredWidth(widths[i]);
             }
-        }
-        
-        //Get the result set for the procedure list
-/*        public ResultSet getResults(int ind, ConnDetails connDeets){      	
-        	
-            try
-	        {
-	        	Connection conn = connecting.CreateConnection(connDeets);
-	        	System.out.println(ind);
-	        	PreparedStatement st =conn.prepareStatement(procedure[ind]);	//ind]);
-	        	System.out.println(st);
-	        	results = st.executeQuery();
-	        	if (results==null){
-	        		getResults(0, conDeets);
-	        	}
-	        }
-	        catch(Exception ex)
-	        { 
-	        JOptionPane.showMessageDialog(null, ex.toString());
-	        }
-        		return results;       		            
-        }
-*/       
+        }      
 	    
 	    public String DisplayClientDetails(String parameter){
 	    	
@@ -192,7 +170,6 @@ public class SalesPane extends JPanel
 								 + "POST CODE\t" + customerPostCode + "\n\n"
 								 + "PHONE NUMBER:\t" + customerPhone + "\n\n"
 								 + "EMAIL:\t" + customerEmail;
-						
 						 return str;
 					}
 	        	}
@@ -202,17 +179,20 @@ public class SalesPane extends JPanel
 	        JOptionPane.showMessageDialog(null, ex.toString());
 	        }      		            
 			return "";
-	    }
-	    	
-	    	
+	    }	
 	    
 	    public ResultSet getResults(int ind, ConnDetails connDeets){      	
 	    	
 	        try
 	        {
+	        	//System.out.println("Index: " + ind + " " + connDeets);
 	        	Connection conn = connecting.CreateConnection(connDeets);
+	        	//System.out.println("+++++++++++");
 	        	PreparedStatement st =conn.prepareStatement(procedure[ind]);	//ind]);
+	        	//System.out.println("dddddddddd");
 	        	results = st.executeQuery();
+	        	//System.out.println("sssssssssssssssssss");
+	        	
 	        	if (results==null){
 	        		getResults(0, conDeets);
 	        	}
@@ -223,7 +203,6 @@ public class SalesPane extends JPanel
 	        }
 	    		return results;       		            
 	    }
-	    
 	    
         //Get the results set for the customer details
         public ResultSet getDetails(String qry, String param, ConnDetails connDeets){      	
@@ -242,10 +221,7 @@ public class SalesPane extends JPanel
 	        JOptionPane.showMessageDialog(null, ex.toString());
 	        }
         		return qryResults;       		            
-        }
-  
-
-	
+        }	
 }
 
 

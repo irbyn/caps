@@ -2,10 +2,11 @@ package Sales;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -16,6 +17,7 @@ import javax.swing.table.TableColumnModel;
 
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
+import net.proteanit.sql.DbUtils;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -23,12 +25,10 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 class QuotePanel extends JPanel {
-	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
-	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+	//private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
+	//private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String param = "";  
 	private ResultSet rs;
-	
-	private CreateConnection connecting;
 	
 	private JTableHeader header;
 	private TableColumnModel columnModel;
@@ -36,15 +36,27 @@ class QuotePanel extends JPanel {
 	private JPanel infoPanel;
 	private JTable salesTbl;
 	private DefaultTableModel model1;
-	
-	private ConnDetails conDets;
 
+	private SalesPane sp;
+	private ConnDetails conDeets;
+	private CreateConnection connecting;
 	
 	private JTextField txtBxReesCode;
 	private JTextField txtBxQuoteNum;
 
-	public QuotePanel(ConnDetails conDeets, SalesPane sp) {
-		 conDets = conDeets;
+	private JScrollPane scrollPane = new JScrollPane(salesTbl);
+	private JTextArea txtBxSCheck;
+	private JTextArea txtBxQuote;
+	private JTextArea txtBxPhoto;
+	private JTextArea txtAreaCustInfo;
+	private JLabel lblSiteCheck;
+	private JLabel lblQuote;
+	private JLabel lblPhoto;
+	private JButton btnCancel;
+	private JButton btnSave;
+
+	public QuotePanel(ConnDetails ConDeets, SalesPane sp) {
+		 conDeets = ConDeets;
 
 
 		  connecting = new CreateConnection();
@@ -71,7 +83,7 @@ class QuotePanel extends JPanel {
 	        infoPanel.setBounds(0, 280, 1077, 289);  //setPreferredSize(new Dimension(0, 300));
 	        infoPanel.setLayout(null);
 			
-			JTextArea txtAreaCustInfo = new JTextArea();
+			txtAreaCustInfo = new JTextArea();
 			txtAreaCustInfo.setEditable(false);
 			txtAreaCustInfo.setBounds(23, 24, 382, 237);
 			infoPanel.add(txtAreaCustInfo);
@@ -86,35 +98,52 @@ class QuotePanel extends JPanel {
 		infoPanel.add(txtBxQuoteNum);
 		txtBxQuoteNum.setColumns(10);
 		
-		JTextArea txtBxSCheck = new JTextArea();
+		txtBxSCheck = new JTextArea();
 		txtBxSCheck.setBounds(583, 124, 97, 94);
 		infoPanel.add(txtBxSCheck);
 		
-		JTextArea txtBxQuote = new JTextArea();
+		txtBxQuote = new JTextArea();
 		txtBxQuote.setBounds(757, 124, 97, 94);
 		infoPanel.add(txtBxQuote);
 		
-		JTextArea txtBxPhoto = new JTextArea();
+		txtBxPhoto = new JTextArea();
 		txtBxPhoto.setBounds(936, 124, 97, 94);
 		infoPanel.add(txtBxPhoto);
 		
-		JLabel lblSiteCheck = new JLabel("Site Check");
+		lblSiteCheck = new JLabel("Site Check");
 		lblSiteCheck.setBounds(608, 104, 72, 14);
 		infoPanel.add(lblSiteCheck);
 		
-		JLabel lblQuote = new JLabel("Quote");
+		lblQuote = new JLabel("Quote");
 		lblQuote.setBounds(787, 104, 46, 14);
 		infoPanel.add(lblQuote);
 		
-		JLabel lblPhoto = new JLabel("Photo");
+		lblPhoto = new JLabel("Photo");
 		lblPhoto.setBounds(956, 104, 46, 14);
 		infoPanel.add(lblPhoto);
 		
-		JButton btnCancel = new JButton("Cancel");
+		btnCancel = new JButton("Cancel");
 		btnCancel.setBounds(593, 227, 148, 23);
 		infoPanel.add(btnCancel);
+		btnCancel.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+			   { 
+				   resetTable();
+				   
+				   //resetting the other textboxes
+				   txtBxReesCode.setText(null);
+				   txtBxQuoteNum.setText(null);
+				   txtBxSCheck.setText(null);
+				   txtBxQuote.setText(null);
+				   txtBxPhoto.setText(null);
+				   
+				}					
+			}
+		});
 		
-		JButton btnSave = new JButton("Save Quote Details");
+		btnSave = new JButton("Save Quote Details");
 		btnSave.setBounds(885, 227, 148, 23);
 		infoPanel.add(btnSave);
 		
@@ -164,6 +193,19 @@ class QuotePanel extends JPanel {
   	});
   	  
 }
+	
+	protected void resetTable() {
+		//Fix this little null error 
+		ResultSet rs = sp.getResults(3,  conDeets);
+	  	salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+	  	//spaceHeader(columnModel, columnWidth);
+	  	//sentChk.setSelected(false);
+	  	
+		//rowSelected=false;
+		param = "";
+		txtAreaCustInfo.setText("");
+
+	}	
   
   public JTable getSalesTbl(){
   	return salesTbl;

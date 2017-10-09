@@ -2,6 +2,8 @@ package Sales;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,26 +31,35 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 class FollowUpPanel extends JPanel {
-	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
-	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+	//private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
+	//private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String param = "";  
 	private ResultSet rs;
-	
+	private DefaultTableModel model1;
 	private CreateConnection connecting;
-	
+	private ConnDetails conDeets;
+	private SalesPane sp;
 	private JTableHeader header;
 	private TableColumnModel columnModel;
 	private JPanel tablePanel;
 	private JPanel infoPanel;
 	private JTable salesTbl;
-	private DefaultTableModel model1;
-	
-	private ConnDetails conDets;
+	private JTextArea txtAreaCustInfo;
+	private JSpinner spnTimeDate;
+	private JRadioButton rdBtnNxtFlwUp;
+	private JRadioButton rdBtnInvoice;
+	private JRadioButton rdBtnSoldEls;
+	private JButton btnCancel;
+	private JButton btnSave;
+	private JButton btnViewSC;
+	private JButton btnViewQuote;
+	private JButton btnViewPhoto;
+
 
 	private JTextField txtBxInvNumb;
 
-	  public FollowUpPanel(ConnDetails conDeets, SalesPane sp) {
-		  conDets = conDeets;
+	  public FollowUpPanel(ConnDetails ConDeets, SalesPane sp) {
+		  conDeets = ConDeets;
 
 
 		  connecting = new CreateConnection();
@@ -75,66 +86,66 @@ class FollowUpPanel extends JPanel {
 	        infoPanel.setBounds(0, 280, 1077, 289);  //setPreferredSize(new Dimension(0, 300));
 	        infoPanel.setLayout(null);
 			
-			JTextArea txtAreaCustInfo = new JTextArea();
+			txtAreaCustInfo = new JTextArea();
 			txtAreaCustInfo.setEditable(false);
 			txtAreaCustInfo.setBounds(23, 24, 382, 237);
 			infoPanel.add(txtAreaCustInfo);
 			
-
-			//This will be its own table
-			/*JTable tbtMsg = new JTable(new DefaultTableModel(null, new Object[]{"Date", "Message"}));
-			tbtMsg.setShowGrid(false);
-			DefaultTableModel modelMsg = (DefaultTableModel) tbtMsg.getModel();
-			//I don't know how to display the column names 
-			modelMsg.addRow(new Object[]{"Date", "Message"});
-			//Sample data
-			modelMsg.addRow(new Object[]{"15/09/2017", "Left 1 voice message"});
-*/			
-			//Make table scrollable
-			
-			/*tbtMsg.setBounds(587, 26, 474, 155);
-			add(tbtMsg);
-	*/		
-			
-			JSpinner spnTimeDate = new JSpinner();
+			spnTimeDate = new JSpinner();
 			spnTimeDate.setModel(new SpinnerDateModel(new Date(1505908800000L), null, null, Calendar.DAY_OF_YEAR));
 			spnTimeDate.setBounds(753, 29, 208, 20);
 			infoPanel.add(spnTimeDate);
 			
-			JRadioButton rdbtnNxtFlwUp = new JRadioButton("Next Follow Up");
-			rdbtnNxtFlwUp.setBounds(563, 25, 151, 23);
-			infoPanel.add(rdbtnNxtFlwUp);
+			rdBtnNxtFlwUp = new JRadioButton("Next Follow Up");
+			rdBtnNxtFlwUp.setBounds(563, 25, 151, 23);
+			infoPanel.add(rdBtnNxtFlwUp);
 			
-			JRadioButton rdbtnInvoice = new JRadioButton("Invoice");
-			rdbtnInvoice.setBounds(563, 55, 109, 23);
-			infoPanel.add(rdbtnInvoice);
+			rdBtnInvoice = new JRadioButton("Invoice");
+			rdBtnInvoice.setBounds(563, 55, 109, 23);
+			infoPanel.add(rdBtnInvoice);
 			
 			txtBxInvNumb = new JTextField();
 			txtBxInvNumb.setBounds(753, 58, 208, 20);
 			infoPanel.add(txtBxInvNumb);
 			txtBxInvNumb.setColumns(10);
 			
-			JRadioButton rdbtnNewRadioButton = new JRadioButton("Sold Elsewhere");
-			rdbtnNewRadioButton.setBounds(563, 83, 109, 23);
-			infoPanel.add(rdbtnNewRadioButton);
+			rdBtnSoldEls = new JRadioButton("Sold Elsewhere");
+			rdBtnSoldEls.setBounds(563, 83, 151, 23);
+			infoPanel.add(rdBtnSoldEls);
 			
-			JButton btnCancel = new JButton("Cancel");
+			btnCancel = new JButton("Cancel");
 			btnCancel.setBounds(563, 204, 148, 23);
 			infoPanel.add(btnCancel);
+			btnCancel.addActionListener( new ActionListener()
+			{
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+				   { 
+					   resetTable();
+					   
+					   //Resetting the other attributes within the tab
+					   spnTimeDate.setValue(null);
+					   rdBtnNxtFlwUp.setSelected(false);
+					   rdBtnInvoice.setSelected(false);
+					   txtBxInvNumb.setText(null);
+					   rdBtnSoldEls.setSelected(false);
+					}					
+				}
+			});
 			
-			JButton btnSave = new JButton("Save Details");
+			btnSave = new JButton("Save Details");
 			btnSave.setBounds(855, 204, 148, 23);
 			infoPanel.add(btnSave);
 			
-			JButton btnViewSC = new JButton("Visit Site Check");
+			btnViewSC = new JButton("Visit Site Check");
 			btnViewSC.setBounds(569, 117, 125, 23);
 			infoPanel.add(btnViewSC);
 			
-			JButton btnViewQuote = new JButton("View Quotation");
+			btnViewQuote = new JButton("View Quotation");
 			btnViewQuote.setBounds(753, 117, 125, 23);
 			infoPanel.add(btnViewQuote);
 			
-			JButton btnViewPhoto = new JButton("View Photo");
+			btnViewPhoto = new JButton("View Photo");
 			btnViewPhoto.setBounds(912, 117, 125, 23);
 			infoPanel.add(btnViewPhoto);
 			
@@ -163,27 +174,20 @@ class FollowUpPanel extends JPanel {
 				}
 			}
 	  	});
-	  	
-	 // 	rs = sp.getResults(1, conDeets);		
-	  //	salesTbl.setModel(DbUtils.resultSetToTableModel(rs));  	
-	  	//spaceHeader();  
-	  	
-//	  	this.add(infoPanel, BorderLayout.SOUTH);
-	  	
-/*	  	salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			@Override
-			public void valueChanged(ListSelectionEvent arg0) {
-				if (!arg0.getValueIsAdjusting()){
-					try{
-					param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
-		        	updatePermitDetails(param);
-					} catch (IndexOutOfBoundsException e){
-						//
-					}
-				}
-			}
-	  	});*/
 }
+	  
+		protected void resetTable() {
+			//Fix this little null error 
+			ResultSet rs = sp.getResults(3,  conDeets);
+		  	salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+		  	//spaceHeader(columnModel, columnWidth);
+		  	//sentChk.setSelected(false);
+		  	
+			//rowSelected=false;
+			param = "";
+			txtAreaCustInfo.setText("");
+
+		}	
   
   public JTable getSalesTbl(){
   	return salesTbl;
