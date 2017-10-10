@@ -120,7 +120,6 @@ class CCCApprovedPanel extends JPanel {
 	        
 	        cccPanel = new JPanel();
 	        cccPanel.setBounds(290, 20, 580, 100);  
-	        cccPanel.setBackground(Color.BLUE);
 	        cccPanel.setLayout(new BorderLayout());
 	        
 	        detailsTxtArea = new JTextArea("");

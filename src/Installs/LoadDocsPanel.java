@@ -10,7 +10,11 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -48,6 +52,8 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import com.microsoft.sqlserver.jdbc.SQLServerException;
+
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Permit.PermitPane;
@@ -59,10 +65,22 @@ class LoadDocsPanel extends JPanel {
 	
 	private int [] columnWidth = {30, 100, 120, 80}; 	
 	private String getSaleID = "EXEC AWS_WCH_DB.dbo.[i_InstallsGetSaleID] ";
+	private String updateDocs = "{Call AWS_WCH_DB.dbo.[i_InstallsUpdateDocs] (?,?,?,?,?)}";
+
 	private File inv;
 	private File site;
 	private File photo;
+	private File[] photosArr;
+	private int photoLimit = 5;
 	private String folder = "//C:/pdfs/Invoice/";
+	private String invPfx = "INV_";
+	private String sitePfx = "SC_";
+	private String photoPfx = "PH_";
+	
+	private String invc;
+	private String sck;
+	private String pht;
+	
 	private String invFile;
 	private String siteFile;
 	private String photoFile;
@@ -74,7 +92,12 @@ class LoadDocsPanel extends JPanel {
 	private Boolean invExists = false;
 	private Boolean siteExists = false;
 	private Boolean photoExists = false;
-
+	private Boolean saveINV = false;
+	private Boolean saveSC = false;
+	private Boolean savePH = false;
+	private Boolean saveAllowed = true;
+	
+	private String msg;
 	
 	private CreateConnection connecting;
 	
@@ -107,7 +130,6 @@ class LoadDocsPanel extends JPanel {
     private JButton viewSiteBtn;
     private JButton removePhotoBtn;
     private JButton viewPhotoBtn;
-    
 	
 	private JTextField installTxtBx;
 	private JTextField siteTxtBx;
@@ -233,7 +255,7 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
       cancelPermitReqBtn.setBounds(720, 260, 150, 25);
       infoPanel.add(cancelPermitReqBtn);
       
-      savePermitReqBtn = new JButton("Save Permit Details");
+      savePermitReqBtn = new JButton("Save Documents");
       savePermitReqBtn.setBounds(895, 260, 150, 25);
       infoPanel.add(savePermitReqBtn);
       
@@ -281,11 +303,14 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 	  	viewPhotoBtn.addActionListener( new ActionListener()
 		{	@Override
 			public void actionPerformed(ActionEvent arg0) {
-			   { 				   
-					if (photoExists){
+			   { 		
+				   int ph = photosArr.length;
+				   ip.showMessage("" + ph);
+					for (int i =0; i< ph; i++){
+						if (photosArr[i].exists())
 					      if (Desktop.isDesktopSupported()) {
 					    	    try {
-					    	        Desktop.getDesktop().open(photo);
+					    	        Desktop.getDesktop().open(photosArr[i]);
 					    	    } catch (IOException ex) {
 					    	    }
 					    	}
@@ -351,11 +376,9 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 			public void actionPerformed(ActionEvent arg0) {
 			   { 
 				   if(rowSelected){
-				//	   ip.showMessage("HI");
-					   
-					   JOptionPane.showMessageDialog(null, invLM.getElementAt(0).toString());
-					   JOptionPane.showMessageDialog(null, siteLM.getElementAt(0).toString());
-					   JOptionPane.showMessageDialog(null, photoLM.getElementAt(0).toString());					   
+					   if(allowSave()){						   
+						   saveDocuments();
+					   }
 				   }
 				   else {
 					   ip.showMessage("No Customer Selected");
@@ -375,7 +398,7 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 		//			pp.setFormsLocked();
 					try{
 					param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
-					
+
 					detailsTxtArea.setText(ip.DisplayClientDetails(param));
 					displayClientDetails(param);
 					checkForFiles();
@@ -388,16 +411,218 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 		  	});
 	  	resetTable();
 }
-protected void checkForFiles() {
-	inv = new File(folder+"INV_"+param+".pdf");
+
+protected void updateInstallDocs(String invoice) {
+	
+		CallableStatement pm = null;
+		JOptionPane.showMessageDialog(null, saleID + " " + getPhotoLoaded());
+		try {
+					
+		    Connection conn = connecting.CreateConnection(conDeets);	        	   	
+		
+		    pm = conn.prepareCall(updateDocs);
+			
+		    pm.setString(1, invoice);
+		    pm.setString(2, getInvLoaded());
+		    pm.setString(3,	saleID);
+		    pm.setString(4, getSiteLoaded());
+		    pm.setString(5, getPhotoLoaded());
+		    
+		    pm.executeUpdate();
+		    }
+	        catch (SQLServerException sqex)
+	        {
+	           	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+	        }
+	        catch(Exception ex)
+	        { 
+	           JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+	        }			
+	}
+
+
+protected void saveDocuments() {
+	invc = "";
+	sck = "";
+	pht = "";	
+	saveINV = false;
+	saveSC = false;
+	savePH = false;
+	
+	if (invExists || invLM.getSize() >0 ){
+		invc = "Loaded";
+	}
+	if (invExists && invLM.getSize() >0){
+    	int input = JOptionPane.showConfirmDialog(null,"This Invoice already exists!\n "
+    			+ "Do you want to Overwrite existing file?",  "Overwrite existing Invoice?", JOptionPane.YES_NO_OPTION);
+    	if (input == 0){    		
+    		saveInv(invLM.getElementAt(0));   		
+    			} 
+	} else if (invLM.getSize() >0){
+		saveInv(invLM.getElementAt(0));		
+	}
+//	invLM.removeElementAt(0);
+	
+	
+	if (siteExists || siteLM.getSize() >0 ){
+		sck = "Loaded";
+	}
+	if (siteExists && siteLM.getSize() >0){
+    	int input = JOptionPane.showConfirmDialog(null,"This Site Check already exists!\n "
+    			+ "Do you want to Overwrite existing file?",  "Overwrite existing Site Check?", JOptionPane.YES_NO_OPTION);
+    	if (input == 0){
+    		saveSite(siteLM.getElementAt(0));
+    			} else{
+    				ip.showMessage("dont save inv");
+    				siteLM.removeElementAt(0);
+    			}
+	} else if (siteLM.getSize() >0){
+		saveSite(siteLM.getElementAt(0));
+	}
+	
+	int existingFoto = photosArr.length;
+	int newFoto = photoLM.getSize();
+	if (existingFoto >0 || newFoto>0){
+		pht = "Loaded";
+	}
+	if (existingFoto+newFoto>photoLimit){
+		JOptionPane.showMessageDialog(null, "Maximum of " + photoLimit +" Photos reached, Some photos not saved");		
+		for(int i = existingFoto; i<photoLimit; i++){
+			savePhoto(photoLM.getElementAt(i-existingFoto),i+1);
+		}		
+	}else {
+		for(int i = 0; i<newFoto; i++){
+			savePhoto(photoLM.getElementAt(i),i);
+		}
+	}
+	updateInstallDocs(param);
+	resetTable();
+}
+
+/*
+ * Saves INVOICE to the correct file path
+ */
+protected void saveInv(Object f){
+	if(f instanceof File){
+		inv = (File)f;
+		File src = new File(inv.getAbsolutePath());
+		File target = new File(folder+invPfx+param+".pdf");
+
+		try {
+			Files.copy(src.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			
+		} catch (IOException e) {
+			ip.showMessage("Saving Invoice Failed!");
+		}		
+	}
+}
+
+/*
+ * Saves Sitechecks to the correct file path
+ */
+protected void saveSite(Object f){
+	if(f instanceof File){
+		site = (File)f;
+		File src = new File(site.getAbsolutePath());
+		File target = new File(folder+sitePfx+saleID+".pdf");
+
+		try {
+			Files.copy(src.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			
+		} catch (IOException e) {
+			ip.showMessage("Saving Site Check Failed!");
+		}		
+	}
+}
+
+protected void savePhoto(Object f, int fotoNum){
+	if(f instanceof File){
+
+		photo = (File)f;
+		File src = new File(photo.getAbsolutePath());
+		String file = photo.getAbsolutePath().toString();
+		String fileExt = file.split("\\.")[1];
+		File target = new File(folder+photoPfx+saleID+"_"+fotoNum+"."+fileExt);
+
+		try {
+			Files.copy(src.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			
+		} catch (IOException e) {
+			ip.showMessage("Saving Photo Failed!");
+		}		
+	}
+}
+
+
+/*
+ * Checks for any reason files should not be saved: too many or wrong type!
+ */
+protected Boolean allowSave() {
+
+	saveAllowed=true;
+	msg = "";
+	if (invLM.getSize()>0 || siteLM.getSize()>0 || photoLM.getSize()>0 ){
+	
+	if (invLM.getSize()>1){
+		msg = msg +"Only one Invoice can be saved\n";
+		saveAllowed=false;
+	}	
+	if (invLM.getSize()==1){
+		String file = invLM.get(0).toString();
+		if(!file.endsWith(".pdf")){
+			msg = msg +"Only .pdf files are allowed for Invoice\n";
+			saveAllowed=false;	
+		}
+	}
+	
+	if (siteLM.getSize()>1){
+		msg = msg +"Only one SiteCheck can be saved\n";
+		saveAllowed=false;
+	}
+	if (siteLM.getSize()==1){
+		String file = siteLM.get(0).toString();
+		if(!file.endsWith(".pdf")){
+			msg = msg +"Only .pdf files are allowed for SiteCheck\n";
+			saveAllowed=false;	
+		}
+	}
+	int photos = photoLM.getSize();
+	if (photos>0){
+		for(int i=0; i<photos;i++){
+			String file = photoLM.get(i).toString();
+			if(!file.endsWith(".png") && !file.endsWith(".jpg") && !file.endsWith(".jpeg")){
+				msg = msg +"Photo: " + (1+i) + ") Only .png, .jpg or .jpeg files are Allowed.\n";
+				saveAllowed=false;	
+			}
+		}
+	}
+	}else{
+		msg = msg +"No Files to Save";
+		saveAllowed=false;
+	}
+	if (!saveAllowed)	{
+		JOptionPane.showMessageDialog(null, msg);
+		return saveAllowed;
+	}
+	return saveAllowed;
+}
+
+/*
+ * Checks if this install (and sale), have files in the file system
+ * updates Boolean values invExists, siteExists, photoExists, 
+ */
+	protected void checkForFiles() {
+	//Check for stored Invoice
+	inv = new File(folder+invPfx+param+".pdf");//Uses InstallID/Invoice number
 	if (inv.exists()){
 		viewInvBtn.setVisible(true);
 		invExists = true;
 	}else{
 		viewInvBtn.setVisible(false);
 		invExists = false;
-	}					
-	site = new File(folder+"SC_"+saleID+".pdf");
+	}	
+	//Check for stored SiteCheck Forms	
+	site = new File(folder+sitePfx+saleID+".pdf");//Uses SaleID number
 	if (site.exists()){
 		viewSiteBtn.setVisible(true);
 		siteExists = true;
@@ -405,8 +630,16 @@ protected void checkForFiles() {
 		viewSiteBtn.setVisible(false);
 		siteExists = false;
 	}
-	photo = new File(folder+"PH_"+saleID+".pdf");
-	if (photo.exists()){
+	//Check for stored Photo(s)	
+	//Create array of photos
+	File f = new File(folder);					
+		photosArr = f.listFiles(new FilenameFilter() {
+		public boolean accept(File dir, String name) {
+			return name.startsWith(photoPfx+saleID+"_");	//Uses SaleID number
+		}
+	});
+
+	if (photosArr.length>0){
 		viewPhotoBtn.setVisible(true);
 		photoExists = true;
 	}else{
@@ -415,7 +648,8 @@ protected void checkForFiles() {
 	}
 	
 }
-private void displayClientDetails(String parameter) {
+
+	private void displayClientDetails(String parameter) {
 	
 	rs = ip.getDetails(getSaleID, param);
 	
@@ -426,12 +660,12 @@ private void displayClientDetails(String parameter) {
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 }	
-public void spaceHeader(TableColumnModel colM, int[] colW) {
+
+	public void spaceHeader(TableColumnModel colM, int[] colW) {
     int i;
    	TableColumn tabCol = colM.getColumn(0);
    	for (i=0; i<colW.length; i++){
@@ -441,8 +675,13 @@ public void spaceHeader(TableColumnModel colM, int[] colW) {
   	header.repaint();
   }   
 
-protected void resetTable() {
-	
+	protected void clearDrops(){
+		invLM.removeAllElements();
+		siteLM.removeAllElements();
+		photoLM.removeAllElements();
+	}
+
+	protected void resetTable() {	
 	ResultSet rs = ip.getResults(0,  conDeets);
   	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
   	spaceHeader(columnModel, columnWidth);
@@ -450,21 +689,16 @@ protected void resetTable() {
 	rowSelected=false;
 	param = "";
 	detailsTxtArea.setText("");
-	invLM.removeAllElements();
-	siteLM.removeAllElements();
-	photoLM.removeAllElements();
-	viewInvBtn.setVisible(true);
-	viewSiteBtn.setVisible(true);
-	viewPhotoBtn.setVisible(true);
+	clearDrops();
+	viewInvBtn.setVisible(false);
+	viewSiteBtn.setVisible(false);
+	viewPhotoBtn.setVisible(false);
 	invExists = false;
 	siteExists = false;
 	photoExists = false;
-	
 }		
 
-
-
-class FileCellRenderer extends DefaultListCellRenderer {
+	class FileCellRenderer extends DefaultListCellRenderer {
 
 	/*
 	 * Formats the output of the drop to Show an Icon and filename (not full path)
@@ -486,7 +720,7 @@ class FileCellRenderer extends DefaultListCellRenderer {
     }
 }
 
-class ListTransferHandler extends TransferHandler {
+	class ListTransferHandler extends TransferHandler {
 
     private JList list;
 
@@ -537,6 +771,7 @@ class ListTransferHandler extends TransferHandler {
         System.out.println(string);
     }
 }
+
 	public JTable getPermitsTbl(){
 		return permitsTbl;
 	}
@@ -550,5 +785,16 @@ class ListTransferHandler extends TransferHandler {
 	public Boolean doesPhotoExist(){
 		return photoExists;
 	}
+	private String getInvLoaded() {
+		return invc;
+	}
+	private String getSiteLoaded() {
+		return sck;
+	}
+	private String getPhotoLoaded() {
+		return pht;
+	}
+
+
 
 }

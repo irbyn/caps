@@ -206,10 +206,10 @@ class CCCToClientPanel extends JPanel {
 
 		try {
 				
-			String update = upCCCClient;	
+	//		String update = upCCCClient;	
 		    Connection conn = connecting.CreateConnection(conDeets);	        	   	
 		
-		    pm = conn.prepareCall(update);
+		    pm = conn.prepareCall(upCCCClient);
 			
 		    pm.setString(1, invoice);
 		    pm.setString(2, getCCCSentDate());
