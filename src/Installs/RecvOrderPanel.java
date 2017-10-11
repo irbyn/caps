@@ -42,6 +42,7 @@ class RecvOrderPanel extends JPanel {
 	
 	private String param = "";  
 	private ResultSet rs;
+	private Color LtGray = Color.decode("#eeeeee");
 	
 	private Boolean rowSelected = false;
 	
@@ -102,7 +103,8 @@ public RecvOrderPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) 
       
       detailsTxtArea = new JTextArea("");
       detailsTxtArea.setBounds(20, 20, 250, 260);
-      detailsTxtArea.setBorder(BorderFactory.createLineBorder(Color.black));
+      detailsTxtArea.setBorder(BorderFactory.createLoweredBevelBorder());
+      detailsTxtArea.setBackground(LtGray);
       detailsTxtArea.setLineWrap(true);
       detailsTxtArea.setEditable(false);
       infoPanel.add(detailsTxtArea);

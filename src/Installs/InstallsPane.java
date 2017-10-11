@@ -2,11 +2,14 @@ package Installs;
 
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -103,11 +106,11 @@ private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.i_InstallsToLoad
                     TableColumnModel tcm = tablez[tabIndex].getColumnModel();
                      int cols = tcm.getColumnCount();
 
-                     if (cols == 6){
-                    	 int[] colWidths = new int[]{20, 150, 150, 100, 100, 100}; 
+                     if (cols == 7){
+                    	 int[] colWidths = new int[]{20, 150, 150, 100, 100, 100, 100}; 
                     	 spaceHeader(colWidths, tcm);
-                     } else if (cols == 7){
-                    	 int[] colWidths = new int[]{20, 150, 150, 100, 100, 100, 100};   
+                     } else if (cols == 8){
+                    	 int[] colWidths = new int[]{20, 150, 150, 100, 100, 100, 100, 100};   
                     	 spaceHeader(colWidths, tcm);                         
                      } else if (cols == 9){
                         	 int[] colWidths = new int[]{30, 100, 120, 80, 40, 40, 40, 40, 40};   
@@ -261,5 +264,68 @@ private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.i_InstallsToLoad
         JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
         }
 	}
+	
+	/*
+	 * Checks if this install (and sale), have files in the file system
+	 * updates Boolean values invExists, siteExists, photoExists, 
+	 */
+/*		protected void checkForFiles() {
+	
+	String folder;
+	
+	String saleID;
+	String invoiceNum;
+	String invPfx;
+	String sitePfx;
+	String photoPfx;
+	
+	JButton viewInvBtn;
+	JButton viewSiteBtn;
+	JButton viewPhotoBtn;
+	
+	boolean invExists;
+	boolean siteExists;
+	boolean photoExists;
+	
+	File inv;
+	File site;
+	File[] photosArr;
+			
+		//Check for stored Invoice
+		inv = new File(folder+invPfx+invoiceNum+".pdf");//Uses InstallID/Invoice number
+		if (inv.exists()){
+			viewInvBtn.setVisible(true);
+			invExists = true;
+		}else{
+			viewInvBtn.setVisible(false);
+			invExists = false;
+		}	
+		//Check for stored SiteCheck Forms	
+		site = new File(folder+sitePfx+saleID+".pdf");//Uses SaleID number
+		if (site.exists()){
+			viewSiteBtn.setVisible(true);
+			siteExists = true;
+		}else{
+			viewSiteBtn.setVisible(false);
+			siteExists = false;
+		}
+		//Check for stored Photo(s)	
+		//Create array of photos
+		File f = new File(folder);					
+			photosArr = f.listFiles(new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				return name.startsWith(photoPfx+saleID+"_");	//Uses SaleID number
+			}
+		});
 
+		if (photosArr.length>0){
+			viewPhotoBtn.setVisible(true);
+			photoExists = true;
+		}else{
+			viewPhotoBtn.setVisible(false);
+			photoExists = false;
+		}
+		
+	}
+*/
 }

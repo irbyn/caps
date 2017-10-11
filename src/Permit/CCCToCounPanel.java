@@ -37,7 +37,7 @@ class CCCToCounPanel extends JPanel {
 	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String param = "";  
 	private ResultSet rs;
-	
+	private Color LtGray = Color.decode("#eeeeee");
 	private CreateConnection connecting;
 	
 	private JTableHeader header;
@@ -98,7 +98,8 @@ class CCCToCounPanel extends JPanel {
 	        
 	        detailsTxtArea = new JTextArea("");
 	        detailsTxtArea.setBounds(20, 20, 1025, 140);
-	        detailsTxtArea.setBorder(BorderFactory.createLineBorder(Color.black));
+	        detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
+	        detailsTxtArea.setBackground(LtGray);
 	        detailsTxtArea.setLineWrap(true);
 	        detailsTxtArea.setEditable(false);
 	        infoPanel.add(detailsTxtArea);

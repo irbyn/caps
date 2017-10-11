@@ -56,7 +56,7 @@ class PermitsReqPanel extends JPanel {
 	private String upConsent = "call AWS_WCH_DB.dbo.p_PermitUpdateConsent ";
 	private String upSent = "{call AWS_WCH_DB.dbo.p_PermitUpdateSent (?)}";
 	private String upFire = "{call AWS_WCH_DB.dbo.p_PermitUpdateFire (?,?,?,?,?,?,?,?)}";
-	
+	private Color LtGray = Color.decode("#eeeeee");
 	private CreateConnection connecting;
 	
 	private String param = "";  
@@ -167,7 +167,8 @@ class PermitsReqPanel extends JPanel {
 	        
 	        detailsTxtArea = new JTextArea("");
 	        detailsTxtArea.setBounds(20, 20, 250, 260);
-	        detailsTxtArea.setBorder(BorderFactory.createLineBorder(Color.black));
+	        detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
+	        detailsTxtArea.setBackground(LtGray);
 	        detailsTxtArea.setLineWrap(true);
 	        detailsTxtArea.setEditable(false);
 	        infoPanel.add(detailsTxtArea);

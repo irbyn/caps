@@ -52,7 +52,7 @@ class CCCApprovedPanel extends JPanel {
 	private int [] colWidth = {30, 100, 120, 80};
 	
 	private String upCCCApp = "{Call AWS_WCH_DB.dbo.[p_PermitUpdateCCCApprove] (?,?)}";
-	
+	private Color LtGray = Color.decode("#eeeeee");
 	private Boolean rowSelected = false;
 	private String param = "";  
 	private ResultSet rs;
@@ -124,14 +124,14 @@ class CCCApprovedPanel extends JPanel {
 	        
 	        detailsTxtArea = new JTextArea("");
 	        detailsTxtArea.setBounds(20, 20, 250, 260);
-	        detailsTxtArea.setBorder(BorderFactory.createLineBorder(Color.black));
+	        detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
+	        detailsTxtArea.setBackground(LtGray);
 	        detailsTxtArea.setLineWrap(true);
 	        detailsTxtArea.setEditable(false);
 	        infoPanel.add(detailsTxtArea);
 
 		    model2 = new DefaultTableModel(colNames,0);
 	        cccTbl = new JTable(model2);
-	        cccTbl.setPreferredSize(new Dimension(0, 300));
 	        cccTbl.setAutoCreateRowSorter(true);
 	        
 	        JScrollPane sp = new JScrollPane(cccTbl);

@@ -8,8 +8,10 @@ import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,6 +29,7 @@ import javax.swing.table.TableColumnModel;
 
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
+import Main.GetJobs;
 import Permit.PermitPane;
 import net.proteanit.sql.DbUtils;
 
@@ -35,6 +38,7 @@ class BookingsPanel extends JPanel {
 	
 	private int [] columnWidth = {30, 100, 120, 80, 40, 40, 40, 40, 40}; 	
 	private String upCCCClient = "{Call AWS_WCH_DB.dbo.[p_PermitUpdateCCCToClient] (?,?)}";
+	private Color LtGray = Color.decode("#eeeeee");
 	
 	private String param = "";  
 	private ResultSet rs;
@@ -50,18 +54,21 @@ class BookingsPanel extends JPanel {
 	private JTable permitsTbl;
 	private DefaultTableModel model1;
 	
-	private JTextArea detailsTxtArea;
+//	private JTextArea detailsTxtArea;
 	
-	private JLabel sentLbl;
-	private JCheckBox sentChk;
+//	private JLabel sentLbl;
+//	private JCheckBox sentChk;
 	
-	private JLabel sentDateLbl;
-	private JSpinner sentDate;
+//	private JLabel sentDateLbl;
+//	private JSpinner sentDate;
 	
-	private JButton cancelPermitReqBtn; 
-	private JButton savePermitReqBtn; 
+//	private JButton cancelPermitReqBtn; 
+//	private JButton savePermitReqBtn; 
 	
 	private CreateConnection conn;
+	
+	private JLabel fuelLbl;
+	private JComboBox fuelCmbo;
 	
 	private Boolean lockForm;
 	private ConnDetails conDeets;
@@ -73,6 +80,8 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 	  this.lockForm = lockForm;
 	  this.conDeets = conDetts;
 	  this.ip = ipn;
+	  
+  
 
 	  connecting = new CreateConnection();
 		  	
@@ -95,10 +104,11 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
       infoPanel = new JPanel();
       infoPanel.setBounds(0, 280, 1100, 300);  //setPreferredSize(new Dimension(0, 300));
       infoPanel.setLayout(null);
-      
+ /*     
       detailsTxtArea = new JTextArea("");
       detailsTxtArea.setBounds(20, 20, 250, 260);
-      detailsTxtArea.setBorder(BorderFactory.createLineBorder(Color.black));
+      detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
+      detailsTxtArea.setBackground(LtGray);
       detailsTxtArea.setLineWrap(true);
       detailsTxtArea.setEditable(false);
       infoPanel.add(detailsTxtArea);
@@ -110,14 +120,40 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
       savePermitReqBtn = new JButton("Save Permit Details");
       savePermitReqBtn.setBounds(895, 260, 150, 25);
       infoPanel.add(savePermitReqBtn);
+*/
 
+      
+
+
+      
+ //     job.getInstallers()
+      
+      
+      fuelLbl = new JLabel("Fuel:");
+      fuelLbl.setBounds(825, 200, 70, 20);
+      infoPanel.add(fuelLbl);
+      fuelCmbo = new JComboBox();
+ //     fuelCmbo.setSelectedIndex(0);
+      fuelCmbo.setBackground(Color.WHITE);
+      fuelCmbo.setBounds(895, 200, 150, 20);
+      infoPanel.add(fuelCmbo);
+      
+      GetJobs job = new GetJobs(conDeets);
+      String[] installUr = job.getInstallers();
+      
+      DefaultComboBoxModel model = new DefaultComboBoxModel( installUr );
+      fuelCmbo.setModel( model );   
+      
+      
+      
+      
       this.setLayout(null);
       this.add(tablePanel); 
       this.add(infoPanel);
       
 	  	tablePanel.add(scrollPane, BorderLayout.CENTER);
 	  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);        
-
+/*
 		cancelPermitReqBtn.addActionListener( new ActionListener()
 		{
 			@Override
@@ -154,6 +190,7 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 					}
 				}
 		  	});
+		  	*/
 }
 
 public void spaceHeader(TableColumnModel colM, int[] colW) {
@@ -171,11 +208,11 @@ protected void resetTable() {
 	ResultSet rs = ip.getResults(4,  conDeets);
   	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
   	spaceHeader(columnModel, columnWidth);
-  	sentChk.setSelected(false);
+ // 	sentChk.setSelected(false);
   	
 	rowSelected=false;
 	param = "";
-	detailsTxtArea.setText("");
+//	detailsTxtArea.setText("");
 
 }	
 public JTable getPermitsTbl(){

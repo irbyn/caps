@@ -66,6 +66,11 @@ class LoadDocsPanel extends JPanel {
 	private int [] columnWidth = {30, 100, 120, 80}; 	
 	private String getSaleID = "EXEC AWS_WCH_DB.dbo.[i_InstallsGetSaleID] ";
 	private String updateDocs = "{Call AWS_WCH_DB.dbo.[i_InstallsUpdateDocs] (?,?,?,?,?)}";
+	
+	private String invoiceNum = "";  
+	private String saleID = "";  
+	private ResultSet rs;
+	private Color LtGray = Color.decode("#eeeeee");
 
 	private File inv;
 	private File site;
@@ -84,9 +89,6 @@ class LoadDocsPanel extends JPanel {
 	private String invFile;
 	private String siteFile;
 	private String photoFile;
-	private String param = "";  
-	private String saleID = "";  
-	private ResultSet rs;
 	
 	private Boolean rowSelected = false;
 	private Boolean invExists = false;
@@ -147,124 +149,125 @@ class LoadDocsPanel extends JPanel {
 
 public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 
-	  this.lockForm = lockForm;
-	  this.conDeets = conDetts;
-	  this.ip = ipn;
+		this.lockForm = lockForm;
+		this.conDeets = conDetts;
+		this.ip = ipn;
 
-	  connecting = new CreateConnection();
+		connecting = new CreateConnection();
 		  	
 	    model1 = new DefaultTableModel();  
 	    model1.setRowCount(0);
-      permitsTbl = new JTable(model1);
-      permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-      permitsTbl.setAutoCreateRowSorter(true);
+	    permitsTbl = new JTable(model1);
+	    permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+	    permitsTbl.setAutoCreateRowSorter(true);
       
-      JScrollPane scrollPane = new JScrollPane(permitsTbl);
+	    JScrollPane scrollPane = new JScrollPane(permitsTbl);
 	  
-      header= permitsTbl.getTableHeader();
-      columnModel = header.getColumnModel();
-      add(header); 
+	    header= permitsTbl.getTableHeader();
+	    columnModel = header.getColumnModel();
+	    add(header); 
               	        
-      tablePanel = new JPanel();
-      tablePanel.setBounds(20, 20, 1025, 260);       
-      tablePanel.setLayout(new BorderLayout());
+	    tablePanel = new JPanel();
+	    tablePanel.setBounds(20, 20, 1025, 260);       
+	    tablePanel.setLayout(new BorderLayout());
       
-      infoPanel = new JPanel();
-      infoPanel.setBounds(0, 280, 1100, 300);
-      infoPanel.setLayout(null);
+	    infoPanel = new JPanel();
+	    infoPanel.setBounds(0, 280, 1100, 300);
+	    infoPanel.setLayout(null);
       
-      detailsTxtArea = new JTextArea("");
-      detailsTxtArea.setBounds(20, 20, 250, 260);
-      detailsTxtArea.setBorder(BorderFactory.createLineBorder(Color.black));
-      detailsTxtArea.setLineWrap(true);
-      detailsTxtArea.setEditable(false);
-      infoPanel.add(detailsTxtArea);
+	    detailsTxtArea = new JTextArea("");
+	    detailsTxtArea.setBounds(20, 20, 250, 260);
+	    detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
+	    detailsTxtArea.setBackground(LtGray);
+	    detailsTxtArea.setLineWrap(true);
+	    detailsTxtArea.setEditable(false);
+	    infoPanel.add(detailsTxtArea);
       
-      invPanel = new JPanel();
-      invPanel.setBounds(405, 20, 200, 135); 
-      invPanel.setOpaque(true);
-      invPanel.setVisible(true);
-      invPanel.setLayout(null);
+	    invPanel = new JPanel();
+	    invPanel.setBounds(405, 20, 200, 135); 
+	    invPanel.setOpaque(true);
+	    invPanel.setVisible(true);
+	    invPanel.setLayout(null);
       
-      invLM = new DefaultListModel();
-      invDZ = new JList(invLM);
-      invDZ.setCellRenderer(new FileCellRenderer());
-      invDZ.setTransferHandler(new ListTransferHandler(invDZ));
-      invDZ.setDragEnabled(true);
-      invDZ.setDropMode(javax.swing.DropMode.INSERT);
-      invDZ.setBorder(new TitledBorder("Drop Invoice pdf here"));
-      invSP = new javax.swing.JScrollPane(invDZ);
-      invSP.setBounds(0, 0, 200, 100);
-      invPanel.add(invSP);
+	    invLM = new DefaultListModel();
+	    invDZ = new JList(invLM);
+	    invDZ.setCellRenderer(new FileCellRenderer());
+	    invDZ.setTransferHandler(new ListTransferHandler(invDZ));
+	    invDZ.setDragEnabled(true);
+	    invDZ.setDropMode(javax.swing.DropMode.INSERT);
+	    invDZ.setBorder(new TitledBorder("Drop Invoice pdf here"));
+	    invSP = new javax.swing.JScrollPane(invDZ);
+	    invSP.setBounds(0, 0, 200, 100);
+	    invPanel.add(invSP);
       
-      viewInvBtn = new JButton("View");
-      viewInvBtn.setBounds(0, 110, 95, 25);
-      invPanel.add(viewInvBtn);
-      removeInvBtn = new JButton("Remove");
-      removeInvBtn.setBounds(105, 110, 95, 25);
-      invPanel.add(removeInvBtn);
+	    viewInvBtn = new JButton("View");
+	    viewInvBtn.setBounds(0, 110, 95, 25);
+	    invPanel.add(viewInvBtn);
+	    removeInvBtn = new JButton("Remove");
+	    removeInvBtn.setBounds(105, 110, 95, 25);
+	    invPanel.add(removeInvBtn);
       
-      sitePanel = new JPanel();
-      sitePanel.setBounds(625, 20, 200, 135); 
-      sitePanel.setOpaque(true);
-      sitePanel.setVisible(true);
-      sitePanel.setLayout(null);
+	    sitePanel = new JPanel();
+	    sitePanel.setBounds(625, 20, 200, 135); 
+	    sitePanel.setOpaque(true);
+	    sitePanel.setVisible(true);
+	    sitePanel.setLayout(null);
       
-      siteLM = new DefaultListModel();
-      siteDZ = new JList(siteLM);
-      siteDZ.setCellRenderer(new FileCellRenderer());
-      siteDZ.setTransferHandler(new ListTransferHandler(siteDZ));
-      siteDZ.setDragEnabled(true);
-      siteDZ.setDropMode(javax.swing.DropMode.INSERT);
-      siteDZ.setBorder(new TitledBorder("Drop Site Check pdf here"));
-      siteSP = new javax.swing.JScrollPane(siteDZ);
-      siteSP.setBounds(0, 0, 200, 100);
-      sitePanel.add(siteSP);
+	    siteLM = new DefaultListModel();
+	    siteDZ = new JList(siteLM);
+	    siteDZ.setCellRenderer(new FileCellRenderer());
+	    siteDZ.setTransferHandler(new ListTransferHandler(siteDZ));
+	    siteDZ.setDragEnabled(true);
+	    siteDZ.setDropMode(javax.swing.DropMode.INSERT);
+	    siteDZ.setBorder(new TitledBorder("Drop Site Check pdf here"));
+	    siteSP = new javax.swing.JScrollPane(siteDZ);
+	    siteSP.setBounds(0, 0, 200, 100);
+	    sitePanel.add(siteSP);
       
-      viewSiteBtn = new JButton("View");
-      viewSiteBtn.setBounds(0, 110, 95, 25);
-      sitePanel.add(viewSiteBtn);
-      removeSiteBtn = new JButton("Remove");
-      removeSiteBtn.setBounds(105, 110, 95, 25);
-      sitePanel.add(removeSiteBtn);
+	    viewSiteBtn = new JButton("View");
+	    viewSiteBtn.setBounds(0, 110, 95, 25);
+	    sitePanel.add(viewSiteBtn);
+	    removeSiteBtn = new JButton("Remove");
+	    removeSiteBtn.setBounds(105, 110, 95, 25);
+	    sitePanel.add(removeSiteBtn);
       
-      photoPanel = new JPanel();
-      photoPanel.setBounds(845, 20, 200, 135); 
-      photoPanel.setOpaque(true);
-      photoPanel.setVisible(true);
-      photoPanel.setLayout(null);
+	    photoPanel = new JPanel();
+	    photoPanel.setBounds(845, 20, 200, 135); 
+	    photoPanel.setOpaque(true);
+	    photoPanel.setVisible(true);
+	    photoPanel.setLayout(null);
       
-      photoLM = new DefaultListModel();
-      photoDZ = new JList(photoLM);
-      photoDZ.setCellRenderer(new FileCellRenderer());
-      photoDZ.setTransferHandler(new ListTransferHandler(photoDZ));
-      photoDZ.setDropMode(javax.swing.DropMode.INSERT);
-      photoDZ.setBorder(new TitledBorder("Drop Photos here"));
-      photoSP = new javax.swing.JScrollPane(photoDZ);
-      photoSP.setBounds(0, 0, 200, 100);
-      photoPanel.add(photoSP);
+	    photoLM = new DefaultListModel();
+	    photoDZ = new JList(photoLM);
+	    photoDZ.setCellRenderer(new FileCellRenderer());
+	    photoDZ.setTransferHandler(new ListTransferHandler(photoDZ));
+	    photoDZ.setDropMode(javax.swing.DropMode.INSERT);
+      	photoDZ.setBorder(new TitledBorder("Drop Photos here"));
+      	photoSP = new javax.swing.JScrollPane(photoDZ);
+      	photoSP.setBounds(0, 0, 200, 100);
+      	photoPanel.add(photoSP);
       
-      viewPhotoBtn = new JButton("View");
-      viewPhotoBtn.setBounds(0, 110, 95, 25);
-      photoPanel.add(viewPhotoBtn);
-      removePhotoBtn = new JButton("Remove");
-      removePhotoBtn.setBounds(105, 110, 95, 25);
-      photoPanel.add(removePhotoBtn);
+      	viewPhotoBtn = new JButton("View");
+      	viewPhotoBtn.setBounds(0, 110, 95, 25);
+      	photoPanel.add(viewPhotoBtn);
+      	removePhotoBtn = new JButton("Remove");
+      	removePhotoBtn.setBounds(105, 110, 95, 25);
+      	photoPanel.add(removePhotoBtn);
       
-      cancelPermitReqBtn = new JButton("Cancel");
-      cancelPermitReqBtn.setBounds(720, 260, 150, 25);
-      infoPanel.add(cancelPermitReqBtn);
+      	cancelPermitReqBtn = new JButton("Cancel");
+      	cancelPermitReqBtn.setBounds(720, 260, 150, 25);
+      	infoPanel.add(cancelPermitReqBtn);
       
-      savePermitReqBtn = new JButton("Save Documents");
-      savePermitReqBtn.setBounds(895, 260, 150, 25);
-      infoPanel.add(savePermitReqBtn);
+      	savePermitReqBtn = new JButton("Save Documents");
+      	savePermitReqBtn.setBounds(895, 260, 150, 25);
+      	infoPanel.add(savePermitReqBtn);
       
-      this.setLayout(null);
-      this.add(tablePanel); 
-      infoPanel.add(invPanel);
-      infoPanel.add(sitePanel);
-      infoPanel.add(photoPanel);
-      this.add(infoPanel);    
+      	this.setLayout(null);
+      	this.add(tablePanel); 
+      	infoPanel.add(invPanel);
+      	infoPanel.add(sitePanel);
+      	infoPanel.add(photoPanel);
+      	this.add(infoPanel);    
       
 	  	tablePanel.add(scrollPane, BorderLayout.CENTER);
 	  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);        
@@ -397,10 +400,10 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 					
 		//			pp.setFormsLocked();
 					try{
-					param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
+						invoiceNum = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
 
-					detailsTxtArea.setText(ip.DisplayClientDetails(param));
-					displayClientDetails(param);
+					detailsTxtArea.setText(ip.DisplayClientDetails(invoiceNum));
+					displayClientDetails(invoiceNum);
 					checkForFiles();
 										
 					} catch (IndexOutOfBoundsException e){
@@ -410,12 +413,11 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 				}
 		  	});
 	  	resetTable();
-}
+	}
 
 protected void updateInstallDocs(String invoice) {
 	
 		CallableStatement pm = null;
-		JOptionPane.showMessageDialog(null, saleID + " " + getPhotoLoaded());
 		try {
 					
 		    Connection conn = connecting.CreateConnection(conDeets);	        	   	
@@ -495,7 +497,7 @@ protected void saveDocuments() {
 			savePhoto(photoLM.getElementAt(i),i);
 		}
 	}
-	updateInstallDocs(param);
+	updateInstallDocs(invoiceNum);
 	resetTable();
 }
 
@@ -506,7 +508,7 @@ protected void saveInv(Object f){
 	if(f instanceof File){
 		inv = (File)f;
 		File src = new File(inv.getAbsolutePath());
-		File target = new File(folder+invPfx+param+".pdf");
+		File target = new File(folder+invPfx+invoiceNum+".pdf");
 
 		try {
 			Files.copy(src.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -613,7 +615,7 @@ protected Boolean allowSave() {
  */
 	protected void checkForFiles() {
 	//Check for stored Invoice
-	inv = new File(folder+invPfx+param+".pdf");//Uses InstallID/Invoice number
+	inv = new File(folder+invPfx+invoiceNum+".pdf");//Uses InstallID/Invoice number
 	if (inv.exists()){
 		viewInvBtn.setVisible(true);
 		invExists = true;
@@ -651,7 +653,7 @@ protected Boolean allowSave() {
 
 	private void displayClientDetails(String parameter) {
 	
-	rs = ip.getDetails(getSaleID, param);
+	rs = ip.getDetails(getSaleID, invoiceNum);
 	
     	 try {
 			while(rs.next()){
@@ -687,7 +689,7 @@ protected Boolean allowSave() {
   	spaceHeader(columnModel, columnWidth);
   	
 	rowSelected=false;
-	param = "";
+	invoiceNum = "";
 	detailsTxtArea.setText("");
 	clearDrops();
 	viewInvBtn.setVisible(false);
@@ -794,7 +796,5 @@ protected Boolean allowSave() {
 	private String getPhotoLoaded() {
 		return pht;
 	}
-
-
 
 }

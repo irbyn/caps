@@ -55,7 +55,7 @@ class RecvPermitPanel extends JPanel {
 
 	private String upNumber = "call AWS_WCH_DB.dbo.p_PermitUpdateNumber ";
 	private String upReceived = "call AWS_WCH_DB.dbo.p_PermitUpdateReceived ";
-	
+	private Color LtGray = Color.decode("#eeeeee");
 	private String param = "";  
 	private ResultSet rs;
 	private ResultSet rs2;
@@ -118,7 +118,8 @@ class RecvPermitPanel extends JPanel {
 	        
 	        detailsTxtArea = new JTextArea("");
 	        detailsTxtArea.setBounds(20, 20, 250, 260);
-	        detailsTxtArea.setBorder(BorderFactory.createLineBorder(Color.black));
+	        detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
+	        detailsTxtArea.setBackground(LtGray);
 	        detailsTxtArea.setLineWrap(true);
 	        detailsTxtArea.setEditable(false);
 	        infoPanel.add(detailsTxtArea);

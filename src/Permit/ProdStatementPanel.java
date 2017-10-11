@@ -67,7 +67,7 @@ class ProdStatementPanel extends JPanel {
 	private int [] columnWidth = {20, 80, 100, 80, 30, 30, 40, 40, 60, 30, 30};
 	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsCCC] ";
 	private String upPS3 = "{call AWS_WCH_DB.dbo.p_PermitUpdatePS3 (?,?)}";
-
+	private Color LtGray = Color.decode("#eeeeee");
 	private String param = "";  
 	private ResultSet rs;
 	private Boolean rowSelected = false;
@@ -125,7 +125,6 @@ class ProdStatementPanel extends JPanel {
 			model = new DefaultTableModel();  
 			model.setRowCount(0);
 		    permitsTbl = new JTable(model);
-		    permitsTbl.setPreferredSize(new Dimension(0, 300));
 		    permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		    permitsTbl.setAutoCreateRowSorter(true);
 		        
@@ -145,7 +144,8 @@ class ProdStatementPanel extends JPanel {
 	        
 		    detailsTxtArea = new JTextArea("");
 		    detailsTxtArea.setBounds(20, 20, 250, 260);
-		    detailsTxtArea.setBorder(BorderFactory.createLineBorder(Color.black));
+		    detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
+		    detailsTxtArea.setBackground(LtGray);
 		    detailsTxtArea.setLineWrap(true);
 		    detailsTxtArea.setEditable(false);
 		    infoPanel.add(detailsTxtArea);

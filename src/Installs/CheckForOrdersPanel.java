@@ -2,13 +2,20 @@ package Installs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
@@ -18,11 +25,13 @@ import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -35,6 +44,8 @@ import javax.swing.table.TableColumnModel;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 
+import com.microsoft.sqlserver.jdbc.SQLServerException;
+
 import DB_Comms.CreateConnection;
 import Installs.LoadDocsPanel.FileCellRenderer;
 import Installs.LoadDocsPanel.ListTransferHandler;
@@ -44,15 +55,29 @@ import net.proteanit.sql.DbUtils;
 
 class CheckForOrdersPanel extends JPanel {
 	
-	private int [] columnWidth = {30, 100, 120, 80, 40, 40, 40, 40}; 	
-	private String upCCCClient = "{Call AWS_WCH_DB.dbo.[p_PermitUpdateCCCToClient] (?,?)}";
-	private String folder = "//C:/pdfs/Invoice/INV_";
-//	private String invPfx = "INV_";
-	private String param = "";  
+	private int [] columnWidth = {20, 150, 150, 100, 100, 100, 100, 100}; 	
+	private String getSaleID = "EXEC AWS_WCH_DB.dbo.[i_InstallsGetSaleID] ";
+	private String upStkList = "{Call AWS_WCH_DB.dbo.[i_InstallsUpdateFire] (?,?,?)}";
+	private String upStkItem = "{Call AWS_WCH_DB.dbo.[i_InstallsUpdateItems] (?,?,?,?)}";
+	private String folder = "//C:/pdfs/Invoice/";	
+	private String invPfx = "INV_";
+	private String sitePfx = "SC_";
+	private String photoPfx = "PH_";
+
+	private String invoiceNum = ""; 
+	private String saleID = ""; 
+	private String stkItems = "";
+	private String qt = ""; 
+	private String code = "";
+	private String dsc = ""; 
 	private ResultSet rs;
 	
 	private String[] colNames = {"Qty", "Code", "Description"};
 	private int [] colWidth = {30, 80, 280};
+	private String[] ocolNames = {"Row", "Description"};
+	private int [] ocolWidth = {40, 280};
+	
+	private Color LtGray = Color.decode("#eeeeee");
 	
 	private Boolean rowSelected = false;
 	
@@ -71,16 +96,34 @@ class CheckForOrdersPanel extends JPanel {
 	private DefaultTableModel model2;
 	private JPanel stockPanel;
 	
-	private JTextArea detailsTxtArea;	
-	private JLabel sentLbl;
-	private JCheckBox sentChk;
-	private JLabel sentDateLbl;
-	private JSpinner sentDate;
+	private JTable orderTbl;
+	private JTableHeader ohd;
+	private TableColumnModel ocm;
+	private DefaultTableModel omodel;
+	private JPanel orderPanel;
 	
-	private JButton getStockBtn;
+	private JTextArea detailsTxtArea;	
+	
+	private JButton getFireBtn;
+	private JButton getOrdersBtn;
+	
+	private JLabel fireLbl;
+	private JTextField fireTxtBx;
+
 	private JButton cancelPermitReqBtn; 
 	private JButton savePermitReqBtn; 
-
+	
+	JButton viewInvBtn;
+	JButton viewSiteBtn;
+	JButton viewPhotoBtn;
+	
+	boolean invExists;
+	boolean siteExists;
+	boolean photoExists;
+	
+	File inv;
+	File site;
+	File[] photosArr;
 	private String text;
 	private CreateConnection conn;
 	
@@ -91,89 +134,187 @@ class CheckForOrdersPanel extends JPanel {
 
 public CheckForOrdersPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 
-	  this.lockForm = lockForm;
-	  this.conDeets = conDetts;
-	  this.ip = ipn;
+	 	this.lockForm = lockForm;
+	 	this.conDeets = conDetts;
+	 	this.ip = ipn;
 
-	  connecting = new CreateConnection();
+	 	connecting = new CreateConnection();
 		  	
-	    model1 = new DefaultTableModel();  
-	    model1.setRowCount(0);
-      permitsTbl = new JTable(model1);
-      permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-      permitsTbl.setAutoCreateRowSorter(true);
+	 	model1 = new DefaultTableModel();  
+	 	model1.setRowCount(0);
+	 	permitsTbl = new JTable(model1);
+	 	permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+	 	permitsTbl.setAutoCreateRowSorter(true);
       
-      JScrollPane scrollPane = new JScrollPane(permitsTbl);
+	 	JScrollPane scrollPane = new JScrollPane(permitsTbl);
 	  
-      header= permitsTbl.getTableHeader();
-      columnModel = header.getColumnModel();
-      add(header); 
+	 	header= permitsTbl.getTableHeader();
+	 	columnModel = header.getColumnModel();
+	 	add(header); 
               	        
-      tablePanel = new JPanel();
-      tablePanel.setBounds(20, 20, 1025, 260);  //setPreferredSize(new Dimension(0, 300));      
-      tablePanel.setLayout(new BorderLayout());
+	 	tablePanel = new JPanel();
+	 	tablePanel.setBounds(20, 20, 1025, 260);        
+	 	tablePanel.setLayout(new BorderLayout());
       
-      infoPanel = new JPanel();
-      infoPanel.setBounds(0, 280, 1100, 300);  //setPreferredSize(new Dimension(0, 300));
-      infoPanel.setLayout(null);
+	 	infoPanel = new JPanel();
+	 	infoPanel.setBounds(0, 280, 1100, 300);  
+	 	infoPanel.setLayout(null);
+	 	
+	 	orderPanel = new JPanel();
+	 	orderPanel.setBounds(720, 120, 325, 130);
+	 	orderPanel.setLayout(new BorderLayout());
       
-      stockPanel = new JPanel();
-      stockPanel.setBounds(290, 20, 410, 265); 
-      stockPanel.setLayout(new BorderLayout());
+	 	stockPanel = new JPanel();
+	 	stockPanel.setBounds(290, 20, 410, 230); 
+	 	stockPanel.setLayout(new BorderLayout());
       
-      detailsTxtArea = new JTextArea("");
-      detailsTxtArea.setBounds(20, 20, 250, 265);
-      detailsTxtArea.setBorder(BorderFactory.createLineBorder(Color.black));
-      detailsTxtArea.setLineWrap(true);
-      detailsTxtArea.setEditable(false);      
-      infoPanel.add(detailsTxtArea);
+	 	detailsTxtArea = new JTextArea("");
+	 	detailsTxtArea.setBounds(20, 20, 250, 265);
+	 	detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
+	 	detailsTxtArea.setBackground(LtGray);
+	 	detailsTxtArea.setLineWrap(true);
+	 	detailsTxtArea.setEditable(false);      
+	 	infoPanel.add(detailsTxtArea);
       
 	    model2 = new DefaultTableModel(colNames,0);
-	    stockTbl = new JTable(model2);
-	    model2.setRowCount(0);
-	    stockTbl.setPreferredSize(new Dimension(0, 300));
-	    stockTbl.setAutoCreateRowSorter(true);
-        
+	    stockTbl = new JTable(model2);       
         JScrollPane sp = new JScrollPane(stockTbl);
-	  
-        hd= stockTbl.getTableHeader();
-        
+        hd= stockTbl.getTableHeader();        
         cm = hd.getColumnModel();
 	  	spaceHeader(cm, colWidth);
         add(hd);
-      
-      getStockBtn = new JButton("Get Stock Items");
-      getStockBtn.setBounds(720, 20, 150, 25);
-      infoPanel.add(getStockBtn);
-      
-      cancelPermitReqBtn = new JButton("Cancel");
-      cancelPermitReqBtn.setBounds(720, 260, 150, 25);
-      infoPanel.add(cancelPermitReqBtn);
-      
-      savePermitReqBtn = new JButton("Save Stock Info");
-      savePermitReqBtn.setBounds(895, 260, 150, 25);
-      infoPanel.add(savePermitReqBtn);
+        
+	    viewInvBtn = new JButton("View Invoice");
+	    viewInvBtn.setBounds(290, 260, 123, 25);
+	    viewInvBtn.setVisible(false);
+	    infoPanel.add(viewInvBtn);
+	    
+	    viewSiteBtn = new JButton("View SiteCheck");
+	    viewSiteBtn.setBounds(433, 260, 123, 25);
+	    viewSiteBtn.setVisible(false);
+	    infoPanel.add(viewSiteBtn);
+	    
+      	viewPhotoBtn = new JButton("View Photos");
+      	viewPhotoBtn.setBounds(577, 260, 123, 25);
+      	viewPhotoBtn.setVisible(false);
+      	infoPanel.add(viewPhotoBtn);
+        
+        getFireBtn = new JButton("Mark Fire");
+        getFireBtn.setBounds(720, 40, 150, 25);
+        infoPanel.add(getFireBtn);
+        
+        getOrdersBtn = new JButton("Order Stock Item");
+        getOrdersBtn.setBounds(720, 80, 150, 25);
+        infoPanel.add(getOrdersBtn);
 
-      this.setLayout(null);
-      this.add(tablePanel);
-      infoPanel.add(stockPanel);
-      this.add(infoPanel);
+        fireLbl = new JLabel("Fire:");
+        fireLbl.setBounds(895, 40, 30, 25);
+        infoPanel.add(fireLbl);
+        
+        fireTxtBx = new JTextField();
+        fireTxtBx.setBounds(925, 40, 120, 25);
+        infoPanel.add(fireTxtBx);
+ 	
+    	omodel = new DefaultTableModel(ocolNames,0);
+	    orderTbl = new JTable(omodel);       
+        JScrollPane osp = new JScrollPane(orderTbl);
+        ohd= orderTbl.getTableHeader();        
+        ocm = ohd.getColumnModel();
+	  	spaceHeader(ocm, ocolWidth);
+        add(ohd);
       
-      stockPanel.add(sp, BorderLayout.CENTER);
-      stockPanel.add(stockTbl.getTableHeader(), BorderLayout.NORTH); 
+        cancelPermitReqBtn = new JButton("Cancel");
+        cancelPermitReqBtn.setBounds(720, 260, 150, 25);
+        infoPanel.add(cancelPermitReqBtn);
+      
+        savePermitReqBtn = new JButton("Save Stock Info");
+        savePermitReqBtn.setBounds(895, 260, 150, 25);
+        infoPanel.add(savePermitReqBtn);
+
+        this.setLayout(null);
+        this.add(tablePanel);
+        infoPanel.add(orderPanel);
+        infoPanel.add(stockPanel);
+        this.add(infoPanel);
+      
+        stockPanel.add(sp, BorderLayout.CENTER);
+        stockPanel.add(stockTbl.getTableHeader(), BorderLayout.NORTH); 
+        orderPanel.add(osp, BorderLayout.CENTER);
+        orderPanel.add(orderTbl.getTableHeader(), BorderLayout.NORTH); 
 	  	
 	  	tablePanel.add(scrollPane, BorderLayout.CENTER);
 	  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);        
 
-	  	getStockBtn.addActionListener( new ActionListener()
+	  	
+	  	viewInvBtn.addActionListener( new ActionListener()
+		{	@Override
+			public void actionPerformed(ActionEvent arg0) {
+			   { 				   
+					if (invExists){
+					      if (Desktop.isDesktopSupported()) {
+					    	    try {
+					    	        Desktop.getDesktop().open(inv);
+					    	    } catch (IOException ex) {
+					    	    }
+					    	}
+					}			   
+			   }
+			}
+		});
+	  	viewSiteBtn.addActionListener( new ActionListener()
+		{	@Override
+			public void actionPerformed(ActionEvent arg0) {
+			   { 				   
+					if (siteExists){
+					      if (Desktop.isDesktopSupported()) {
+					    	    try {
+					    	        Desktop.getDesktop().open(site);
+					    	    } catch (IOException ex) {
+					    	    }
+					    	}
+					}			   
+			   }
+			}
+		});
+	  	viewPhotoBtn.addActionListener( new ActionListener()
+		{	@Override
+			public void actionPerformed(ActionEvent arg0) {
+			   { 		
+				   int ph = photosArr.length;
+				   ip.showMessage("" + ph);
+					for (int i =0; i< ph; i++){
+						if (photosArr[i].exists())
+					      if (Desktop.isDesktopSupported()) {
+					    	    try {
+					    	        Desktop.getDesktop().open(photosArr[i]);
+					    	    } catch (IOException ex) {
+					    	    }
+					    	}
+					}			   
+			   }
+			}
+		});
+	  	getFireBtn.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 			   { 
-				   readInvoice();
+				   recordFire();
 				}					
 			}
-		});	
+		});
+	  	getOrdersBtn.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+			   { 
+				   if(stockTbl.getSelectedRow()!=-1){
+				   int row = stockTbl.getSelectedRow();
+				   orderStock(row);
+				   }
+				}					
+			}
+		});
 		cancelPermitReqBtn.addActionListener( new ActionListener()
 		{
 			@Override
@@ -188,9 +329,7 @@ public CheckForOrdersPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 			   { 
-				   if(rowSelected){
-					   
-				   }
+				   saveStockLines();
 			   }
 			}
 		});
@@ -199,12 +338,15 @@ public CheckForOrdersPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane 
 			public void valueChanged(ListSelectionEvent arg0) {
 				if (!arg0.getValueIsAdjusting()){
 					rowSelected=true;
+					clearStock();
 		//			pp.setFormsLocked();
 					try{
-					param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
+						invoiceNum = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
 					
-					detailsTxtArea.setText(ip.DisplayClientDetails(param));
-					
+						detailsTxtArea.setText(ip.DisplayClientDetails(invoiceNum));
+						displayClientDetails(invoiceNum);
+						readInvoice();
+						checkForFiles();
 					
 					} catch (IndexOutOfBoundsException e){
 						//Ignoring IndexOutOfBoundsExceptions!
@@ -212,13 +354,139 @@ public CheckForOrdersPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane 
 					}
 				}
 		  	});
+	  	stockTbl.addMouseListener(new MouseAdapter() {
+	  	    @Override
+	  	    public void mouseClicked(MouseEvent evt) {
+	  	        if (evt.getClickCount() == 2) {
+		  	        orderStock(stockTbl.rowAtPoint(evt.getPoint()));				  	  
+	  	         }		  	      
+	  	    }
+	  	});
+	  	orderTbl.addMouseListener(new MouseAdapter() {
+	  	    @Override
+	  	    public void mouseClicked(MouseEvent evt) {
+	  	        if (evt.getClickCount() == 2) {
+	  	        	omodel.removeRow(orderTbl.rowAtPoint(evt.getPoint()));				  	  
+	  	         }		  	      
+	  	    }
+	  	});
 }
 
+protected void updateStockList() {
+	
+	CallableStatement pm = null;
+
+	try {
+				
+	    Connection conn = connecting.CreateConnection(conDeets);	        	   	
+	
+	    pm = conn.prepareCall(upStkList);
+		
+	    pm.setString(1, invoiceNum);
+	    pm.setString(2, getFireCode());
+	    pm.setString(3,	getStockList());
+	    
+	    pm.executeUpdate();
+	    }
+        catch (SQLServerException sqex)
+        {
+           	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+        }
+        catch(Exception ex)
+        { 
+           JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+        }			
+}
+protected void updateStockItem() {
+	
+	CallableStatement pm = null;
+
+	try {
+				
+	    Connection conn = connecting.CreateConnection(conDeets);	        	   	
+	
+	    pm = conn.prepareCall(upStkItem);
+		
+	    pm.setString(1, invoiceNum);
+	    pm.setString(2, qt);
+	    pm.setString(3,	code);
+	    pm.setString(4,	dsc);
+	    
+	    
+	    pm.executeUpdate();
+	    }
+        catch (SQLServerException sqex)
+        {
+           	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+        }
+        catch(Exception ex)
+        { 
+           JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+        }			
+}
+
+protected void saveStockLines() {
+	   if(rowSelected){
+			int rows = 0;
+			int rowNum = 0;
+		   stkItems = "";					   
+		   qt = ""; 
+		   code = "";
+		   dsc = ""; 
+//		   JOptionPane.showMessageDialog(null, "FIRE = " + fireTxtBx.getText());
+		   
+		   rows = model2.getRowCount();
+		   for (int i = 0 ; i< rows ; i++){
+			   qt = model2.getValueAt(i, 0).toString(); 
+			   dsc = model2.getValueAt(i, 2).toString(); 
+			   stkItems = stkItems + qt + " x " + dsc + "\n" ;
+		   }
+		   updateStockList();
+		   qt = ""; 
+		   code = "";
+		   dsc = "";
+		   rows = omodel.getRowCount();
+		   for (int i = 0 ; i< rows ; i++){
+			   
+			   rowNum = (Integer.parseInt(omodel.getValueAt(i, 0).toString())-1);
+			   
+			   qt = model2.getValueAt(rowNum, 0).toString(); 
+			   code = model2.getValueAt(rowNum, 1).toString(); 
+			   dsc = model2.getValueAt(rowNum, 2).toString();
+			   
+			   updateStockItem();
+			   resetTable();
+		   }					   
+	   }	
+}
+
+protected void recordFire() {
+	if(stockTbl.getSelectedRow()!=-1){
+		fireTxtBx.setText(stockTbl.getValueAt(stockTbl.getSelectedRow(), 1).toString());
+	}
+}
+protected void orderStock(int row) {
+	int lineNum = row + 1;//getValueAtrow(row, 0).toString();
+	String desc = stockTbl.getValueAt(row, 2).toString();
+	int dLength = desc.length();
+	int end = 45;
+	if (dLength < 45){
+		end = dLength;
+	}
+	
+	String[] rowData = new String [] {""+lineNum,  desc.substring(0, end)};
+	omodel.addRow(rowData);
+}
+
+/*
+ * Reads selected file, strips away unwanted info
+ */
 protected void readInvoice() {
 
-	   String src = folder + param + ".pdf";
+	   String src = folder + invPfx + invoiceNum + ".pdf";
 	      //Loading an existing document
 	      File file = new File(src);
+	      if (file.exists()){
 	          		      
 	      PDDocument document;
 		try {
@@ -232,62 +500,110 @@ protected void readInvoice() {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	      
    
-	      
-	      
+		//Find split point on invoice
 	      String patternString = "=========================================================="
 	      		+ "========================================================================";
-	        Pattern pattern = Pattern.compile(patternString);
-	        
-	        String[] split = pattern.split(text);
-	        
+	        Pattern pattern = Pattern.compile(patternString);	        
+	        String[] split = pattern.split(text);	        
 	        String inv = split[3];
 	        
-
-	        int chars = inv.length();
-
-	        String[] stkLine = new String[25];
-	        int i=0;
-	        int lineLength = 130;
-	        int start = 0;
-	        int end = lineLength + start;
+	        //	Initialise variables to search each line for text
 	        String foundPermit = "";
 	        String stockCode = "";
 	        String stockDesc = "";
 	        String stockQty = "";
-	        
-	        System.out.println("");
-
-	        for (i=0;i<25;i++){
-	        	
-	        	stkLine[i] = inv.substring(start, end);
-	        	
-	        	foundPermit = stkLine[i].substring(2,6);
-	        	
-	        	if (foundPermit.equals("INST") || foundPermit.equals("PERM")){	        		
+	        int chars = inv.length();				//total number of characters
+	        int maxRows = 25;						// 25 rows
+	//        String[] stkLine = new String[maxRows];
+	        String newLine = "";
+	        int i=0;
+	        int lineLength = 130;
+	        int start = 0;
+	        int end = lineLength + start;
+	        //For each line of text
+	        for (i=0;i<maxRows;i++){        	
+	        	newLine = inv.substring(start, end);		//split off 130 chars as a line
+	        	foundPermit = newLine.substring(2,6);
+	        	if (i == 0){
+	        		
+	        	}
+	        	if (foundPermit.equals("INST") || foundPermit.equals("PERM")){	
+	        		//Stop if either term is found as the first 4 characters (stock code)
 	        	}
 	        	else {
-
-			    stockCode = stkLine[i].substring(2,20);
-			    stockDesc = stkLine[i].substring(23,82);
-			    stockQty = stkLine[i].substring(96,99);
-			    
+	        		// create a row for table
+			    stockCode = newLine.substring(2,20);
+			    stockDesc = newLine.substring(23,82);
+			    stockQty = newLine.substring(96,99);			    
 			    model2.addRow(new Object[]{stockQty, stockCode, stockDesc});
-
-/*	        	System.out.println("Qty:  " + stockQty);  // + "          ReesCode: " + stockCode);
-	        	System.out.println("CODE: " + stockCode);
-	        	System.out.println("Desc: " + stockDesc);
-			    System.out.println("");
-*/	        	
+			    
+			    	//	next newLine starting points
 	        	start = start + lineLength;
 	        	end = end + lineLength;
-	        	}
-	        	
-	        	
-	        }
+	        	}	
+	        }	
+	      }
+}
+
+/*
+ * Checks if this install (and sale), have files in the file system
+ * updates Boolean values invExists, siteExists, photoExists, 
+ */
+	protected void checkForFiles() {
+	//Check for stored Invoice
+	inv = new File(folder+invPfx+invoiceNum+".pdf");//Uses InstallID/Invoice number
+	if (inv.exists()){
+		viewInvBtn.setVisible(true);
+		invExists = true;
+	}else{
+		viewInvBtn.setVisible(false);
+		invExists = false;
+	}	
+	//Check for stored SiteCheck Forms	
+	site = new File(folder+sitePfx+saleID+".pdf");//Uses SaleID number
+	if (site.exists()){
+		viewSiteBtn.setVisible(true);
+		siteExists = true;
+	}else{
+		viewSiteBtn.setVisible(false);
+		siteExists = false;
+	}
+	//Check for stored Photo(s)	
+	//Create array of photos
+	File f = new File(folder);					
+		photosArr = f.listFiles(new FilenameFilter() {
+		public boolean accept(File dir, String name) {
+			return name.startsWith(photoPfx+saleID+"_");	//Uses SaleID number
+		}
+	});
+
+	if (photosArr.length>0){
+		viewPhotoBtn.setVisible(true);
+		photoExists = true;
+	}else{
+		viewPhotoBtn.setVisible(false);
+		photoExists = false;
+	}
 	
 }
+
+	private void displayClientDetails(String parameter) {
+	
+	rs = ip.getDetails(getSaleID, invoiceNum);
+	
+    	 try {
+			while(rs.next()){
+						    					
+				 saleID 		= rs.getString("SID");						 						
+
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+}	
+
 
 public void spaceHeader(TableColumnModel colM, int[] colW) {
     int i;
@@ -304,17 +620,28 @@ protected void resetTable() {
 	ResultSet rs = ip.getResults(1,  conDeets);
   	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
   	spaceHeader(columnModel, columnWidth);
-  	
 	rowSelected=false;
-	param = "";
+	invoiceNum = "";
 	detailsTxtArea.setText("");
-	int stkRows = model2.getRowCount();
-	for (int i = 0;i<stkRows;i++){
-		model2.removeRow(0);
-	}
-
+	clearStock();
+	
 }	
+
+public void clearStock(){
+    viewInvBtn.setVisible(false);
+    viewSiteBtn.setVisible(false);
+  	viewPhotoBtn.setVisible(false);
+	fireTxtBx.setText("");
+	model2.setRowCount(0);
+	omodel.setRowCount(0);
+}
 public JTable getPermitsTbl(){
 	return permitsTbl;
+}
+protected String getFireCode(){
+	return fireTxtBx.getText();
+}
+protected String getStockList(){
+	return stkItems;
 }
 }
