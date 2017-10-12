@@ -28,6 +28,8 @@ import java.awt.Dimension;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 
 import javax.swing.JSpinner;
 import javax.swing.SpinnerDateModel;
@@ -42,7 +44,7 @@ class EstimationPanel extends JPanel {
 	private JTextField txtBxPrice;
 	private JTextField txtBxComment;	
 
-	//private String result2 = "EXEC AWS_WCH_DB.dbo.[s_SalesEstimation] ";
+	private String spResults = "EXEC AWS_WCH_DB.dbo.[s_SalesGetSalesPerson] ";
 	//private String result3 = "EXEC AWS_WCH_DB.dbo.[s_SalesEstimation] ";
 	private String param = "";  
 	private ResultSet rs;
@@ -58,7 +60,6 @@ class EstimationPanel extends JPanel {
 	private JTable salesTbl;
 	private DefaultTableModel model1;
 	private JTextArea txtAreaCustInfo;
-	
 	private JLabel siteAddrLbl;
 	private JLabel lblPrice;
 	private JComboBox<String> comBxInstType;
@@ -160,8 +161,9 @@ class EstimationPanel extends JPanel {
 				lblSChkDoneBy.setBounds(454, 127, 128, 14);
 				infoPanel.add(lblSChkDoneBy);
 
-				spnTimeDate = new JSpinner();
-				spnTimeDate.setModel(new SpinnerDateModel(new Date(1505908800000L), null, null, Calendar.DAY_OF_YEAR));
+				SimpleDateFormat dt = new SimpleDateFormat("dd.MMM.yyyy");
+		        spnTimeDate = new JSpinner(new SpinnerDateModel());
+		        spnTimeDate.setEditor(new JSpinner.DateEditor(spnTimeDate, dt.toPattern()));
 				spnTimeDate.setBounds(681, 96, 335, 20);
 				infoPanel.add(spnTimeDate);
 
@@ -198,17 +200,24 @@ class EstimationPanel extends JPanel {
 				btnCancel.setBounds(644, 255, 148, 23);
 				infoPanel.add(btnCancel);
 				btnCancel.addActionListener(new ActionListener(){
-					//Fix the null exception error
+					
 					@Override
 					public void actionPerformed(ActionEvent arg0){
-						resetTable();
+						try {
+							//Hmm still doesn't clear the table 
+							resetTable();
+						}
+						catch (NullPointerException e){
+							System.out.println("Execution Complete");
+						}					
+						
 						//reset all the blank fields within the estimation tab
 						txtBxFire.setText(null);
 						txtBxPrice.setText(null);
 						//comBxInstType.setSelectedIndex(0);
 						chckBxToBook.setSelected(false);
 						//comBxSChkDoneBy.setSelectedIndex(0);
-						spnTimeDate.setValue(0);
+				        spnTimeDate.setEditor(new JSpinner.DateEditor(spnTimeDate, dt.toPattern()));
 						chckBxSChkComp.setSelected(false);
 						txtBxComment.setText(null);
 						//comBxSlsPerson.setSelectedItem(0);
@@ -239,7 +248,8 @@ class EstimationPanel extends JPanel {
 				if (!arg0.getValueIsAdjusting()){
 					rowSelected=true;
 					try{
-					param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
+						//Get the customer ID as a paramater to feed into the SQL procedure 
+					param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 1).toString();
 					//displayClientDetails(param);
 					txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
 					} catch (IndexOutOfBoundsException e){
@@ -249,7 +259,6 @@ class EstimationPanel extends JPanel {
 			}
 	  	});
 	}
-
 		
 	protected void resetTable() {
 		//Fix this little null error 
@@ -263,26 +272,25 @@ class EstimationPanel extends JPanel {
 		rowSelected=false;
 		param = "";
 		txtAreaCustInfo.setText("");
+		//System.out.println(rowSelected);
 
-	}	
+	}
 	
-/*	
-	protected void resetTable() {
+/*	private void displayClientDetails(String parameter) {
 		
-		//get the results for the second (estimation) results set
-		ResultSet rs = sp.getResults(2,  conDeets);
-	  	salesTbl.setModel(DbUtils.resultSetToTableModel(rs));
-	  	//Blank out all fields 
-	  	
-	  	//spaceHeader(columnModel, columnWidth);
-	  	//sentChk.setSelected(false);
-	  	
-		rowSelected=false;
-		param = "";
-		txtAreaCustInfo.setText("");
-
-}	*/
+	rs = sp.getDetails(getSaleID, param);
 	
+    	 try {
+			while(rs.next()){
+						    					
+				 saleID 		= rs.getString("SID");						 						
+
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+}*/		
 	public JTable getSalesTbl(){
 		return salesTbl;
 	}

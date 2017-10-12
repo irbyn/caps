@@ -163,13 +163,13 @@ public class SalesPane extends JPanel
 						 //String suburb 			= qryResults.getString("Suburb");
 						 //String status 			= qryResults.getString("PermitStatus");
 
-						 String str = "INVOICE:\t" + parameter + "\n"
-								 + "CLIENT:\t" + customerName + "\n\n"
-								 + "SITE ADDRESs:\t" + customerAddress + "\n\n"
-								 + "SUBURB:\t" + customerSuburb + "\n\n"
-								 + "POST CODE\t" + customerPostCode + "\n\n"
+						 String str = "INVOICE:\t\t" + parameter + "\n\n"
+								 + "CLIENT:\t\t" + customerName + "\n\n"
+								 + "SITE ADDRESS:\t" + customerAddress + "\n\n"
+								 + "SUBURB:\t\t" + customerSuburb + "\n\n"
+								 + "POST CODE:\t\t" + customerPostCode + "\n\n"
 								 + "PHONE NUMBER:\t" + customerPhone + "\n\n"
-								 + "EMAIL:\t" + customerEmail;
+								 + "EMAIL:\t\t" + customerEmail;
 						 return str;
 					}
 	        	}

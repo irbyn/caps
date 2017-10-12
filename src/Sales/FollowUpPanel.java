@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -91,8 +92,9 @@ class FollowUpPanel extends JPanel {
 			txtAreaCustInfo.setBounds(23, 24, 382, 237);
 			infoPanel.add(txtAreaCustInfo);
 			
-			spnTimeDate = new JSpinner();
-			spnTimeDate.setModel(new SpinnerDateModel(new Date(1505908800000L), null, null, Calendar.DAY_OF_YEAR));
+			SimpleDateFormat dt = new SimpleDateFormat("dd.MMM.yyyy");
+			spnTimeDate = new JSpinner(new SpinnerDateModel());
+	        spnTimeDate.setEditor(new JSpinner.DateEditor(spnTimeDate, dt.toPattern()));
 			spnTimeDate.setBounds(753, 29, 208, 20);
 			infoPanel.add(spnTimeDate);
 			
@@ -129,6 +131,7 @@ class FollowUpPanel extends JPanel {
 					   rdBtnInvoice.setSelected(false);
 					   txtBxInvNumb.setText(null);
 					   rdBtnSoldEls.setSelected(false);
+				        spnTimeDate.setEditor(new JSpinner.DateEditor(spnTimeDate, dt.toPattern()));
 					}					
 				}
 			});
