@@ -103,8 +103,8 @@ public class SalesPane extends JPanel
 					TableColumnModel tcm = tablez[tabIndex].getColumnModel();
 					int cols = tcm.getColumnCount();
 
-					if (cols == 6){
-						int[] colWidths = new int[]{20, 150, 150, 100, 100, 100}; 
+					if (cols == 5){
+						int[] colWidths = new int[]{20, 150, 150, 100, 100}; 
 						spaceHeader(colWidths, tcm);
 					} else if (cols == 7){
 						int[] colWidths = new int[]{20, 150, 150, 100, 100, 100, 100};   
@@ -185,17 +185,18 @@ public class SalesPane extends JPanel
 	    	
 	        try
 	        {
-	        	//System.out.println("Index: " + ind + " " + connDeets);
+	        	System.out.println("Index: " + ind + " " + connDeets);
 	        	Connection conn = connecting.CreateConnection(connDeets);
-	        	//System.out.println("+++++++++++");
-	        	PreparedStatement st =conn.prepareStatement(procedure[ind]);	//ind]);
-	        	//System.out.println("dddddddddd");
+	        	System.out.println("+++++++++++");
+	        	PreparedStatement st =conn.prepareStatement(procedure[ind]);
+	        	System.out.println("dddddddddd");
 	        	results = st.executeQuery();
-	        	//System.out.println("sssssssssssssssssss");
-	        	
-	        	if (results==null){
+	        	System.out.println("sssssssssssssssssss");
+	        	System.out.println(results);
+/*	        	if (results==null){
 	        		getResults(0, conDeets);
 	        	}
+	*/        	
 	        }
 	        catch(Exception ex)
 	        { 
