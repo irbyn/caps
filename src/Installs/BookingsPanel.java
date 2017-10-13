@@ -68,6 +68,7 @@ class BookingsPanel extends JPanel {
 	private CreateConnection conn;
 	
 	private JLabel fuelLbl;
+	private JComboBox fireCmbo;
 	private JComboBox fuelCmbo;
 	
 	private Boolean lockForm;
@@ -127,11 +128,12 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 
       
  //     job.getInstallers()
+      fireCmbo = new JComboBox();
+      fireCmbo.setBackground(Color.WHITE);
+      fireCmbo.setBounds(635, 200, 150, 20);
+      infoPanel.add(fireCmbo);
       
-      
-      fuelLbl = new JLabel("Fuel:");
-      fuelLbl.setBounds(825, 200, 70, 20);
-      infoPanel.add(fuelLbl);
+
       fuelCmbo = new JComboBox();
  //     fuelCmbo.setSelectedIndex(0);
       fuelCmbo.setBackground(Color.WHITE);
@@ -139,11 +141,26 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
       infoPanel.add(fuelCmbo);
       
       GetJobs job = new GetJobs(conDeets);
+      
+      
+      
       String[] installUr = job.getInstallers();
       
       DefaultComboBoxModel model = new DefaultComboBoxModel( installUr );
-      fuelCmbo.setModel( model );   
+      fireCmbo.setModel( model );   
       
+    
+ /*     String[] SC = job.getSiteChecker();
+      
+      DefaultComboBoxModel modelSC = new DefaultComboBoxModel( SC );
+      fuelCmbo.setModel( modelSC );   
+ */     
+
+      String[] SELL = job.getSales();
+      
+      DefaultComboBoxModel modelSELL = new DefaultComboBoxModel( SELL );
+      fuelCmbo.setModel( modelSELL );   
+    
       
       
       

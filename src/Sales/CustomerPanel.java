@@ -8,11 +8,15 @@ import javax.swing.JTable;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
@@ -27,7 +31,9 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonModel;
 import javax.swing.JCheckBox;
 
 class CustomerPanel extends JPanel {
@@ -178,6 +184,24 @@ class CustomerPanel extends JPanel {
 		pAddChbx.setBounds(346, 413, 222, 23);
 		add(pAddChbx);
 
+		//When check box is selected
+		pAddChbx.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+
+				if (pAddChbx.isSelected()){
+					if (pAddrTxtBx.getText().equals("") || pSuburbTxtBx.getText().equals("")){
+						JOptionPane.showMessageDialog(null, "You must enter a postal address first.");
+
+					}else {
+						//Get the text from postal address and add it to the sit address
+						sAddrTxtBx.setText(pAddrTxtBx.getText());
+						sSuburbTxtBx.setText(pSuburbTxtBx.getText());
+					}
+				}
+
+			}
+		});
+
 		sAddrlbl = new JLabel("Site Street Address:");
 		sAddrlbl.setBounds(346, 457, 135, 15);
 		add(sAddrlbl);
@@ -204,13 +228,29 @@ class CustomerPanel extends JPanel {
 		cancelBtn.setBounds(537, 532, 135, 25);
 		add(cancelBtn);
 		cancelBtn.addActionListener(new ActionListener(){
-			
-			
 			@Override
 			public void actionPerformed(ActionEvent arg0){
-				System.out.println(fNameTxtBx);
-				if(fNameTxtBx.toString() == ""){
-					System.out.println(fNameTxtBx.equals(null));
+				//Do any of the text boxes contain data
+				if(!fNameTxtBx.getText().equals("") || !lNameTxtBx.getText().equals("") || !homeNumTxtBx.getText().equals("") 
+						|| !mobileNumTxtBx.getText().equals("") || !emailTxtBx.getText().equals("") || !pAddrTxtBx.getText().equals("") 
+						|| !pSuburbTxtBx.getText().equals("") || !pAreaCodeTxtBx.getText().equals("") || pAddChbx.isSelected()
+						|| !sAddrTxtBx.getText().equals("") || sSuburbTxtBx.getText().equals("")){
+					int dialogButton = JOptionPane.YES_NO_OPTION;
+					int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to cancel?","Warning",dialogButton);
+					if(dialogResult == JOptionPane.YES_OPTION){
+						//Set all the text boxes to blank
+						fNameTxtBx.setText("");
+						lNameTxtBx.setText("");
+						homeNumTxtBx.setText("");
+						mobileNumTxtBx.setText("");
+						emailTxtBx.setText("");
+						pAddrTxtBx.setText("");
+						pSuburbTxtBx.setText("");
+						pAreaCodeTxtBx.setText("");
+						pAddChbx.setSelected(false);
+						sAddrTxtBx.setText("");
+						sSuburbTxtBx.setText("");
+					}
 				}
 			}
 		});
@@ -229,7 +269,7 @@ class CustomerPanel extends JPanel {
 						int dialogButton = JOptionPane.YES_NO_OPTION;
 						int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to create this customer","Warning",dialogButton);
 						if(dialogResult == JOptionPane.YES_OPTION){
-						  // Saving code here -- add customer to the database
+							// Saving code here -- add customer to the database
 						}
 					}
 				}					
@@ -257,7 +297,7 @@ class CustomerPanel extends JPanel {
 		//Check if all text boxes are all filled in correctly
 		//List<String> errors = new ArrayList<String>();
 
-		if (fNameTxtBx.getText().equals(null)){
+		if (fNameTxtBx.getText().equals("")){
 			errorChk = true;
 			//Cannot be null or more than 15 chars
 			error = error + "FIRST NAME: can not be empty\n";
@@ -266,14 +306,14 @@ class CustomerPanel extends JPanel {
 			error = error + "FIRST NAME: can not be more than 15 letters\n";
 		}
 
-		if (lNameTxtBx.getText().equals(null)){
+		if (lNameTxtBx.getText().equals("")){
 			errorChk = true;
 			error = error + "LAST NAME: can not be empty\n";
 		} else if(lNameTxtBx.getText().length() > 15){
 			errorChk = true;
 			error = error + "LAST NAME: can not be more than 15 letters\n";
 		}
-		if (homeNumTxtBx.getText().equals(null) && !mobileNumTxtBx.getText().equals(null)){
+		if (homeNumTxtBx.getText().equals("") && !mobileNumTxtBx.getText().equals("")){
 			errorChk = true;
 			error = error + "NUMBERS: either home number or mobile number can not be empty\n";
 		}
@@ -305,7 +345,7 @@ class CustomerPanel extends JPanel {
 			error = error + "MOBILE NUMBER: can only contain numbers\n";
 		}
 		//Make sure the email contails 
-		if (emailTxtBx.getText().equals(null)){
+		if (emailTxtBx.getText().equals("")){
 			errorChk = true;
 			error = error + "EMAIL: con not be empty\n";
 		}else if (!emailTxtBx.getText().contains("@")){
@@ -317,7 +357,7 @@ class CustomerPanel extends JPanel {
 		}
 
 		//otherwise the email field should be valid
-		if (pAddrTxtBx.getText().equals(null) || sAddrTxtBx.getText().equals(null)){
+		if (pAddrTxtBx.getText().equals("") || sAddrTxtBx.getText().equals("")){
 			errorChk = true;
 			error = error + "STREET ADDRESS: can not be empty\n";
 		}else if (pAddrTxtBx.getText().length() > 30 || sAddrTxtBx.getText().length() > 30){
@@ -325,15 +365,15 @@ class CustomerPanel extends JPanel {
 			error = error + "STREET ADDRESS: can not be longer than 30 letters\n";
 		}
 
-		if (pSuburbTxtBx.getText().equals(null) || sSuburbTxtBx.getText().equals(null)){
+		if (pSuburbTxtBx.getText().equals("") || sSuburbTxtBx.getText().equals("")){
 			errorChk = true;
 			error = error + "SUBURB: can not be empty\n";
 		} else if(pSuburbTxtBx.getText().length() > 20 || sAddrTxtBx.getText().length() > 20){
 			errorChk = true;
 			error = error + "SUBURB: can not be longer than 30 letters\n";
 		}
-		
-		if (pAreaCodeTxtBx.getText().equals(null)){
+
+		if (pAreaCodeTxtBx.getText().equals("")){
 			errorChk = true;
 			error = error + "SUBURB: can not be empty\n";
 
@@ -348,6 +388,6 @@ class CustomerPanel extends JPanel {
 		}
 		return errorChk;
 	}
-	
-	
+
+
 }
