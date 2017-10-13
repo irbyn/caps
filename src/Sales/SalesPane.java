@@ -182,18 +182,19 @@ public class SalesPane extends JPanel
 	    }	
 	    
 	    public ResultSet getResults(int ind, ConnDetails connDeets){      	
-	    	
+	    	JOptionPane.showMessageDialog(null, "about to try");
 	        try
 	        {
-	        	//System.out.println("Index: " + ind + " " + connDeets);
+	        	 JOptionPane.showMessageDialog(null, "Index: " + ind + " " + connDeets);
 	        	Connection conn = connecting.CreateConnection(connDeets);
-	        	//System.out.println("+++++++++++");
+	        	 JOptionPane.showMessageDialog(null, "+++++++++++");
 	        	PreparedStatement st =conn.prepareStatement(procedure[ind]);	//ind]);
-	        	//System.out.println("dddddddddd");
+	        	 JOptionPane.showMessageDialog(null, "dddddddddd");
 	        	results = st.executeQuery();
-	        	//System.out.println("sssssssssssssssssss");
+	        	 JOptionPane.showMessageDialog(null, "sssssssssssssssssss");
 	        	
 	        	if (results==null){
+	        		 JOptionPane.showMessageDialog(null, "RESULTS ARE NULL");
 	        		getResults(0, conDeets);
 	        	}
 	        }
@@ -213,7 +214,7 @@ public class SalesPane extends JPanel
 	        	PreparedStatement st2 =conn.prepareStatement(qry + param);	
 	        	qryResults = st2.executeQuery();
 	        	if (qryResults==null){
-	    			System.out.println("null query");
+	        		 JOptionPane.showMessageDialog(null, "null query");
 	        	}
 	        }
 	        catch(Exception ex)

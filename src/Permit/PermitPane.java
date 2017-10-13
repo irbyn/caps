@@ -120,7 +120,8 @@ public class PermitPane extends JPanel
                  //       ResultSet r1 = results;
                         
                         // add ResultSet into Selected Tab JTable.
-                        tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));               
+                        tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));         
+                        
                         TableColumnModel tcm = tablez[tabIndex].getColumnModel();
                          int cols = tcm.getColumnCount();
 
@@ -165,6 +166,7 @@ public class PermitPane extends JPanel
         	
             try
 	        {
+            	
 	        	Connection conn = connecting.CreateConnection(conDeets);
 	        	PreparedStatement st2 =conn.prepareStatement(custDetails + ' ' +  parameter);	    	
 	        	qryResults = st2.executeQuery();
@@ -235,6 +237,7 @@ public class PermitPane extends JPanel
 	        }
         		return results;       		            
         }
+            
         
         public ResultSet getDetails(String qry, String param){      	
         	

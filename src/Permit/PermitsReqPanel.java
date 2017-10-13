@@ -576,10 +576,9 @@ class PermitsReqPanel extends JPanel {
 
 		    try {
 				
-			String updateFire = upFire;	
         	Connection conn = connecting.CreateConnection(conDeets);	        	   	
 		
-        	pm = conn.prepareCall(updateFire);
+        	pm = conn.prepareCall(upFire);
 			
         	pm.setString(1, getFireCode());
         	pm.setString(2, getFireType());

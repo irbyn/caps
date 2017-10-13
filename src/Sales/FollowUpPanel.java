@@ -47,6 +47,7 @@ class FollowUpPanel extends JPanel {
 	private JTable salesTbl;
 	private JTextArea txtAreaCustInfo;
 	private JSpinner spnTimeDate;
+	private SimpleDateFormat dt;
 	private JRadioButton rdBtnNxtFlwUp;
 	private JRadioButton rdBtnInvoice;
 	private JRadioButton rdBtnSoldEls;
@@ -55,12 +56,15 @@ class FollowUpPanel extends JPanel {
 	private JButton btnViewSC;
 	private JButton btnViewQuote;
 	private JButton btnViewPhoto;
+	private Boolean rowSelected;
 
 
 	private JTextField txtBxInvNumb;
 
 	  public FollowUpPanel(ConnDetails ConDeets, SalesPane sp) {
-		  conDeets = ConDeets;
+		  
+		  this.sp = sp;
+		  this.conDeets = ConDeets;
 
 
 		  connecting = new CreateConnection();
@@ -126,13 +130,15 @@ class FollowUpPanel extends JPanel {
 					   resetTable();
 					   
 					   //Resetting the other attributes within the tab
-					   spnTimeDate.setValue(null);
-					   rdBtnNxtFlwUp.setSelected(false);
+			//		   spnTimeDate.setValue(null);
+					   
+//   !!ADD THESE TO RESET TABLE					   
+/*					   rdBtnNxtFlwUp.setSelected(false);
 					   rdBtnInvoice.setSelected(false);
 					   txtBxInvNumb.setText(null);
 					   rdBtnSoldEls.setSelected(false);
 				        spnTimeDate.setEditor(new JSpinner.DateEditor(spnTimeDate, dt.toPattern()));
-					}					
+*/					}					
 				}
 			});
 			
@@ -166,7 +172,7 @@ class FollowUpPanel extends JPanel {
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {
 				if (!arg0.getValueIsAdjusting()){
-					//rowSelected=true;
+					rowSelected=true;
 					try{
 					param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
 					//displayClientDetails(param);
@@ -180,16 +186,36 @@ class FollowUpPanel extends JPanel {
 }
 	  
 		protected void resetTable() {
+			
+			salesTbl.clearSelection();
+			
+			rs = sp.getResults(4, conDeets);
+			salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+	//	  	spaceHeader();
+		  	
+			rowSelected=false;
+			param = "";
+			txtAreaCustInfo.setText("");
+			
+			   rdBtnNxtFlwUp.setSelected(false);
+			   rdBtnInvoice.setSelected(false);
+			   txtBxInvNumb.setText(null);
+			   rdBtnSoldEls.setSelected(false);
+	//	        spnTimeDate.setEditor(new JSpinner.DateEditor(spnTimeDate, dt.toPattern()));
+
+	
+/*			
+			salesTbl.clearSelection();
 			//Fix this little null error 
-			ResultSet rs = sp.getResults(3,  conDeets);
-		  	salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+//			ResultSet rs = sp.getResults(4,  conDeets);
+//		  	salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 		  	//spaceHeader(columnModel, columnWidth);
 		  	//sentChk.setSelected(false);
 		  	
 			//rowSelected=false;
 			param = "";
 			txtAreaCustInfo.setText("");
-
+*/
 		}	
   
   public JTable getSalesTbl(){
