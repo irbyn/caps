@@ -56,7 +56,8 @@ class QuotePanel extends JPanel {
 	private JButton btnSave;
 
 	public QuotePanel(ConnDetails ConDeets, SalesPane sp) {
-		 conDeets = ConDeets;
+		this.sp = sp;
+		this.conDeets = ConDeets;
 
 
 		  connecting = new CreateConnection();

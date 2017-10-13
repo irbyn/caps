@@ -9,6 +9,8 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
@@ -24,6 +26,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 
@@ -200,9 +203,17 @@ class CustomerPanel extends JPanel {
 		cancelBtn = new JButton("Cancel");
 		cancelBtn.setBounds(537, 532, 135, 25);
 		add(cancelBtn);
-
-
-
+		cancelBtn.addActionListener(new ActionListener(){
+			
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0){
+				System.out.println(fNameTxtBx);
+				if(fNameTxtBx.toString() == ""){
+					System.out.println(fNameTxtBx.equals(null));
+				}
+			}
+		});
 
 		createCustBtn = new JButton("Create Customer");
 		createCustBtn.setBounds(735, 532, 135, 25);
@@ -212,60 +223,15 @@ class CustomerPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				{ 
-					//Check if all text boxes are all filled in correctly
-
-					if (fNameTxtBx.getText().equals(null) || fNameTxtBx.getText().length() > 15){
-						//Cannot be null or more than 15 chars 
-					}
-					if (lNameTxtBx.getText().equals(null) || lNameTxtBx.getText().length() > 15){
-						System.out.println("Names");
-					}
-					//Convert Phone numbers to Numbers
-					try {
-
-						Integer.parseInt(homeNumTxtBx.getText());
-						Integer.parseInt(mobileNumTxtBx.getText());
-
-						if (homeNumTxtBx.getText().equals(null) || homeNumTxtBx.getText().length() > 15){
-							System.out.println("Number");
+					//If validate data is false then there is no error
+					if (validatedata() == false){
+						//Check to see if the user is sure about creating the customer
+						int dialogButton = JOptionPane.YES_NO_OPTION;
+						int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to create this customer","Warning",dialogButton);
+						if(dialogResult == JOptionPane.YES_OPTION){
+						  // Saving code here -- add customer to the database
 						}
 					}
-					catch (NumberFormatException e) {
-						//Display number error message 
-						//System.out.println("Test");
-					}
-					//Make sure the 
-					if (emailTxtBx.getText().equals(null)){
-
-					}
-						//If the email contains an @ then check to make sure it isn't too long
-					else if (emailTxtBx.getText().contains("@") || emailTxtBx.getText().length() > 255 ){
-							System.out.println("Email");
-						}
-					//otherwise the email field should be valid
-					if ( pAddrTxtBx.getText().equals(null) || pAddrTxtBx.getText().length() > 30){
-						System.out.println("P Address");
-
-					}
-					if (pSuburbTxtBx.getText().equals(null) || pSuburbTxtBx.getText().length() > 20){
-						System.out.println("P Suburb");
-
-					}
-					if (pAreaCodeTxtBx.getText().equals(null) || pAreaCodeTxtBx.getText().length() > 20){
-						System.out.println("P Code");
-
-					}
-
-					if (sAddrTxtBx.getText().equals(null) || sAddrTxtBx.getText().length() > 20){
-						System.out.println("S Address");
-
-					}
-					if (sSuburbTxtBx.getText().equals(null) || sAddrTxtBx.getText().length() > 20){
-						System.out.println("S Suburb");
-
-					}
-
-
 				}					
 			}
 		});
@@ -284,4 +250,104 @@ class CustomerPanel extends JPanel {
 	public JTable getSalesTbl(){
 		return salesTbl;
 	}
+
+	public boolean validatedata(){
+		Boolean errorChk = false;
+		String error = " ";
+		//Check if all text boxes are all filled in correctly
+		//List<String> errors = new ArrayList<String>();
+
+		if (fNameTxtBx.getText().equals(null)){
+			errorChk = true;
+			//Cannot be null or more than 15 chars
+			error = error + "FIRST NAME: can not be empty\n";
+		}else if(fNameTxtBx.getText().length() > 15){
+			errorChk = true;
+			error = error + "FIRST NAME: can not be more than 15 letters\n";
+		}
+
+		if (lNameTxtBx.getText().equals(null)){
+			errorChk = true;
+			error = error + "LAST NAME: can not be empty\n";
+		} else if(lNameTxtBx.getText().length() > 15){
+			errorChk = true;
+			error = error + "LAST NAME: can not be more than 15 letters\n";
+		}
+		if (homeNumTxtBx.getText().equals(null) && !mobileNumTxtBx.getText().equals(null)){
+			errorChk = true;
+			error = error + "NUMBERS: either home number or mobile number can not be empty\n";
+		}
+		//Convert Phone numbers to Numbers
+		try {
+
+			Integer.parseInt(homeNumTxtBx.getText());
+			if(homeNumTxtBx.getText().length() > 15){
+				errorChk = true;
+				error = error + "HOME NUMBER: can not be more than 15 numbers\n";
+			}
+		}
+		catch (NumberFormatException e) {
+			//Display number error message 
+			errorChk = true;
+			error = error + "HOME NUMBER: can only contain numbers\n";
+		}
+		//Convert Mobile Numbers
+		try {
+			Integer.parseInt(mobileNumTxtBx.getText());
+			if(homeNumTxtBx.getText().length() > 15){
+				errorChk = true;
+				error = error + "MOBILE NUMBER: can not be more than 15 numbers\n";
+			}
+		}
+		catch (NumberFormatException e) {
+			//Display number error message 
+			errorChk = true;
+			error = error + "MOBILE NUMBER: can only contain numbers\n";
+		}
+		//Make sure the email contails 
+		if (emailTxtBx.getText().equals(null)){
+			errorChk = true;
+			error = error + "EMAIL: con not be empty\n";
+		}else if (!emailTxtBx.getText().contains("@")){
+			errorChk = true;
+			error = error + "EMAIL: must contain an @ \n";
+		}else if(emailTxtBx.getText().length() > 30){
+			errorChk = true;
+			error = error + "EMAIL: can not be longer than 30 letters\n";
+		}
+
+		//otherwise the email field should be valid
+		if (pAddrTxtBx.getText().equals(null) || sAddrTxtBx.getText().equals(null)){
+			errorChk = true;
+			error = error + "STREET ADDRESS: can not be empty\n";
+		}else if (pAddrTxtBx.getText().length() > 30 || sAddrTxtBx.getText().length() > 30){
+			errorChk = true;
+			error = error + "STREET ADDRESS: can not be longer than 30 letters\n";
+		}
+
+		if (pSuburbTxtBx.getText().equals(null) || sSuburbTxtBx.getText().equals(null)){
+			errorChk = true;
+			error = error + "SUBURB: can not be empty\n";
+		} else if(pSuburbTxtBx.getText().length() > 20 || sAddrTxtBx.getText().length() > 20){
+			errorChk = true;
+			error = error + "SUBURB: can not be longer than 30 letters\n";
+		}
+		
+		if (pAreaCodeTxtBx.getText().equals(null)){
+			errorChk = true;
+			error = error + "SUBURB: can not be empty\n";
+
+		} else if (pAreaCodeTxtBx.getText().length() > 20){
+			errorChk = true;
+			error = error + "SUBURB: can not be longer than 20 letters\n";
+		}
+
+		//Check to see if any errors has occured
+		if (errorChk == true){
+			JOptionPane.showMessageDialog(null, error);
+		}
+		return errorChk;
+	}
+	
+	
 }

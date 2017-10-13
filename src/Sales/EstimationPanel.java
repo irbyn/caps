@@ -10,12 +10,14 @@ import javax.swing.table.TableColumnModel;
 
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
+import Main.GetJobs;
 import net.proteanit.sql.DbUtils;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -82,8 +84,8 @@ class EstimationPanel extends JPanel {
 	private ConnDetails conDeets;
 
 	public EstimationPanel(ConnDetails ConDeets, SalesPane sp) {
-
-		conDeets = ConDeets;
+		this.sp = sp;
+		this.conDeets = ConDeets;
 		rowSelected = false;
 
 		connecting = new CreateConnection();
@@ -102,15 +104,13 @@ class EstimationPanel extends JPanel {
 
 		//Panel for the table
 		tablePanel = new JPanel();
-				tablePanel.setBounds(20, 20, 1025, 260);  //setPreferredSize(new Dimension(0, 300));      
+				tablePanel.setBounds(20, 20, 1025, 260);      
 				tablePanel.setLayout(new BorderLayout());
 
 				//Content panel
 				infoPanel = new JPanel();
-				infoPanel.setBounds(0, 280, 1100, 289);  //setPreferredSize(new Dimension(0, 300));
+				infoPanel.setBounds(0, 280, 1100, 289);
 				infoPanel.setLayout(null);
-
-				//setLayout(null);
 
 				siteAddrLbl = new JLabel("Fire Place");
 				siteAddrLbl.setBounds(461, 10, 201, 20);
@@ -203,30 +203,42 @@ class EstimationPanel extends JPanel {
 					
 					@Override
 					public void actionPerformed(ActionEvent arg0){
-						try {
-							//Hmm still doesn't clear the table 
 							resetTable();
-						}
-						catch (NullPointerException e){
 							System.out.println("Execution Complete");
-						}					
 						
 						//reset all the blank fields within the estimation tab
 						txtBxFire.setText(null);
 						txtBxPrice.setText(null);
 						//comBxInstType.setSelectedIndex(0);
 						chckBxToBook.setSelected(false);
-						//comBxSChkDoneBy.setSelectedIndex(0);
+						comBxSChkDoneBy.setSelectedIndex(0);
 				        spnTimeDate.setEditor(new JSpinner.DateEditor(spnTimeDate, dt.toPattern()));
 						chckBxSChkComp.setSelected(false);
 						txtBxComment.setText(null);
-						//comBxSlsPerson.setSelectedItem(0);
+						comBxSlsPerson.setSelectedItem(0);
 					}
 				});
 
 				btnSave = new JButton("Save Details");
 				btnSave.setBounds(855, 255, 148, 23);
 				infoPanel.add(btnSave);
+
+			      GetJobs job = new GetJobs(conDeets);
+			   
+			      String[] installUr = job.getInstallers();
+			      
+			      DefaultComboBoxModel model = new DefaultComboBoxModel( installUr );
+			      comBxSChkDoneBy.setModel( model );   
+			         
+			 /*     String[] SC = job.getSiteChecker();
+			      
+			      DefaultComboBoxModel modelSC = new DefaultComboBoxModel( SC );
+			      fuelCmbo.setModel( modelSC );  */ 
+
+			      String[] SELL = job.getSales();
+			      
+			      DefaultComboBoxModel modelSELL = new DefaultComboBoxModel( SELL );
+			      comBxSlsPerson.setModel( modelSELL ); 
 
 				this.setLayout(null);
 				this.add(tablePanel); 
@@ -235,12 +247,6 @@ class EstimationPanel extends JPanel {
 				tablePanel.add(scrollPane, BorderLayout.CENTER);
 				tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
 
-
-				rs = sp.getResults(1, conDeets);		
-				salesTbl.setModel(DbUtils.resultSetToTableModel(rs));  	
-				//spaceHeader();  
-
-				//	  	this.add(infoPanel, BorderLayout.SOUTH);
 
 		  	salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
@@ -261,10 +267,7 @@ class EstimationPanel extends JPanel {
 	}
 		
 	protected void resetTable() {
-		//Fix this little null error 
-		//System.out.println(conDeets);
-		rs = sp.getResults(3,  conDeets);
-
+		ResultSet rs = sp.getResults(1,  conDeets);
 	  	salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 	  	//spaceHeader(columnModel, columnWidth);
 	  	//sentChk.setSelected(false);
@@ -272,25 +275,8 @@ class EstimationPanel extends JPanel {
 		rowSelected=false;
 		param = "";
 		txtAreaCustInfo.setText("");
-		//System.out.println(rowSelected);
-
 	}
 	
-/*	private void displayClientDetails(String parameter) {
-		
-	rs = sp.getDetails(getSaleID, param);
-	
-    	 try {
-			while(rs.next()){
-						    					
-				 saleID 		= rs.getString("SID");						 						
-
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-}*/		
 	public JTable getSalesTbl(){
 		return salesTbl;
 	}

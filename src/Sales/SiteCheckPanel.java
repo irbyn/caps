@@ -61,7 +61,8 @@ class SiteCheckPanel extends JPanel {
 
 	public SiteCheckPanel(ConnDetails conDeets, SalesPane sp) {
 
-		conDeets = conDeets;
+		this.sp = sp;
+		this.conDeets = conDeets;
 
 		connecting = new CreateConnection();
 
