@@ -94,7 +94,7 @@ public class SalesPane extends JPanel
 					JTabbedPane pane = (JTabbedPane) e.getSource();
 					tabIndex = pane.getSelectedIndex();
 
-					getResults(tabIndex, conDeets); 
+					getResults(tabIndex); 
 					//ResultSet r1 = results;
 
 					// add ResultSet into Selected Tab JTable.
@@ -181,11 +181,10 @@ public class SalesPane extends JPanel
 			return "";
 	    }	
 	    
-	    public ResultSet getResults(int ind, ConnDetails connDeets){      	
-	    	
+	    public ResultSet getResults(int ind){      		
 	        try
 	        {
-	        	Connection conn = connecting.CreateConnection(connDeets);
+	        	Connection conn = connecting.CreateConnection(conDeets);
 	        	PreparedStatement st =conn.prepareStatement(procedure[ind]);
 	        	results = st.executeQuery();    	
 	        }
@@ -197,11 +196,11 @@ public class SalesPane extends JPanel
 	    }
 	    
         //Get the results set for the customer details
-        public ResultSet getDetails(String qry, String param, ConnDetails connDeets){      	
+        public ResultSet getDetails(String qry, String param){      	
         	
             try
 	        {
-	        	Connection conn = connecting.CreateConnection(connDeets);
+	        	Connection conn = connecting.CreateConnection(conDeets);
 	        	PreparedStatement st2 =conn.prepareStatement(qry + param);	
 	        	qryResults = st2.executeQuery();
 	        	if (qryResults==null){

@@ -189,7 +189,7 @@ class FollowUpPanel extends JPanel {
 			
 			salesTbl.clearSelection();
 			
-			rs = sp.getResults(4, conDeets);
+			rs = sp.getResults(4);
 			salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 	//	  	spaceHeader();
 		  	

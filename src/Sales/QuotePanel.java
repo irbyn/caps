@@ -181,7 +181,7 @@ class QuotePanel extends JPanel {
 
 	protected void resetTable() {
 		//Fix this little null error 
-		ResultSet rs = sp.getResults(3,  conDeets);
+		ResultSet rs = sp.getResults(3);
 		salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 		//spaceHeader(columnModel, columnWidth);
 		//sentChk.setSelected(false);

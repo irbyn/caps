@@ -45,16 +45,12 @@ class EstimationPanel extends JPanel {
 	private JTextField txtBxFire;
 	private JTextField txtBxPrice;
 	private JTextField txtBxComment;	
-
 	private String spResults = "EXEC AWS_WCH_DB.dbo.[s_SalesGetSalesPerson] ";
 	//private String result3 = "EXEC AWS_WCH_DB.dbo.[s_SalesEstimation] ";
 	private String param = "";  
 	private ResultSet rs;
-
 	private Boolean rowSelected = false;
-
 	private CreateConnection connecting;
-
 	private JTableHeader header;
 	private TableColumnModel columnModel;
 	private JPanel tablePanel;
@@ -64,22 +60,21 @@ class EstimationPanel extends JPanel {
 	private JTextArea txtAreaCustInfo;
 	private JLabel siteAddrLbl;
 	private JLabel lblPrice;
-	private JComboBox<String> comBxInstType;
 	private JLabel lblInstallType;
 	private JLabel lblSiteCheck;
-	private JCheckBox chckBxToBook;
-	private JComboBox<String> comBxSChkDoneBy;
-	private JLabel lblSChkDoneBy;
-	private JSpinner spnTimeDate;
-	private JCheckBox chckBxSChkComp;
 	private JLabel lblComment;
 	private JLabel lblSalesPrsn;
+	private JLabel lblSChkDoneBy;
+	private JComboBox<String> comBxInstType;
+	private JComboBox<String> comBxSChkDoneBy;
+	private JCheckBox chckBxToBook;
+	private JCheckBox chckBxSChkComp;
+	private JSpinner spnTimeDate;
 	private JComboBox<String> comBxSlsPerson;
 	private JLabel lblFire;
 	private JButton btnSendEmail;
 	private JButton btnCancel;
 	private JButton btnSave;
-
 	private SalesPane sp;
 	private ConnDetails conDeets;
 
@@ -203,7 +198,6 @@ class EstimationPanel extends JPanel {
 		btnCancel.setBounds(644, 255, 148, 23);
 		infoPanel.add(btnCancel);
 		btnCancel.addActionListener(new ActionListener(){
-
 			@Override
 			public void actionPerformed(ActionEvent arg0){
 				//if there is unsaved data
@@ -275,7 +269,7 @@ class EstimationPanel extends JPanel {
 	}
 
 	protected void resetTable() {
-		ResultSet rs = sp.getResults(1,  conDeets);
+		ResultSet rs = sp.getResults(1);
 		salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 		//spaceHeader(columnModel, columnWidth);
 		//sentChk.setSelected(false);

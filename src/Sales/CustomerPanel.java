@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
@@ -26,6 +29,7 @@ import javax.swing.table.TableColumnModel;
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Permit.PermitPane;
+import net.proteanit.sql.DbUtils;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -41,8 +45,10 @@ import javax.swing.JCheckBox;
 class CustomerPanel extends JPanel {
 	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
 	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+	private String qry = "EXEC AWS_WCH_DB.dbo.[s_CustomerDetails] ";
 	private String param = "";  
 	private ResultSet rs;
+	private ResultSet rs2;
 
 	private CreateConnection connecting;
 
@@ -52,7 +58,7 @@ class CustomerPanel extends JPanel {
 	private JPanel infoPanel;
 	private JTable salesTbl;
 	private DefaultTableModel model1;
-
+	private Boolean rowSelected;
 	private ConnDetails conDets;
 
 	private JTextField fNameTxtBx;
@@ -68,6 +74,7 @@ class CustomerPanel extends JPanel {
 	private JLabel fNameLbl;
 	private JLabel lNameLbl;
 	private JLabel lblHomeNum;
+	private JLabel mobileNumLbl;
 	private JLabel emaillbl;
 	private JLabel pAddrlbl;
 	private JLabel pSuburblbl;
@@ -81,16 +88,21 @@ class CustomerPanel extends JPanel {
 	private JButton cancelBtn;
 	private JButton createCustBtn;
 	private JTextField mobileNumTxtBx;
+	private SalesPane sp;
+	private ConnDetails conDeets;
 
 	public CustomerPanel(ConnDetails conDeets, SalesPane sp) {
-		conDets = conDeets;
+		this.sp = sp;
+		this.conDeets = conDeets;
+		rowSelected = false;
 
+		//conDets = conDeets;
 		connecting = new CreateConnection();
 
 		model1 = new DefaultTableModel();  
 		model1.setRowCount(0);
 		salesTbl = new JTable(model1);
-		salesTbl.setPreferredSize(new Dimension(0, 0));
+		salesTbl.setPreferredSize(new Dimension(0, 600));
 		salesTbl.setAutoCreateRowSorter(true);
 
 		JScrollPane scrollPane = new JScrollPane(salesTbl);
@@ -99,92 +111,111 @@ class CustomerPanel extends JPanel {
 		columnModel = header.getColumnModel();
 		add(header); 
 
-		setLayout(null);
+		//Panel for the table
+		tablePanel = new JPanel();
+		tablePanel.setBounds(10, 10, 601, 560);      
+		tablePanel.setLayout(new BorderLayout());
+		tablePanel.add(scrollPane, BorderLayout.CENTER);
+		tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
+
+		//Content panel
+		infoPanel = new JPanel();
+		infoPanel.setBounds(621, 0, 424, 585);
+		infoPanel.setLayout(null);
 
 		contactLbl = new JLabel("Contact Information");
 		contactLbl.setFont(new Font("Arial", Font.BOLD, 20));
-		contactLbl.setBounds(263, 10, 201, 20);
-		add(contactLbl);
+		contactLbl.setBounds(20, 11, 201, 20);
+		infoPanel.add(contactLbl);
 
 		fNameLbl = new JLabel("First Name:");
-		fNameLbl.setBounds(346, 40, 102, 14);
-		add(fNameLbl);
+		fNameLbl.setBounds(55, 41, 102, 14);
+		infoPanel.add(fNameLbl);
 
 		fNameTxtBx = new JTextField();
-		fNameTxtBx.setBounds(492, 40, 302, 20);
-		add(fNameTxtBx);
+		fNameTxtBx.setBounds(201, 41, 210, 20);
+		infoPanel.add(fNameTxtBx);
 		fNameTxtBx.setColumns(10);
 
 		lNameLbl = new JLabel("Last Name:");
-		lNameLbl.setBounds(346, 80, 102, 15);
-		add(lNameLbl);
+		lNameLbl.setBounds(55, 81, 102, 15);
+		infoPanel.add(lNameLbl);
 
 		lNameTxtBx = new JTextField();
 		lNameTxtBx.setColumns(10);
-		lNameTxtBx.setBounds(492, 80, 302, 20);
-		add(lNameTxtBx);
+		lNameTxtBx.setBounds(201, 81, 210, 20);
+		infoPanel.add(lNameTxtBx);
 
 		lblHomeNum = new JLabel("Home Number:");
-		lblHomeNum.setBounds(346, 120, 102, 15);
-		add(lblHomeNum);
+		lblHomeNum.setBounds(55, 121, 102, 15);
+		infoPanel.add(lblHomeNum);
 
 		homeNumTxtBx = new JTextField();
 		homeNumTxtBx.setColumns(10);
-		homeNumTxtBx.setBounds(492, 120, 302, 20);
-		add(homeNumTxtBx);
+		homeNumTxtBx.setBounds(201, 121, 210, 20);
+		infoPanel.add(homeNumTxtBx);
 
+		mobileNumLbl = new JLabel("Mobile Number:");
+		mobileNumLbl.setBounds(55, 167, 118, 14);
+		infoPanel.add(mobileNumLbl);
+
+		mobileNumTxtBx = new JTextField();
+		mobileNumTxtBx.setBounds(204, 164, 210, 20);
+		infoPanel.add(mobileNumTxtBx);
+
+		mobileNumTxtBx.setColumns(10);
 		emaillbl = new JLabel("Email:");
-		emaillbl.setBounds(346, 212, 102, 15);
-		add(emaillbl);
+		emaillbl.setBounds(55, 213, 102, 15);
+		infoPanel.add(emaillbl);
 
 		emailTxtBx = new JTextField();
 		emailTxtBx.setColumns(10);
-		emailTxtBx.setBounds(492, 212, 302, 20);
-		add(emailTxtBx);
+		emailTxtBx.setBounds(201, 213, 210, 20);
+		infoPanel.add(emailTxtBx);
 
 		//Postal Address Information
 		postAddrlbl = new JLabel("Postal Address");
 		postAddrlbl.setFont(new Font("Arial", Font.BOLD, 20));
-		postAddrlbl.setBounds(263, 243, 201, 20);
-		add(postAddrlbl);
+		postAddrlbl.setBounds(20, 239, 201, 20);
+		infoPanel.add(postAddrlbl);
 
 		pAddrlbl = new JLabel("Postal Street Address:");
-		pAddrlbl.setBounds(346, 274, 173, 15);
-		add(pAddrlbl);
+		pAddrlbl.setBounds(55, 275, 173, 15);
+		infoPanel.add(pAddrlbl);
 
 		pAddrTxtBx = new JTextField();
 		pAddrTxtBx.setColumns(10);
-		pAddrTxtBx.setBounds(492, 271, 302, 20);
-		add(pAddrTxtBx);
+		pAddrTxtBx.setBounds(201, 272, 210, 20);
+		infoPanel.add(pAddrTxtBx);
 
 		pSuburblbl = new JLabel("Postal Suburb:");
-		pSuburblbl.setBounds(346, 315, 173, 15);
-		add(pSuburblbl);
+		pSuburblbl.setBounds(55, 316, 173, 15);
+		infoPanel.add(pSuburblbl);
 
 		pSuburbTxtBx = new JTextField();
 		pSuburbTxtBx.setColumns(10);
-		pSuburbTxtBx.setBounds(492, 312, 302, 20);
-		add(pSuburbTxtBx);
+		pSuburbTxtBx.setBounds(201, 313, 210, 20);
+		infoPanel.add(pSuburbTxtBx);
 
 		pAreaCodelbl = new JLabel("Post Code");
-		pAreaCodelbl.setBounds(346, 353, 173, 15);
-		add(pAreaCodelbl);
+		pAreaCodelbl.setBounds(55, 354, 173, 15);
+		infoPanel.add(pAreaCodelbl);
 
 		pAreaCodeTxtBx = new JTextField();
 		pAreaCodeTxtBx.setColumns(10);
-		pAreaCodeTxtBx.setBounds(492, 350, 302, 20);
-		add(pAreaCodeTxtBx);
+		pAreaCodeTxtBx.setBounds(201, 351, 210, 20);
+		infoPanel.add(pAreaCodeTxtBx);
 
 		//Site Address Information
 
 		siteAddrLbl = new JLabel("Site Address");
-		siteAddrLbl.setBounds(263, 381, 201, 20);
+		siteAddrLbl.setBounds(20, 380, 201, 20);
 		siteAddrLbl.setFont(new java.awt.Font("Arial", Font.BOLD, 20));
-		add(siteAddrLbl);
+		infoPanel.add(siteAddrLbl);
 
 		pAddChbx = new JCheckBox("Postal Address is Site Address");
-		pAddChbx.setBounds(346, 413, 222, 23);
-		add(pAddChbx);
+		pAddChbx.setBounds(55, 414, 210, 23);
+		infoPanel.add(pAddChbx);
 
 		//When check box is selected
 		pAddChbx.addItemListener(new ItemListener() {
@@ -208,30 +239,30 @@ class CustomerPanel extends JPanel {
 		});
 
 		sAddrlbl = new JLabel("Site Street Address:");
-		sAddrlbl.setBounds(346, 457, 135, 15);
-		add(sAddrlbl);
+		sAddrlbl.setBounds(55, 458, 135, 15);
+		infoPanel.add(sAddrlbl);
 
 		sAddrTxtBx = new JTextField();
 		sAddrTxtBx.setColumns(10);
-		sAddrTxtBx.setBounds(492, 454, 302, 20);
-		add(sAddrTxtBx);		
+		sAddrTxtBx.setBounds(201, 455, 210, 20);
+		infoPanel.add(sAddrTxtBx);		
 
 		sSuburblbl = new JLabel("Site Suburb:");
-		sSuburblbl.setBounds(346, 496, 135, 15);
-		add(sSuburblbl);
+		sSuburblbl.setBounds(55, 497, 135, 15);
+		infoPanel.add(sSuburblbl);
 
 		sSuburbTxtBx = new JTextField();
 		sSuburbTxtBx.setColumns(10);
-		sSuburbTxtBx.setBounds(492, 493, 302, 20);
-		add(sSuburbTxtBx);
+		sSuburbTxtBx.setBounds(201, 494, 210, 20);
+		infoPanel.add(sSuburbTxtBx);
 
-		searchCustBtn = new JButton("Search for Existing Customer");
-		searchCustBtn.setBounds(263, 532, 210, 25);
-		add(searchCustBtn);
+		/*		searchCustBtn = new JButton("Search for Existing Customer");
+		searchCustBtn.setBounds(23, 533, 185, 25);
+		infoPanel.add(searchCustBtn);*/
 
 		cancelBtn = new JButton("Cancel");
-		cancelBtn.setBounds(537, 532, 135, 25);
-		add(cancelBtn);
+		cancelBtn.setBounds(22, 533, 135, 25);
+		infoPanel.add(cancelBtn);
 		cancelBtn.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0){
@@ -261,8 +292,8 @@ class CustomerPanel extends JPanel {
 		});
 
 		createCustBtn = new JButton("Create Customer");
-		createCustBtn.setBounds(735, 532, 135, 25);
-		add(createCustBtn);
+		createCustBtn.setBounds(276, 533, 135, 25);
+		infoPanel.add(createCustBtn);
 		createCustBtn.addActionListener( new ActionListener()
 		{
 			@Override
@@ -281,16 +312,69 @@ class CustomerPanel extends JPanel {
 			}
 		});
 		this.setLayout(null);
+		this.add(tablePanel); 
+		this.add(infoPanel);
 
-		JLabel MobileNumLbl = new JLabel("Mobile Number:");
-		MobileNumLbl.setBounds(346, 166, 118, 14);
-		add(MobileNumLbl);
+		salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent arg0) {
+				if (!arg0.getValueIsAdjusting()){
+					rowSelected=true;
+					try{
+						//Get the customer ID as a paramater to feed into the SQL procedure 
+						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
+						displayClientDetails(param);
+						//txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
+					} catch (IndexOutOfBoundsException e){
 
-		mobileNumTxtBx = new JTextField();
-		mobileNumTxtBx.setBounds(495, 163, 299, 20);
-		add(mobileNumTxtBx);
-		mobileNumTxtBx.setColumns(10);
+					}
+				}
+			}
+		});
+		
+		//Display the initial table
+		rs = sp.getResults(0);		
+		salesTbl.setModel(DbUtils.resultSetToTableModel(rs));  
 	}
+
+	private void displayClientDetails(String parameter) {
+		
+		rs2 = sp.getDetails(qry, param);
+		
+        	 try {
+				while(rs2.next()){
+							    					
+					 String customerFName 	= rs2.getString("customerFName");
+					 String customerLName 	= rs2.getString("customerLName");
+					 String customerAddress = rs2.getString("customerPStreetAddress");
+					 String customerSuburb 	= rs2.getString("customerPSuburb");
+					 String customerPostCode= rs2.getString("customerPostCode");
+					 String customerPhone 	= rs2.getString("customerPhone");
+					 String customerMobile 	= rs2.getString("customerMobile");
+					 String customerEmail 	= rs2.getString("customerEmail");
+					 String streetAddress 	= rs2.getString("customerSStreetAddress");
+					 String suburb 			= rs2.getString("customerSSuburb");					 						
+
+					 fNameTxtBx.setText(customerFName);
+					 lNameTxtBx.setText(customerLName);			 
+					 homeNumTxtBx.setText(customerPhone);
+					 mobileNumTxtBx.setText(customerMobile);
+					 emailTxtBx.setText(customerEmail);
+					 pAddrTxtBx.setText(customerAddress);
+					 pSuburbTxtBx.setText(customerSuburb);
+					 pAreaCodeTxtBx.setText(customerPostCode);
+					 sAddrTxtBx.setText(streetAddress);
+					 sSuburbTxtBx.setText(suburb);
+					 
+					 //consentTxtBx.setText(consent);
+
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+	} 
 
 	public JTable getSalesTbl(){
 		return salesTbl;
@@ -386,7 +470,7 @@ class CustomerPanel extends JPanel {
 			errorChk = true;
 			error = error + "AREA CODE: can not be longer than 20 letters\n";
 		}
-		
+
 		if (pAddChbx.isSelected())
 			if (!pAddrTxtBx.getText().equals(sAddrTxtBx.getText()) || !pSuburbTxtBx.getText().equals(pSuburbTxtBx.getText())){
 				errorChk = true;
