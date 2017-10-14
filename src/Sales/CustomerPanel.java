@@ -17,6 +17,8 @@ import java.util.List;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
@@ -197,6 +199,9 @@ class CustomerPanel extends JPanel {
 						sAddrTxtBx.setText(pAddrTxtBx.getText());
 						sSuburbTxtBx.setText(pSuburbTxtBx.getText());
 					}
+				}else {
+					sAddrTxtBx.setText("");
+					sSuburbTxtBx.setText("");
 				}
 
 			}
@@ -209,7 +214,7 @@ class CustomerPanel extends JPanel {
 		sAddrTxtBx = new JTextField();
 		sAddrTxtBx.setColumns(10);
 		sAddrTxtBx.setBounds(492, 454, 302, 20);
-		add(sAddrTxtBx);
+		add(sAddrTxtBx);		
 
 		sSuburblbl = new JLabel("Site Suburb:");
 		sSuburblbl.setBounds(346, 496, 135, 15);
@@ -375,12 +380,18 @@ class CustomerPanel extends JPanel {
 
 		if (pAreaCodeTxtBx.getText().equals("")){
 			errorChk = true;
-			error = error + "SUBURB: can not be empty\n";
+			error = error + "AREA CODE: can not be empty\n";
 
 		} else if (pAreaCodeTxtBx.getText().length() > 20){
 			errorChk = true;
-			error = error + "SUBURB: can not be longer than 20 letters\n";
+			error = error + "AREA CODE: can not be longer than 20 letters\n";
 		}
+		
+		if (pAddChbx.isSelected())
+			if (!pAddrTxtBx.getText().equals(sAddrTxtBx.getText()) || !pSuburbTxtBx.getText().equals(pSuburbTxtBx.getText())){
+				errorChk = true;
+				error = error + "CHECK BOX: If the check box is selected \nplease ensure the addresses are the same\n";
+			}
 
 		//Check to see if any errors has occured
 		if (errorChk == true){

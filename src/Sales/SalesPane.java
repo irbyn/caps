@@ -185,18 +185,9 @@ public class SalesPane extends JPanel
 	    	
 	        try
 	        {
-	        	System.out.println("Index: " + ind + " " + connDeets);
 	        	Connection conn = connecting.CreateConnection(connDeets);
-	        	System.out.println("+++++++++++");
 	        	PreparedStatement st =conn.prepareStatement(procedure[ind]);
-	        	System.out.println("dddddddddd");
-	        	results = st.executeQuery();
-	        	System.out.println("sssssssssssssssssss");
-	        	System.out.println(results);
-/*	        	if (results==null){
-	        		getResults(0, conDeets);
-	        	}
-	*/        	
+	        	results = st.executeQuery();    	
 	        }
 	        catch(Exception ex)
 	        { 
