@@ -5,47 +5,40 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JTextField;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
+import com.microsoft.sqlserver.jdbc.SQLServerException;
+
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
-import Permit.PermitPane;
 import net.proteanit.sql.DbUtils;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.AbstractButton;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonModel;
 import javax.swing.JCheckBox;
 
 class CustomerPanel extends JPanel {
-	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
-	private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+	//private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
+	//private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String qry = "EXEC AWS_WCH_DB.dbo.[s_CustomerDetails] ";
+	private String upReceived = "call AWS_WCH_DB.dbo.s_SalesUpdateCustomer";
 	private String param = "";  
 	private ResultSet rs;
 	private ResultSet rs2;
@@ -96,7 +89,6 @@ class CustomerPanel extends JPanel {
 		this.conDeets = conDeets;
 		rowSelected = false;
 
-		//conDets = conDeets;
 		connecting = new CreateConnection();
 
 		model1 = new DefaultTableModel();  
@@ -220,11 +212,9 @@ class CustomerPanel extends JPanel {
 		//When check box is selected
 		pAddChbx.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-
 				if (pAddChbx.isSelected()){
 					if (pAddrTxtBx.getText().equals("") || pSuburbTxtBx.getText().equals("")){
 						JOptionPane.showMessageDialog(null, "You must enter a postal address first.");
-
 					}else {
 						//Get the text from postal address and add it to the sit address
 						sAddrTxtBx.setText(pAddrTxtBx.getText());
@@ -234,7 +224,6 @@ class CustomerPanel extends JPanel {
 					sAddrTxtBx.setText("");
 					sSuburbTxtBx.setText("");
 				}
-
 			}
 		});
 
@@ -274,18 +263,9 @@ class CustomerPanel extends JPanel {
 					int dialogButton = JOptionPane.YES_NO_OPTION;
 					int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to cancel?","Warning",dialogButton);
 					if(dialogResult == JOptionPane.YES_OPTION){
-						//Set all the text boxes to blank
-						fNameTxtBx.setText("");
-						lNameTxtBx.setText("");
-						homeNumTxtBx.setText("");
-						mobileNumTxtBx.setText("");
-						emailTxtBx.setText("");
-						pAddrTxtBx.setText("");
-						pSuburbTxtBx.setText("");
-						pAreaCodeTxtBx.setText("");
-						pAddChbx.setSelected(false);
-						sAddrTxtBx.setText("");
-						sSuburbTxtBx.setText("");
+						resetTable();
+						clearFields();
+
 					}
 				}
 			}
@@ -299,13 +279,19 @@ class CustomerPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				{ 
-					//If validate data is false then there is no error
-					if (validatedata() == false){
-						//Check to see if the user is sure about creating the customer
-						int dialogButton = JOptionPane.YES_NO_OPTION;
-						int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to create this customer","Warning",dialogButton);
-						if(dialogResult == JOptionPane.YES_OPTION){
-							// Saving code here -- add customer to the database
+					if (rowSelected){
+						//If validate data is false then there is no error
+						if (validatedata() == false){
+							//Check to see if the user is sure about creating the customer
+							int dialogButton = JOptionPane.YES_NO_OPTION;
+							int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to create this customer","Warning",dialogButton);
+							if(dialogResult == JOptionPane.YES_OPTION){
+								// Saving code here -- add customer to the database
+								sp.showMessage("Updating Consent Received");
+			        			updateCustomer();
+			        			resetTable();
+			        			clearFields();
+							}
 						}
 					}
 				}					
@@ -331,50 +317,51 @@ class CustomerPanel extends JPanel {
 				}
 			}
 		});
-		
 		//Display the initial table
 		rs = sp.getResults(0);		
 		salesTbl.setModel(DbUtils.resultSetToTableModel(rs));  
 	}
 
 	private void displayClientDetails(String parameter) {
-		
 		rs2 = sp.getDetails(qry, param);
-		
-        	 try {
-				while(rs2.next()){
-							    					
-					 String customerFName 	= rs2.getString("customerFName");
-					 String customerLName 	= rs2.getString("customerLName");
-					 String customerAddress = rs2.getString("customerPStreetAddress");
-					 String customerSuburb 	= rs2.getString("customerPSuburb");
-					 String customerPostCode= rs2.getString("customerPostCode");
-					 String customerPhone 	= rs2.getString("customerPhone");
-					 String customerMobile 	= rs2.getString("customerMobile");
-					 String customerEmail 	= rs2.getString("customerEmail");
-					 String streetAddress 	= rs2.getString("customerSStreetAddress");
-					 String suburb 			= rs2.getString("customerSSuburb");					 						
+		try {
+			while(rs2.next()){
+				String customerFName 	= rs2.getString("customerFName");
+				String customerLName 	= rs2.getString("customerLName");
+				String customerAddress = rs2.getString("customerPStreetAddress");
+				String customerSuburb 	= rs2.getString("customerPSuburb");
+				String customerPostCode= rs2.getString("customerPostCode");
+				String customerPhone 	= rs2.getString("customerPhone");
+				String customerMobile 	= rs2.getString("customerMobile");
+				String customerEmail 	= rs2.getString("customerEmail");
+				String streetAddress 	= rs2.getString("customerSStreetAddress");
+				String suburb 			= rs2.getString("customerSSuburb");					 						
 
-					 fNameTxtBx.setText(customerFName);
-					 lNameTxtBx.setText(customerLName);			 
-					 homeNumTxtBx.setText(customerPhone);
-					 mobileNumTxtBx.setText(customerMobile);
-					 emailTxtBx.setText(customerEmail);
-					 pAddrTxtBx.setText(customerAddress);
-					 pSuburbTxtBx.setText(customerSuburb);
-					 pAreaCodeTxtBx.setText(customerPostCode);
-					 sAddrTxtBx.setText(streetAddress);
-					 sSuburbTxtBx.setText(suburb);
-					 
-					 //consentTxtBx.setText(consent);
-
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				fNameTxtBx.setText(customerFName);
+				lNameTxtBx.setText(customerLName);			 
+				homeNumTxtBx.setText(customerPhone);
+				mobileNumTxtBx.setText(customerMobile);
+				emailTxtBx.setText(customerEmail);
+				pAddrTxtBx.setText(customerAddress);
+				pSuburbTxtBx.setText(customerSuburb);
+				pAreaCodeTxtBx.setText(customerPostCode);
+				sAddrTxtBx.setText(streetAddress);
+				sSuburbTxtBx.setText(suburb);
 			}
-
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	} 
+
+	protected void resetTable() {
+		ResultSet rs = sp.getResults(0);
+		salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+		//spaceHeader(columnModel, columnWidth);
+		//sentChk.setSelected(false);
+		rowSelected=false;
+		param = "";
+	}
 
 	public JTable getSalesTbl(){
 		return salesTbl;
@@ -484,5 +471,76 @@ class CustomerPanel extends JPanel {
 		return errorChk;
 	}
 
+	public void clearFields(){
+		//Set all the text boxes to blank
+		fNameTxtBx.setText("");
+		lNameTxtBx.setText("");
+		homeNumTxtBx.setText("");
+		mobileNumTxtBx.setText("");
+		emailTxtBx.setText("");
+		pAddrTxtBx.setText("");
+		pSuburbTxtBx.setText("");
+		pAreaCodeTxtBx.setText("");
+		pAddChbx.setSelected(false);
+		sAddrTxtBx.setText("");
+		sSuburbTxtBx.setText("");
+	}
+	
+	protected void updateCustomer() {
+		
+		CallableStatement sm = null;
+		try {
+				
+			String update = "{" + upReceived +"(?,?,?,?,?,?,?,?,?)}";	
+		    Connection conn = connecting.CreateConnection(conDeets);	        	   	
+		
+		    sm = conn.prepareCall(update);
+			
+		    sm.setString(1, param);
+		    sm.setString(2, getFName());
+		    sm.setString(3, getLName());
+		    sm.setString(4, getPhone());
+		    sm.setString(5, getMobile());
+		    sm.setString(6, getEmail());
+		    sm.setString(7, getPAddr());
+		    sm.setString(8, getPSuburb());
+		    sm.setString(9, getPAreaCode());
+			
+		    sm.executeUpdate();
+		    }
+	        catch (SQLServerException sqex)
+	        {
+	           	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+	        }
+	        catch(Exception ex)
+	        { 
+	           JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+	        }			
+	}
 
+	
+	public String getFName(){
+		return fNameTxtBx.getText();
+	}
+	public String getLName(){
+		return lNameTxtBx.getText();
+	}
+	public String getPhone(){
+		return homeNumTxtBx.getText();
+	}
+	public String getMobile(){
+		return mobileNumTxtBx.getText();
+	}
+	public String getEmail(){
+		return emailTxtBx.getText();
+	}
+	public String getPAddr(){
+		return pAddrTxtBx.getText();
+	}
+	public String getPSuburb(){
+		return pSuburbTxtBx.getText();
+	}
+	public String getPAreaCode(){
+		return pAreaCodeTxtBx.getText();
+	}
 }

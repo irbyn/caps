@@ -16,6 +16,7 @@ import javax.swing.table.TableColumnModel;
 
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
+import Main.Homescreen;
 import Sales.CustomerPanel;
 import Sales.EstimationPanel;
 import Sales.FollowUpPanel;
@@ -26,7 +27,7 @@ import net.proteanit.sql.DbUtils;
 public class SalesPane extends JPanel
 {
 	private CreateConnection connecting;
-
+	private Homescreen hs;
 	private ConnDetails conDeets;
 
 	private ResultSet results;
@@ -50,9 +51,9 @@ public class SalesPane extends JPanel
 			"EXEC AWS_WCH_DB.dbo.s_SalesQuote", // procedure[3]
 			"EXEC AWS_WCH_DB.dbo.s_SalesFollowUp"};// procedure[4]
 
-	public SalesPane(ConnDetails conDeets)
+	public SalesPane(ConnDetails conDeets, Homescreen hs)
 	{
-		
+		this.hs = hs;
 		this.conDeets = conDeets;
 
 		lockForm = false;
@@ -213,4 +214,8 @@ public class SalesPane extends JPanel
 	        }
         		return qryResults;       		            
         }	
+        
+	    public void showMessage(String msg) {
+	    	hs.showMsg(msg);
+	    }
 }

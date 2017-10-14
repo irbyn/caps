@@ -174,7 +174,7 @@ public class Homescreen extends JFrame {
 
 		// creating new panel objects from the panel classes containing their content
 		schedulePanel = new SchedulePane(conDeets, this); 
-		salesPanel = new SalesPane(conDeets);  
+		salesPanel = new SalesPane(conDeets, this);  
 		installPanel = new InstallsPane(conDeets, this);
 		permitPanel = new PermitPane(conDeets, this);
 		
