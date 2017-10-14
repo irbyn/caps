@@ -37,8 +37,11 @@ import javax.swing.JCheckBox;
 class CustomerPanel extends JPanel {
 	//private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
 	//private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
-	private String qry = "EXEC AWS_WCH_DB.dbo.[s_CustomerDetails] ";
+	private String qryCustDetails = "EXEC AWS_WCH_DB.dbo.[s_CustomerDetails] ";
 	private String upReceived = "call AWS_WCH_DB.dbo.s_SalesUpdateCustomer";
+	private String qryFNSearch = "EXEC AWS_WCH_DB.dbo.[s_SalesSearchFNCustomer]";
+	private String qryLNSearch = "EXEC AWS_WCH_DB.dbo.[s_SalesSearchLNCustomer]";
+	private String qryFNLNSearch = "call AWS_WCH_DB.dbo.s_SalesSearchFNLNCustomer";
 	private String param = "";  
 	private ResultSet rs;
 	private ResultSet rs2;
@@ -47,13 +50,17 @@ class CustomerPanel extends JPanel {
 
 	private JTableHeader header;
 	private TableColumnModel columnModel;
+	private JPanel searchPanel;
 	private JPanel tablePanel;
 	private JPanel infoPanel;
 	private JTable salesTbl;
 	private DefaultTableModel model1;
 	private Boolean rowSelected;
 	private ConnDetails conDets;
-
+	
+	private JTextField mobileNumTxtBx;
+	private JTextField sFNameTxtBx;
+	private JTextField sLNameTxtBx;
 	private JTextField fNameTxtBx;
 	private JTextField lNameTxtBx;
 	private JTextField homeNumTxtBx;
@@ -76,13 +83,20 @@ class CustomerPanel extends JPanel {
 	private JLabel postAddrlbl; 
 	private JLabel sSuburblbl;
 	private JLabel sAddrlbl;
+	private JLabel searchLbl;
+	private JLabel sFNameLbl;
+	private JLabel sLNameLbl;
 	private JCheckBox pAddChbx;
+	private JButton btnSearch;
 	private JButton searchCustBtn;
 	private JButton cancelBtn;
+	private JButton updateBtn;
 	private JButton createCustBtn;
-	private JTextField mobileNumTxtBx;
+
 	private SalesPane sp;
 	private ConnDetails conDeets;
+	private JButton clearSchBtn;
+
 
 	public CustomerPanel(ConnDetails conDeets, SalesPane sp) {
 		this.sp = sp;
@@ -102,10 +116,95 @@ class CustomerPanel extends JPanel {
 		header= salesTbl.getTableHeader();
 		columnModel = header.getColumnModel();
 		add(header); 
-
+		
+		searchPanel = new JPanel();
+		searchPanel.setBounds(0, 0, 611, 77);
+		searchPanel.setLayout(null);
+		
+		//Search Panel contents
+		searchLbl = new JLabel("Search");
+		searchLbl.setFont(new Font("Arial", Font.BOLD, 20));
+		searchLbl.setBounds(20, 11, 122, 20);
+		searchPanel.add(searchLbl);
+		
+		sFNameLbl = new JLabel("First Name:");
+		sFNameLbl.setBounds(20, 42, 68, 14);
+		searchPanel.add(sFNameLbl);
+		
+		sLNameLbl = new JLabel("Last Name:");
+		sLNameLbl.setBounds(318, 42, 68, 14);
+		searchPanel.add(sLNameLbl);
+		
+		sFNameTxtBx = new JTextField();
+		sFNameTxtBx.setBounds(87, 39, 210, 20);
+		searchPanel.add(sFNameTxtBx);
+		sFNameTxtBx.setColumns(10);
+		
+		sLNameTxtBx = new JTextField();
+		sLNameTxtBx.setColumns(10);
+		sLNameTxtBx.setBounds(385, 39, 210, 20);
+		searchPanel.add(sLNameTxtBx);
+		
+		btnSearch = new JButton("Search");
+		btnSearch.setBounds(472, 6, 120, 25);
+		searchPanel.add(btnSearch);
+		btnSearch.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0){
+				//If both first name and last name fields have content search db for both FN and LN
+				if (!sFNameTxtBx.getText().equals("") && !sLNameTxtBx.getText().equals("")){
+					CallableStatement sm = null;
+					try {					
+						String fLNQry = "{" + qryFNLNSearch +"(?,?)}";	
+						Connection conn = connecting.CreateConnection(conDeets);	        	   	
+						sm = conn.prepareCall(fLNQry);
+						sm.setString(1, sFNameTxtBx.getText());
+						sm.setString(2, sLNameTxtBx.getText());
+						ResultSet qryResults = sm.executeQuery();
+						rs = qryResults;
+						salesTbl.setModel(DbUtils.resultSetToTableModel(rs));
+					}catch (SQLServerException sqex){
+						JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+					}catch(Exception ex){ 
+						JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+					}		
+				}
+				//Otherwise if just FN has text search db with FN
+				else if (!sFNameTxtBx.getText().equals("") && sLNameTxtBx.getText().equals("")){
+					rs = sp.getDetails(qryFNSearch, sFNameTxtBx.getText());
+					salesTbl.setModel(DbUtils.resultSetToTableModel(rs));
+				}
+				//Otherwise just search by last name
+				else if (sFNameTxtBx.getText().equals("") && !sLNameTxtBx.getText().equals("")){
+					rs = sp.getDetails(qryLNSearch, sLNameTxtBx.getText());
+					salesTbl.setModel(DbUtils.resultSetToTableModel(rs));
+				}else {
+					JOptionPane.showMessageDialog(null, "You must enter either a first name \nor last name to search.");
+				}
+				//salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+				//spaceHeader(columnModel, columnWidth);
+				//sentChk.setSelected(false);
+				rowSelected=false;
+				param = "";					
+			}
+		});
+		
+		
+		clearSchBtn = new JButton("Clear Search");
+		clearSchBtn.setBounds(328, 6, 120, 25);
+		searchPanel.add(clearSchBtn);
+		clearSchBtn.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0){
+				resetTable();
+				sFNameTxtBx.setText("");
+				sLNameTxtBx.setText("");
+			}
+			});
+		
 		//Panel for the table
 		tablePanel = new JPanel();
-		tablePanel.setBounds(10, 10, 601, 560);      
+		tablePanel.setBounds(10, 78, 601, 494);      
 		tablePanel.setLayout(new BorderLayout());
 		tablePanel.add(scrollPane, BorderLayout.CENTER);
 		tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
@@ -250,7 +349,7 @@ class CustomerPanel extends JPanel {
 		infoPanel.add(searchCustBtn);*/
 
 		cancelBtn = new JButton("Cancel");
-		cancelBtn.setBounds(22, 533, 135, 25);
+		cancelBtn.setBounds(22, 533, 120, 25);
 		infoPanel.add(cancelBtn);
 		cancelBtn.addActionListener(new ActionListener(){
 			@Override
@@ -265,16 +364,16 @@ class CustomerPanel extends JPanel {
 					if(dialogResult == JOptionPane.YES_OPTION){
 						resetTable();
 						clearFields();
-
+						createCustBtn.setEnabled(true);
 					}
 				}
 			}
 		});
-
-		createCustBtn = new JButton("Create Customer");
-		createCustBtn.setBounds(276, 533, 135, 25);
-		infoPanel.add(createCustBtn);
-		createCustBtn.addActionListener( new ActionListener()
+		
+		updateBtn = new JButton("Update");
+		updateBtn.setBounds(152, 534, 120, 25);
+		infoPanel.add(updateBtn);
+		updateBtn.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -288,24 +387,53 @@ class CustomerPanel extends JPanel {
 							if(dialogResult == JOptionPane.YES_OPTION){
 								// Saving code here -- add customer to the database
 								sp.showMessage("Updating Consent Received");
-			        			updateCustomer();
-			        			resetTable();
-			        			clearFields();
+								updateCustomer();
+								resetTable();
+								clearFields();
+								createCustBtn.setEnabled(true);
 							}
 						}
 					}
 				}					
 			}
 		});
-		this.setLayout(null);
-		this.add(tablePanel); 
-		this.add(infoPanel);
 
+		createCustBtn = new JButton("Create Customer");
+		createCustBtn.setBounds(276, 533, 120, 25);
+		infoPanel.add(createCustBtn);
+		createCustBtn.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				{ 
+					//If validate data is false then there is no error
+					if (validatedata() == false){
+						//Check to see if the user is sure about creating the customer
+						int dialogButton = JOptionPane.YES_NO_OPTION;
+						int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to create this customer","Warning",dialogButton);
+						if(dialogResult == JOptionPane.YES_OPTION){
+							// Saving code here -- add customer to the database
+							sp.showMessage("Updating Consent Received");
+							//createCustomer();
+							resetTable();
+							clearFields();
+						}
+
+					}
+				}					
+			}
+		});
+		
+		this.setLayout(null);
+		this.add(searchPanel);
+		this.add(tablePanel); 
+		this.add(infoPanel);		
 		salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {
 				if (!arg0.getValueIsAdjusting()){
 					rowSelected=true;
+					createCustBtn.setEnabled(false);
 					try{
 						//Get the customer ID as a paramater to feed into the SQL procedure 
 						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
@@ -323,7 +451,7 @@ class CustomerPanel extends JPanel {
 	}
 
 	private void displayClientDetails(String parameter) {
-		rs2 = sp.getDetails(qry, param);
+		rs2 = sp.getDetails(qryCustDetails, param);
 		try {
 			while(rs2.next()){
 				String customerFName 	= rs2.getString("customerFName");
@@ -354,6 +482,7 @@ class CustomerPanel extends JPanel {
 		}
 	} 
 
+	
 	protected void resetTable() {
 		ResultSet rs = sp.getResults(0);
 		salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
@@ -485,40 +614,42 @@ class CustomerPanel extends JPanel {
 		sAddrTxtBx.setText("");
 		sSuburbTxtBx.setText("");
 	}
-	
+
 	protected void updateCustomer() {
-		
+
 		CallableStatement sm = null;
 		try {
-				
-			String update = "{" + upReceived +"(?,?,?,?,?,?,?,?,?)}";	
-		    Connection conn = connecting.CreateConnection(conDeets);	        	   	
-		
-		    sm = conn.prepareCall(update);
-			
-		    sm.setString(1, param);
-		    sm.setString(2, getFName());
-		    sm.setString(3, getLName());
-		    sm.setString(4, getPhone());
-		    sm.setString(5, getMobile());
-		    sm.setString(6, getEmail());
-		    sm.setString(7, getPAddr());
-		    sm.setString(8, getPSuburb());
-		    sm.setString(9, getPAreaCode());
-			
-		    sm.executeUpdate();
-		    }
-	        catch (SQLServerException sqex)
-	        {
-	           	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
-	        }
-	        catch(Exception ex)
-	        { 
-	           JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
-	        }			
+
+			String update = "{" + upReceived +"(?,?,?,?,?,?,?,?,?,?,?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+
+			sm = conn.prepareCall(update);
+
+			sm.setString(1, param);
+			sm.setString(2, getFName());
+			sm.setString(3, getLName());
+			sm.setString(4, getPhone());
+			sm.setString(5, getMobile());
+			sm.setString(6, getEmail());
+			sm.setString(7, getPAddr());
+			sm.setString(8, getPSuburb());
+			sm.setString(9, getPAreaCode());
+			sm.setString(10, getSAddr());
+			sm.setString(11, getSSuburb());
+
+			sm.executeUpdate();
+		}
+		catch (SQLServerException sqex)
+		{
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}			
 	}
 
-	
+
 	public String getFName(){
 		return fNameTxtBx.getText();
 	}
@@ -542,5 +673,11 @@ class CustomerPanel extends JPanel {
 	}
 	public String getPAreaCode(){
 		return pAreaCodeTxtBx.getText();
+	}
+	public String getSAddr(){
+		return sAddrTxtBx.getText();
+	}
+	public String getSSuburb(){
+		return sSuburbTxtBx.getText();
 	}
 }

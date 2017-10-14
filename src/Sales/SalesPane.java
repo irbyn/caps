@@ -196,9 +196,23 @@ public class SalesPane extends JPanel
 	    		return results;       		            
 	    }
 	    
+	    public ResultSet getSearchResults(String qry, String param){      		
+	        try
+	        {
+	        	Connection conn = connecting.CreateConnection(conDeets);
+	        	PreparedStatement st =conn.prepareStatement(qry + param);
+	        	results = st.executeQuery();    	
+	        }
+	        catch(Exception ex)
+	        { 
+	        JOptionPane.showMessageDialog(null, ex.toString());
+	        }
+	    		return results;       		            
+	    }
+	    
         //Get the results set for the customer details
         public ResultSet getDetails(String qry, String param){      	
-        	
+        	System.out.println(qry);
             try
 	        {
 	        	Connection conn = connecting.CreateConnection(conDeets);
