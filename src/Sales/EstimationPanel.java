@@ -166,7 +166,7 @@ class EstimationPanel extends JPanel {
 		SimpleDateFormat dt = new SimpleDateFormat("dd.MMM.yyyy");
 		spnTimeDate = new JSpinner(new SpinnerDateModel());
 		spnTimeDate.setEditor(new JSpinner.DateEditor(spnTimeDate, dt.toPattern()));
-		spnTimeDate.setBounds(681, 96, 335, 20);
+		spnTimeDate.setBounds(755, 96, 261, 20);
 		infoPanel.add(spnTimeDate);
 
 		chckBxSChkComp = new JCheckBox("Site Check Completed");
@@ -313,7 +313,6 @@ class EstimationPanel extends JPanel {
 			errorChk = true;
 			error = error + "PRICE: can only contain numbers\n";
 		}
-
 	}
 
 	public Boolean checkTxtBx(){
