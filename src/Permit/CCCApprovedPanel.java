@@ -68,6 +68,7 @@ class CCCApprovedPanel extends JPanel {
 	private JTableHeader hd;
 	private TableColumnModel cm;
 	private DefaultTableModel model2;
+
 	
 	private JPanel tablePanel;
 	private JPanel infoPanel;
@@ -338,10 +339,7 @@ class CCCApprovedPanel extends JPanel {
 		rowSelected=false;
 		param = "";
 		detailsTxtArea.setText("");
-		int cccRows = model2.getRowCount();
-		for (int i = 0;i<cccRows;i++){
-			model2.removeRow(0);
-		}
+		model2.setRowCount(0);
 }		
     
 		private void displayClientDetails(String parameter) {

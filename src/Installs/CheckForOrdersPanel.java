@@ -57,7 +57,7 @@ class CheckForOrdersPanel extends JPanel {
 	
 	private int [] columnWidth = {20, 150, 150, 100, 100, 100, 100, 100}; 	
 	private String getSaleID = "EXEC AWS_WCH_DB.dbo.[i_InstallsGetSaleID] ";
-	private String upStkList = "{Call AWS_WCH_DB.dbo.[i_InstallsUpdateFire] (?,?,?)}";
+	private String upStkList = "{Call AWS_WCH_DB.dbo.[i_InstallsUpdateFire] (?,?,?,?)}";
 	private String upStkItem = "{Call AWS_WCH_DB.dbo.[i_InstallsUpdateItems] (?,?,?,?)}";
 	private String folder = "//C:/pdfs/Invoice/";	
 	private String invPfx = "INV_";
@@ -385,6 +385,7 @@ protected void updateStockList() {
 	    pm.setString(1, invoiceNum);
 	    pm.setString(2, getFireCode());
 	    pm.setString(3,	getStockList());
+	    pm.setInt(4, omodel.getRowCount());
 	    
 	    pm.executeUpdate();
 	    }
@@ -426,9 +427,13 @@ protected void updateStockItem() {
 }
 
 protected void saveStockLines() {
-	   if(rowSelected){
-			int rows = 0;
-			int rowNum = 0;
+	   if(rowSelected)
+	   {
+		   if(getFireCode().equals("") || getFireCode().equals(null) ){
+			   ip.showMessage("Please Indicate Fire before Saving!");
+		   }else{
+		   int rows = 0;
+		   int rowNum = 0;
 		   stkItems = "";					   
 		   qt = ""; 
 		   code = "";
@@ -441,22 +446,26 @@ protected void saveStockLines() {
 			   dsc = model2.getValueAt(i, 2).toString(); 
 			   stkItems = stkItems + qt + " x " + dsc + "\n" ;
 		   }
+//		   JOptionPane.showMessageDialog(null, stkItems);
 		   updateStockList();
+		   
 		   qt = ""; 
 		   code = "";
 		   dsc = "";
 		   rows = omodel.getRowCount();
+//		   JOptionPane.showMessageDialog(null,  "ROW: " + rows);
 		   for (int i = 0 ; i< rows ; i++){
-			   
+
 			   rowNum = (Integer.parseInt(omodel.getValueAt(i, 0).toString())-1);
-			   
+//			   JOptionPane.showMessageDialog(null,  "ROW num: " + rowNum);
 			   qt = model2.getValueAt(rowNum, 0).toString(); 
 			   code = model2.getValueAt(rowNum, 1).toString(); 
-			   dsc = model2.getValueAt(rowNum, 2).toString();
-			   
+			   dsc = model2.getValueAt(rowNum, 2).toString();			   
+//			   JOptionPane.showMessageDialog(null,  "[" + qt + "] [" + code + "] [" + dsc + "]");
 			   updateStockItem();
-			   resetTable();
-		   }					   
+		   }	
+		   resetTable();
+		   }
 	   }	
 }
 
@@ -465,6 +474,7 @@ protected void recordFire() {
 		fireTxtBx.setText(stockTbl.getValueAt(stockTbl.getSelectedRow(), 1).toString());
 	}
 }
+
 protected void orderStock(int row) {
 	int lineNum = row + 1;//getValueAtrow(row, 0).toString();
 	String desc = stockTbl.getValueAt(row, 2).toString();

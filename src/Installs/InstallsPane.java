@@ -49,12 +49,18 @@ public class InstallsPane extends JPanel
 		private String custDetails = "EXEC AWS_WCH_DB.dbo.p_CustomerDetails";				
 
 // Stored procedures to fill tables (Triggered by tab selection)
-private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.i_InstallsToLoad", // procedure[0]
-											"EXEC AWS_WCH_DB.dbo.i_InstallsToCheck", // procedure[1]
-											"EXEC AWS_WCH_DB.dbo.i_InstallsPlaceOrders", // procedure[2]
-											"EXEC AWS_WCH_DB.dbo.i_InstallsReceiveOrders", // procedure[3]
-											"EXEC AWS_WCH_DB.dbo.i_InstallsToBook"};// procedure[4]
+private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.i_InstallsToLoad", 	// procedure[0]
+											"EXEC AWS_WCH_DB.dbo.i_InstallsToCheck", 	// procedure[1]
+											"EXEC AWS_WCH_DB.dbo.i_InstallsPlaceOrders",// procedure[2]
+											"EXEC AWS_WCH_DB.dbo.i_InstallsReceiveOrders",//procedure[3]
+											"EXEC AWS_WCH_DB.dbo.i_InstallsToBook"};	// procedure[4]
 
+private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// procedure[0]
+										 {30, 100, 120, 80, 40, 40, 40, 40},	 		// procedure[1]
+										 {20, 100, 120, 20, 80, 400}, 					// procedure[2]
+										 {30, 100, 120, 80, 40, 40, 40, 40, 40}, 		// procedure[3]
+										 {30, 100, 120, 80, 40, 40, 40, 40, 40}};		// procedure[4]
+		
 
 	public InstallsPane(ConnDetails conDeets, Homescreen hs)
     {   
@@ -76,7 +82,7 @@ private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.i_InstallsToLoad
 		
 		 JTable[] tablez = new JTable[]{loadDocPnl.getPermitsTbl(), 
 				 						checkOrderPnl.getPermitsTbl(), 
-				 						placeOrderPnl.getPermitsTbl(),  
+				 						placeOrderPnl.getInstTbl(),  
 				 						recvOrderPnl.getPermitsTbl(), 
 				 						bookingPnl.getPermitsTbl()};
 
@@ -104,24 +110,11 @@ private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.i_InstallsToLoad
                     // add ResultSet into Selected Tab JTable.
                     tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));               
                     TableColumnModel tcm = tablez[tabIndex].getColumnModel();
-                     int cols = tcm.getColumnCount();
 
-                     if (cols == 7){
-                    	 int[] colWidths = new int[]{20, 150, 150, 100, 100, 100, 100}; 
-                    	 spaceHeader(colWidths, tcm);
-                     } else if (cols == 8){
-                    	 int[] colWidths = new int[]{20, 150, 150, 100, 100, 100, 100, 100};   
-                    	 spaceHeader(colWidths, tcm);                         
-                     } else if (cols == 9){
-                        	 int[] colWidths = new int[]{30, 100, 120, 80, 40, 40, 40, 40, 40};   
-                        	 spaceHeader(colWidths, tcm);
-                     }else {
-                    	 int[] colWidths = new int[]{20, 80, 100, 80, 30, 30, 40, 40, 60, 30, 30};    
-                    	 spaceHeader(colWidths, tcm);
-                     }
+                     spaceHeader(spacing[tabIndex], tcm);
+                     
                 }
                 }
-//            }
         });   		
     }
     

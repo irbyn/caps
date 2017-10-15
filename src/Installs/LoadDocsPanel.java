@@ -27,6 +27,7 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.DropMode;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -142,6 +143,9 @@ class LoadDocsPanel extends JPanel {
 	
 	private CreateConnection conn;
 	
+	private ImageIcon fll;
+	private ImageIcon pic;
+	
 	private Boolean lockForm;
 	private ConnDetails conDeets;
 	private InstallsPane ip;
@@ -154,10 +158,13 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 		this.ip = ipn;
 
 		connecting = new CreateConnection();
+		fll = new ImageIcon(getClass().getResource("pdf.png"));
+		pic = new ImageIcon(getClass().getResource("pictures.png"));
 		  	
 	    model1 = new DefaultTableModel();  
 	    model1.setRowCount(0);
 	    permitsTbl = new JTable(model1);
+
 	    permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	    permitsTbl.setAutoCreateRowSorter(true);
       
@@ -184,7 +191,7 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 	    infoPanel.add(detailsTxtArea);
       
 	    invPanel = new JPanel();
-	    invPanel.setBounds(405, 20, 200, 135); 
+	    invPanel.setBounds(405, 20, 200, 210); 
 	    invPanel.setOpaque(true);
 	    invPanel.setVisible(true);
 	    invPanel.setLayout(null);
@@ -199,16 +206,16 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 	    invSP = new javax.swing.JScrollPane(invDZ);
 	    invSP.setBounds(0, 0, 200, 100);
 	    invPanel.add(invSP);
-      
-	    viewInvBtn = new JButton("View");
-	    viewInvBtn.setBounds(0, 110, 95, 25);
+
+	    viewInvBtn = new JButton(fll);
+	    viewInvBtn.setBounds(0, 110, 40, 40);
 	    invPanel.add(viewInvBtn);
-	    removeInvBtn = new JButton("Remove");
-	    removeInvBtn.setBounds(105, 110, 95, 25);
+	    removeInvBtn = new JButton("Remove Invoice");
+	    removeInvBtn.setBounds(50, 110, 150, 25);
 	    invPanel.add(removeInvBtn);
       
 	    sitePanel = new JPanel();
-	    sitePanel.setBounds(625, 20, 200, 135); 
+	    sitePanel.setBounds(625, 20, 200, 210); 
 	    sitePanel.setOpaque(true);
 	    sitePanel.setVisible(true);
 	    sitePanel.setLayout(null);
@@ -224,15 +231,15 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 	    siteSP.setBounds(0, 0, 200, 100);
 	    sitePanel.add(siteSP);
       
-	    viewSiteBtn = new JButton("View");
-	    viewSiteBtn.setBounds(0, 110, 95, 25);
+	    viewSiteBtn = new JButton(fll);
+	    viewSiteBtn.setBounds(0, 110, 40, 40);
 	    sitePanel.add(viewSiteBtn);
-	    removeSiteBtn = new JButton("Remove");
-	    removeSiteBtn.setBounds(105, 110, 95, 25);
+	    removeSiteBtn = new JButton("Remove SiteCheck");
+	    removeSiteBtn.setBounds(50, 110, 150, 25);
 	    sitePanel.add(removeSiteBtn);
       
 	    photoPanel = new JPanel();
-	    photoPanel.setBounds(845, 20, 200, 135); 
+	    photoPanel.setBounds(845, 20, 200, 210); 
 	    photoPanel.setOpaque(true);
 	    photoPanel.setVisible(true);
 	    photoPanel.setLayout(null);
@@ -247,11 +254,11 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
       	photoSP.setBounds(0, 0, 200, 100);
       	photoPanel.add(photoSP);
       
-      	viewPhotoBtn = new JButton("View");
-      	viewPhotoBtn.setBounds(0, 110, 95, 25);
+      	viewPhotoBtn = new JButton(pic);
+      	viewPhotoBtn.setBounds(0, 110, 40, 40);
       	photoPanel.add(viewPhotoBtn);
-      	removePhotoBtn = new JButton("Remove");
-      	removePhotoBtn.setBounds(105, 110, 95, 25);
+      	removePhotoBtn = new JButton("Remove Photo");
+      	removePhotoBtn.setBounds(50, 110, 150, 25);
       	photoPanel.add(removePhotoBtn);
       
       	cancelPermitReqBtn = new JButton("Cancel");
