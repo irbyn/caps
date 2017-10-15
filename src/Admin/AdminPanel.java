@@ -35,20 +35,19 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
-import Permit.PermitPane;
-//import Permit.PermitsReqPanel;
+import Main.Homescreen;
 import net.proteanit.sql.DbUtils;
-
-import javax.swing.JComboBox;
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JPasswordField;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
 
 public class AdminPanel extends JFrame {
 	private String qryList = new String("EXEC AWS_WCH_DB.dbo.[a_UserList]");
 	private String qryDetails = new String("EXEC AWS_WCH_DB.dbo.[a_UserDetails]");
+	private String upUser = "call AWS_WCH_DB.dbo.a_UpdateUser";
 	private String param = "";  
+	private Homescreen hs;
 
 	//private String dbURL = "";
 	private ResultSet rs;
@@ -97,12 +96,14 @@ public class AdminPanel extends JFrame {
 	private JTextField councNumtxtBx;
 	private JTextField reeseNumbtxtBx;
 	private JCheckBox chckbxAccAct;
+	private JComboBox<String> roleTypeCmbBx;
 
 	private JLabel lblAbilities; 
 	private JCheckBox chckbxSCheck ;
 	private JCheckBox chckbxInstaller; 
 	private JCheckBox chckbxSales;
 	private JLabel lblNZHHANumb;
+	private JLabel roleTypelbl;
 
 	private ConnDetails conDeets;
 
@@ -116,6 +117,8 @@ public class AdminPanel extends JFrame {
 	private JTextField mobileTxtBx;
 	private JButton saveUserBtn;
 	private Boolean rowSelected;
+	private JLabel ranklbl;
+	private JTextField rankTxtBx;
 
 	public AdminPanel(String User, String Pass){
 		rowSelected = false;
@@ -124,9 +127,9 @@ public class AdminPanel extends JFrame {
 
 		//PASS THE LOGIN DETAILS TO Class connectionDetails
 		conDeets = new ConnDetails(user, pass);
-		
-		
-		
+
+
+
 		getContentPane().setLayout(null);
 		setPreferredSize(new Dimension(1100, 700));
 		setResizable(false);
@@ -223,31 +226,41 @@ public class AdminPanel extends JFrame {
 		emailtxtBx.setBounds(121, 277, 201, 24);
 		infoPanel.add(emailtxtBx);
 		emailtxtBx.setColumns(10);
-
+		
+		roleTypeCmbBx = new JComboBox<String> ();
+		roleTypeCmbBx.setModel(new DefaultComboBoxModel<String>(new String[] {"Salesperson", "Installer", "Admin", "Shop"}));
+		roleTypeCmbBx.setBackground(Color.WHITE);
+		roleTypeCmbBx.setBounds(498, 22, 199, 20);
+		infoPanel.add(roleTypeCmbBx);
+		
+		roleTypelbl = new JLabel("Role Type");
+		roleTypelbl.setBounds(359, 28, 118, 14);
+		infoPanel.add(roleTypelbl);
+		
 		pAddrlbl = new JLabel("Postal Street Address:");
-		pAddrlbl.setBounds(359, 28, 134, 15);
+		pAddrlbl.setBounds(359, 65, 134, 15);
 		infoPanel.add(pAddrlbl);
 
 		pAddrtxtBx = new JTextField();
-		pAddrtxtBx.setBounds(496, 22, 201, 24);
+		pAddrtxtBx.setBounds(496, 60, 201, 24);
 		infoPanel.add(pAddrtxtBx);
 		pAddrtxtBx.setColumns(10);
 
 		pSuburblbl = new JLabel("Postal Suburb:");
-		pSuburblbl.setBounds(359, 74, 118, 15);
+		pSuburblbl.setBounds(359, 100, 118, 15);
 		infoPanel.add(pSuburblbl);
 
 		pSuburbtxtbx = new JTextField();
-		pSuburbtxtbx.setBounds(496, 72, 201, 24);
+		pSuburbtxtbx.setBounds(496, 95, 201, 24);
 		infoPanel.add(pSuburbtxtbx);
 		pSuburbtxtbx.setColumns(10);
 
 		pAreaCodelbl = new JLabel("Post Code:");
-		pAreaCodelbl.setBounds(359, 127, 118, 15);
+		pAreaCodelbl.setBounds(359, 150, 118, 15);
 		infoPanel.add(pAreaCodelbl);
 
 		pAreaCodetxtBx = new JTextField();
-		pAreaCodetxtBx.setBounds(496, 122, 201, 24);
+		pAreaCodetxtBx.setBounds(496, 141, 201, 24);
 		infoPanel.add(pAreaCodetxtBx);
 		pAreaCodetxtBx.setColumns(10);
 
@@ -277,26 +290,35 @@ public class AdminPanel extends JFrame {
 		rePassLbl.setBounds(359, 277, 134, 14);
 		infoPanel.add(rePassLbl);
 
+		ranklbl = new JLabel("Ranked Number");
+		ranklbl.setBounds(737, 28, 109, 14);
+		infoPanel.add(ranklbl);
+		
+		rankTxtBx = new JTextField();
+		rankTxtBx.setBounds(857, 25, 201, 20);
+		infoPanel.add(rankTxtBx);
+		rankTxtBx.setColumns(10);
+		
 		JLabel councNumblbl = new JLabel("Council Number:");
-		councNumblbl.setBounds(738, 27, 95, 14);
+		councNumblbl.setBounds(740, 65, 95, 14);
 		infoPanel.add(councNumblbl);
 
 		councNumtxtBx = new JTextField();
-		councNumtxtBx.setBounds(857, 22, 201, 24);
+		councNumtxtBx.setBounds(857, 56, 201, 24);
 		infoPanel.add(councNumtxtBx);
 		councNumtxtBx.setColumns(10);
 
 		reesNumLbl = new JLabel("Rees Number:");
-		reesNumLbl.setBounds(738, 76, 108, 14);
+		reesNumLbl.setBounds(739, 95, 108, 14);
 		infoPanel.add(reesNumLbl);
 
 		reeseNumbtxtBx = new JTextField();
 		reeseNumbtxtBx.setColumns(10);
-		reeseNumbtxtBx.setBounds(857, 71, 201, 24);
+		reeseNumbtxtBx.setBounds(857, 90, 201, 24);
 		infoPanel.add(reeseNumbtxtBx);
 
 		chckbxAccAct = new JCheckBox("Active Account");
-		chckbxAccAct.setBounds(26, 70, 134, 23);
+		chckbxAccAct.setBounds(211, 24, 134, 23);
 		infoPanel.add(chckbxAccAct);
 
 		modifyUserBtn = new JButton("Modify");
@@ -305,7 +327,15 @@ public class AdminPanel extends JFrame {
 		modifyUserBtn.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0){
+				int number = adminTbl.getSelectedRow();
+				if (number != -1){
+				createUserBtn.setEnabled(false);
+				saveUserBtn.setEnabled(false);
 				enableFields();
+				} else{
+					JOptionPane.showMessageDialog(null, "You must first select a row");
+				}
+				
 			}
 		});
 
@@ -315,7 +345,11 @@ public class AdminPanel extends JFrame {
 		updateBtn.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0){
+				//showMessage("Updating Consent Received");
+				updateUser();
 				disableFields();
+				clearFields();
+				resetTable();
 			}
 		});
 
@@ -329,9 +363,10 @@ public class AdminPanel extends JFrame {
 					int dialogButton = JOptionPane.YES_NO_OPTION;
 					int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to cancel?","Warning",dialogButton);
 					if(dialogResult == JOptionPane.YES_OPTION){
-						resetTable();
+
 						clearFields();
 						disableFields();
+						resetTable();
 					}
 				}
 			}
@@ -358,7 +393,6 @@ public class AdminPanel extends JFrame {
 				disableFields();
 			}
 		});
-
 
 		mobileLbl = new JLabel("Mobile:");
 		mobileLbl.setBounds(26, 242, 46, 14);
@@ -396,9 +430,9 @@ public class AdminPanel extends JFrame {
 
 		disableFields();
 
-		this.setLayout(null);
-		this.add(tablePanel); 
-		this.add(infoPanel);
+		getContentPane().setLayout(null);
+		getContentPane().add(tablePanel); 
+		getContentPane().add(infoPanel);
 
 		pack();
 	}
@@ -420,8 +454,10 @@ public class AdminPanel extends JFrame {
 				String userCNumber 	= rs2.getString("CouncilNumber");
 				String userReeseNum = rs2.getString("ReesNumber");
 				String userNZHHANum = rs2.getString("NZHHA_Number");
-				//String userActAcc 	= rs2.getString("AccountActive");
-
+				String userActAcc 	= rs2.getString("AccountActive");
+				String userRoleTyp	= rs2.getString("RoleType");
+				String userRankedNum	= rs2.getString("Ranked");
+				
 				fNameTxtBx.setText(userFName);
 				lNameTxtBx.setText(userLName);			 
 				phoneTxtBx.setText(userPhone);
@@ -434,6 +470,26 @@ public class AdminPanel extends JFrame {
 				usertxtBx.setText(userUserName);
 				councNumtxtBx.setText(userCNumber);
 				reeseNumbtxtBx.setText(userReeseNum);
+				rankTxtBx.setText(userRankedNum);
+				if (userActAcc.equals("1")){
+					chckbxAccAct.setSelected(true);
+				}else{
+					chckbxAccAct.setSelected(false);
+				}
+				
+				if (userRoleTyp.equals("Salesperson")){
+					roleTypeCmbBx.setSelectedIndex(0);
+				}else if (userRoleTyp.equals("Installer")){
+					roleTypeCmbBx.setSelectedIndex(1);
+				}else if (userRoleTyp.equals("Admin")){
+					roleTypeCmbBx.setSelectedIndex(2);
+				}else {
+					roleTypeCmbBx.setSelectedIndex(3);
+				}
+				
+				
+				
+				
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -474,14 +530,14 @@ public class AdminPanel extends JFrame {
 		return qryResults;       		            
 	}
 
-	
-	
-	/*protected void updateUser() {
+
+
+	protected void updateUser() {
 
 		CallableStatement stm = null;
 		try {
 
-			String update = "{" + upReceived +"(?,?,?,?,?,?,?,?,?,?,?)}";	
+			String update = "{" + upUser +"(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}";	
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
 
 			stm = conn.prepareCall(update);
@@ -495,10 +551,20 @@ public class AdminPanel extends JFrame {
 			stm.setString(7, getPAddr());
 			stm.setString(8, getPSuburb());
 			stm.setString(9, getPAreaCode());
-			stm.setString(10, getSAddr());
-			stm.setString(11, getSSuburb());
+			stm.setString(10, getNZHHANum());
+			stm.setString(11, getUsername());
+			stm.setString(12, getCouncNum());
+			stm.setInt(13, getReeseNum());
+			stm.setBoolean(14, getSiteCheck());
+			stm.setBoolean(15, getInstall());
+			stm.setBoolean(16, getSell());
+			stm.setInt(17, getRanked());
+			stm.setString(18, getRoleType());
+			stm.setBoolean(19, getAccStatus());
 
-			sm.executeUpdate();
+			
+
+			stm.executeUpdate();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -508,10 +574,10 @@ public class AdminPanel extends JFrame {
 		{ 
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}			
-	}*/
+	}
 
-	
-	
+
+
 	public Boolean checkFields(){
 		Boolean newData = false;
 		if(!fNameTxtBx.getText().equals("") || !lNameTxtBx.getText().equals("") || !phoneTxtBx.getText().equals("") 
@@ -533,7 +599,7 @@ public class AdminPanel extends JFrame {
 		rowSelected=false;
 		param = "";
 	}
-	
+
 	private void validateData(){
 
 	}
@@ -553,6 +619,9 @@ public class AdminPanel extends JFrame {
 		usertxtBx.setEditable(false);
 		councNumtxtBx.setEditable(false);
 		reeseNumbtxtBx.setEditable(false);
+		chckbxAccAct.setEnabled(false);
+		roleTypeCmbBx.setEditable(false);
+		rankTxtBx.setEditable(false);
 	}
 
 	private void enableFields(){
@@ -570,6 +639,9 @@ public class AdminPanel extends JFrame {
 		usertxtBx.setEditable(true);
 		councNumtxtBx.setEditable(true);
 		reeseNumbtxtBx.setEditable(true);
+		chckbxAccAct.setEnabled(true);
+		roleTypeCmbBx.setEditable(true);
+		rankTxtBx.setEditable(true);
 	}
 
 	private void clearFields(){
@@ -587,6 +659,88 @@ public class AdminPanel extends JFrame {
 		usertxtBx.setText("");
 		councNumtxtBx.setText("");
 		reeseNumbtxtBx.setText("");
+		chckbxAccAct.setSelected(false);
+		roleTypeCmbBx.setSelectedIndex(0);
+		rankTxtBx.setText("");
+	}
+
+	public String getFName(){
+		return fNameTxtBx.getText();
+	}
+	public String getLName(){
+		return lNameTxtBx.getText();
+	}
+	public String getPhone(){
+		return phoneTxtBx.getText();
+	}
+	public String getMobile(){
+		return mobileTxtBx.getText();
+	}
+	public String getEmail(){
+		return emailtxtBx.getText();
+	}
+	public String getPAddr(){
+		return pAddrtxtBx.getText();
+	}
+	public String getPSuburb(){
+		return pSuburbtxtbx.getText();
+	}
+	public String getPAreaCode(){
+		return pAreaCodetxtBx.getText();
+	}
+	public String getNZHHANum(){
+		return NZHHANumTxtBx.getText();
+	}
+	public String getUsername(){
+		return usertxtBx.getText();
+	}
+	public String getCouncNum(){
+		return councNumtxtBx.getText();
+	}
+	public int getReeseNum(){
+		return Integer.parseInt(reeseNumbtxtBx.getText());
+	}
+	public Boolean getSiteCheck(){
+		if (chckbxSCheck.isSelected()){
+			return true;
+		}else{
+			return false;
+		}
+		
+	}	
+	public Boolean getInstall(){
+		if (chckbxInstaller.isSelected()){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	public Boolean getSell(){
+		if (chckbxSales.isSelected()){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	public int getRanked(){
+		return Integer.parseInt(rankTxtBx.getText()); 
+	}
+	
+	public String getRoleType(){
+		return (String) roleTypeCmbBx.getSelectedItem();
+	}
+	public boolean getAccStatus(){
+		boolean active;
+		if (chckbxAccAct.isSelected()){
+			active = true;
+		}else{
+			active = false;
+		}
+		return active;
+	}
+
+	public void showMessage(String msg) {
+		hs.showMsg(msg);
 	}
 }
 
