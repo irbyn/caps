@@ -226,46 +226,43 @@ class EstimationPanel extends JPanel {
 		infoPanel.add(btnSave);
 
 		GetJobs job = new GetJobs(conDeets);
-
 		String[] installUr = job.getInstallers();
-
 		/*DefaultComboBoxModel model = new DefaultComboBoxModel( installUr );
-		comBxSChkDoneBy.setModel( model );   
-		 */		String[] SC = job.getSiteChecker();
-		 DefaultComboBoxModel modelSC = new DefaultComboBoxModel( SC );
-		 comBxSChkDoneBy.setModel( modelSC );
-		 /*		DefaultComboBoxModel modelSC = new DefaultComboBoxModel( SC );
+		comBxSChkDoneBy.setModel( model );*/		
+		String[] SC = job.getSiteChecker();
+		DefaultComboBoxModel<String> modelSC = new DefaultComboBoxModel<String>( SC );
+		comBxSChkDoneBy.setModel( modelSC );
+
+		/*DefaultComboBoxModel modelSC = new DefaultComboBoxModel( SC );
 		comBxSlsPerson.setModel( modelSC ); */
 
-		 String[] SELL = job.getSales();
+		String[] SELL = job.getSales();
+		DefaultComboBoxModel<String> modelSELL = new DefaultComboBoxModel<String>( SELL );
+		comBxSlsPerson.setModel( modelSELL ); 
 
-		 DefaultComboBoxModel modelSELL = new DefaultComboBoxModel( SELL );
-		 comBxSlsPerson.setModel( modelSELL ); 
+		this.setLayout(null);
+		this.add(tablePanel); 
+		this.add(infoPanel);
 
-		 this.setLayout(null);
-		 this.add(tablePanel); 
-		 this.add(infoPanel);
+		tablePanel.add(scrollPane, BorderLayout.CENTER);
+		tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
 
-		 tablePanel.add(scrollPane, BorderLayout.CENTER);
-		 tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
+		salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent arg0) {
+				if (!arg0.getValueIsAdjusting()){
+					rowSelected=true;
+					try{
+						//Get the customer ID as a paramater to feed into the SQL procedure 
+						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 1).toString();
+						
+						txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
+					} catch (IndexOutOfBoundsException e){
 
-
-		 salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			 @Override
-			 public void valueChanged(ListSelectionEvent arg0) {
-				 if (!arg0.getValueIsAdjusting()){
-					 rowSelected=true;
-					 try{
-						 //Get the customer ID as a paramater to feed into the SQL procedure 
-						 param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 1).toString();
-						 //displayClientDetails(param);
-						 txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
-					 } catch (IndexOutOfBoundsException e){
-
-					 }
-				 }
-			 }
-		 });
+					}
+				}
+			}
+		});
 	}
 
 	protected void resetTable() {

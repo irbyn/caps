@@ -43,13 +43,13 @@ public class SalesPane extends JPanel
 
 	private Boolean lockForm;
 	private String custDetails = "EXEC AWS_WCH_DB.dbo.s_CustomerDetails";
-	
+
 	// Stored procedures to fill tables (Triggered by tab selection)
 	private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.s_SalesCustomer", // procedure[0]
 			"EXEC AWS_WCH_DB.dbo.s_SalesEstimation", // procedure[1]
 			"EXEC AWS_WCH_DB.dbo.s_SalesSiteCheck", // procedure[2]
 			"EXEC AWS_WCH_DB.dbo.s_SalesQuote", // procedure[3]
-			"EXEC AWS_WCH_DB.dbo.s_SalesFollowUp"};// procedure[4]
+	"EXEC AWS_WCH_DB.dbo.s_SalesFollowUp"};// procedure[4]
 
 	public SalesPane(ConnDetails conDeets, Homescreen hs)
 	{
@@ -71,10 +71,10 @@ public class SalesPane extends JPanel
 		followUp = new FollowUpPanel(conDeets, this);
 
 		JTable[] tablez = new JTable[]{customer.getSalesTbl(), 
-										estimation.getSalesTbl(), 
-										siteCheck.getSalesTbl(), 
-										quote.getSalesTbl(), 
-										followUp.getSalesTbl()};
+				estimation.getSalesTbl(), 
+				siteCheck.getSalesTbl(), 
+				quote.getSalesTbl(), 
+				followUp.getSalesTbl()};
 
 		//Adding tabs to the content panel 
 		salesP.addTab("Customer", customer);
@@ -122,50 +122,48 @@ public class SalesPane extends JPanel
 		});   		
 	}
 
+
+	public void setFormsLocked() {
+		lockForm = true;
+	}	    
+	public void setFormsUnLocked() {
+		lockForm = false;
+	}	  
+
+	private void spaceHeader(int[] widths, TableColumnModel tcm){
+		int cols = tcm.getColumnCount();
+		for (int i = 0; i < cols; i++){
+			tcm.getColumn(i).setPreferredWidth(widths[i]);
+		}
+	}   
 	
-	 public void setFormsLocked() {
-	    	lockForm = true;
-	  }	    
-	    public void setFormsUnLocked() {
-	    	lockForm = false;
-	  }	  
-	    
-	    private void spaceHeader(int[] widths, TableColumnModel tcm){
-        	int cols = tcm.getColumnCount();
-            for (int i = 0; i < cols; i++){
-           	 tcm.getColumn(i).setPreferredWidth(widths[i]);
-            }
-        }      
-	    
-	    public String DisplayClientDetails(String parameter){
-	    	
+	 public String DisplayClientDetails(String parameter){
 	        try
 	        {
-
 	        	Connection conn = connecting.CreateConnection(conDeets);
 	        	PreparedStatement st2 =conn.prepareStatement(custDetails + ' ' +  parameter);	    	
 	        	qryResults = st2.executeQuery();
-
 	        	if (qryResults==null){
 	    			  JOptionPane.showMessageDialog(null, "null query");
 	        	}
 	        	else{
 					while(qryResults.next()){
-//Only displays the first one and not the 
-		        		 //String invoice 		= qryResults.getString("Invoice");
-						 String customerName 	= qryResults.getString("CustomerName");
-						 String customerAddress = qryResults.getString("CustomerAddress");
-						 String customerSuburb 	= qryResults.getString("CustomerSuburb");
-						 String customerPostCode= qryResults.getString("CustomerPostCode");
-						 String customerPhone 	= qryResults.getString("CustomerPhone");
-						// String customerMobile 	= qryResults.getString("CustomerMobile");
-						 String customerEmail 	= qryResults.getString("CustomerEmail");
+						//Only displays the first one and not the 
+		        		 //String invoice 		= qryResults.getString("Sale ID");
+						 String customerFName 	= qryResults.getString("customerFName");
+						 String customerLName 	= qryResults.getString("customerLName");
+						 String customerAddress = qryResults.getString("customerPStreetAddress");
+						 String customerSuburb 	= qryResults.getString("customerPSuburb");
+						 String customerPostCode= qryResults.getString("customerPostCode");
+						 String customerPhone 	= qryResults.getString("customerPhone");
+						// String customerMobile 	= qryResults.getString("customerMobile");
+						 String customerEmail 	= qryResults.getString("customerEmail");
 						 //String streetAddress 	= qryResults.getString("StreetAddress");
 						 //String suburb 			= qryResults.getString("Suburb");
 						 //String status 			= qryResults.getString("PermitStatus");
-
+						 
 						 String str = "INVOICE:\t\t" + parameter + "\n\n"
-								 + "CLIENT:\t\t" + customerName + "\n\n"
+								 + "CLIENT:\t\t" + customerFName + ' ' + customerLName + "\n\n"
 								 + "SITE ADDRESS:\t" + customerAddress + "\n\n"
 								 + "SUBURB:\t\t" + customerSuburb + "\n\n"
 								 + "POST CODE:\t\t" + customerPostCode + "\n\n"
@@ -177,59 +175,60 @@ public class SalesPane extends JPanel
 	        }
 	        catch(Exception ex)
 	        { 
+	        	
 	        JOptionPane.showMessageDialog(null, ex.toString());
 	        }      		            
 			return "";
 	    }	
-	    
-	    public ResultSet getResults(int ind){      		
-	        try
-	        {
-	        	Connection conn = connecting.CreateConnection(conDeets);
-	        	PreparedStatement st =conn.prepareStatement(procedure[ind]);
-	        	results = st.executeQuery();    	
-	        }
-	        catch(Exception ex)
-	        { 
-	        JOptionPane.showMessageDialog(null, ex.toString());
-	        }
-	    		return results;       		            
-	    }
-	    
-	    public ResultSet getSearchResults(String qry, String param){      		
-	        try
-	        {
-	        	Connection conn = connecting.CreateConnection(conDeets);
-	        	PreparedStatement st =conn.prepareStatement(qry + param);
-	        	results = st.executeQuery();    	
-	        }
-	        catch(Exception ex)
-	        { 
-	        JOptionPane.showMessageDialog(null, ex.toString());
-	        }
-	    		return results;       		            
-	    }
-	    
-        //Get the results set for the customer details
-        public ResultSet getDetails(String qry, String param){      	
-        	System.out.println(qry);
-            try
-	        {
-	        	Connection conn = connecting.CreateConnection(conDeets);
-	        	PreparedStatement st2 =conn.prepareStatement(qry + param);	
-	        	qryResults = st2.executeQuery();
-	        	if (qryResults==null){
-	    			System.out.println("null query");
-	        	}
-	        }
-	        catch(Exception ex)
-	        { 
-	        JOptionPane.showMessageDialog(null, ex.toString());
-	        }
-        		return qryResults;       		            
-        }	
-        
-	    public void showMessage(String msg) {
-	    	hs.showMsg(msg);
-	    }
+	
+	public ResultSet getResults(int ind){      		
+		try
+		{
+			Connection conn = connecting.CreateConnection(conDeets);
+			PreparedStatement st =conn.prepareStatement(procedure[ind]);
+			results = st.executeQuery();    	
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, ex.toString());
+		}
+		return results;       		            
+	}
+
+	public ResultSet getSearchResults(String qry, String param){      		
+		try
+		{
+			Connection conn = connecting.CreateConnection(conDeets);
+			PreparedStatement st =conn.prepareStatement(qry + param);
+			results = st.executeQuery();    	
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, ex.toString());
+		}
+		return results;       		            
+	}
+
+	//Get the results set for the customer details
+	public ResultSet getDetails(String qry, String param){      	
+		System.out.println(qry);
+		try
+		{
+			Connection conn = connecting.CreateConnection(conDeets);
+			PreparedStatement st2 =conn.prepareStatement(qry + param);	
+			qryResults = st2.executeQuery();
+			if (qryResults==null){
+				System.out.println("null query");
+			}
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, ex.toString());
+		}
+		return qryResults;       		            
+	}	
+
+	public void showMessage(String msg) {
+		hs.showMsg(msg);
+	}
 }

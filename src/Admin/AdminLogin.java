@@ -53,69 +53,15 @@ public class AdminLogin extends JFrame{
 	private JButton loginBtn;
 	private JButton cancelBtn;
 	private JPanel logPanel;
-	private JTabbedPane adminP;
-	// Stored procedures to fill tables (Triggered by tab selection)
-	private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.a_adminPanel"}; // procedure[0]
+
 
 	public AdminLogin() {
-
-/*		//---------------DOWN------------------------------------
-		connecting = new CreateConnection();
-
-		//Adding Jpanels to the SAles panel area 
-		adminP = new JTabbedPane();
-		adminP.setPreferredSize(new Dimension(1070, 610));
-
-		adminPanel = new AdminPanel(conDeets, adminPanel);
-		//permitRecv = new RecvPermitPanel(conDeets, this);
-		
-		JTable[] tablez = new JTable[]{adminPanel.getPermitsTbl()}; 				
-
-		adminP.addTab("Admin", adminPanel);
-		add(adminP); 
-
-		//		getResults(0);  
-
-		adminP.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				if (e.getSource() instanceof JTabbedPane) {
-
-					JTabbedPane pane = (JTabbedPane) e.getSource();
-					tabIndex = pane.getSelectedIndex();
-
-					getResults(tabIndex, conDeets); 
-					//       ResultSet r1 = results;
-
-					// add ResultSet into Selected Tab JTable.
-					tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));               
-					TableColumnModel tcm = tablez[tabIndex].getColumnModel();
-					int cols = tcm.getColumnCount();
-
-					if (cols == 6){
-						int[] colWidths = new int[]{20, 150, 150, 100, 100, 100}; 
-						spaceHeader(colWidths, tcm);
-					} else if (cols == 7){
-						int[] colWidths = new int[]{20, 150, 150, 100, 100, 100, 100};   
-						spaceHeader(colWidths, tcm);                         
-					} else if (cols == 9){
-						int[] colWidths = new int[]{30, 100, 120, 80, 40, 40, 40, 40, 40};   
-						spaceHeader(colWidths, tcm);
-					}else {
-						int[] colWidths = new int[]{30, 100, 120, 80, 30, 30, 40, 40, 40, 30, 30};    
-						spaceHeader(colWidths, tcm);
-					}
-				}
-			}
-		}); */  		
-	//-----------^^^^^^^^^^^^^^^^^^-----------------------------------------------
 
 	// setting up JFrame
 	getContentPane().setLayout(null);
 	setPreferredSize(new Dimension(400, 250));
 	setResizable(false);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
 
 	// creating main button JPanel (blue)
 	logPanel = new JPanel();
@@ -125,7 +71,7 @@ public class AdminLogin extends JFrame{
 	getContentPane().add(logPanel);
 
 	//Personal Customer Information
-	lbllogIn = new JLabel("Admmin Log in");
+	lbllogIn = new JLabel("Admin Log in");
 	lbllogIn.setBounds(36, 25, 162, 28);
 	logPanel.add(lbllogIn);
 	lbllogIn.setFont(new Font("Arial", Font.BOLD, 20));
@@ -169,70 +115,12 @@ public class AdminLogin extends JFrame{
 
 	cancelBtn.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-			//homescreen = new Homescreen();
 			homescreen.setVisible(true);
 			setVisible(false); //Make the screen invisible
 			//dispose();//Close the login window
 		}
 	});      
 
-	//Load the frame
 	pack();
 	}
-
-
-
-//---------------------------------------------------      
-
-/*private void spaceHeader(int[] widths, TableColumnModel tcm){
-	int cols = tcm.getColumnCount();
-	for (int i = 0; i < cols; i++){
-		tcm.getColumn(i).setPreferredWidth(widths[i]);
-	}
-}
-
-
-public ResultSet getResults(int ind, ConnDetails connDeets){      	
-
-	try
-	{
-		Connection conn = connecting.CreateConnection(connDeets);
-		PreparedStatement st =conn.prepareStatement(procedure[ind]);	//ind]);
-		results = st.executeQuery();
-		if (results==null){
-			getResults(0, conDeets);
-		}
-	}
-	catch(Exception ex)
-	{ 
-		JOptionPane.showMessageDialog(null, ex.toString());
-	}
-	return results;       		            
-}
-
-public ResultSet getDetails(String qry, String param, ConnDetails connDeets){      	
-
-	try
-	{
-		Connection conn = connecting.CreateConnection(connDeets);
-		PreparedStatement st2 =conn.prepareStatement(qry + param);	
-		qryResults = st2.executeQuery();
-		if (qryResults==null){
-			System.out.println("null query");
-		}
-	}
-	catch(Exception ex)
-	{ 
-		JOptionPane.showMessageDialog(null, ex.toString());
-	}
-	return qryResults;       		            
-}
-
-
-
-
-*/
-//-----------^^^^^^^^^^^^^^^^^^-----------------------------------------------
-
-
 }

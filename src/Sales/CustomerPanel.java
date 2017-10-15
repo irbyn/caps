@@ -371,7 +371,7 @@ class CustomerPanel extends JPanel {
 		});
 		
 		updateBtn = new JButton("Update");
-		updateBtn.setBounds(152, 534, 120, 25);
+		updateBtn.setBounds(150, 533, 120, 25);
 		infoPanel.add(updateBtn);
 		updateBtn.addActionListener( new ActionListener()
 		{
@@ -399,7 +399,7 @@ class CustomerPanel extends JPanel {
 		});
 
 		createCustBtn = new JButton("Create Customer");
-		createCustBtn.setBounds(276, 533, 120, 25);
+		createCustBtn.setBounds(276, 533, 135, 25);
 		infoPanel.add(createCustBtn);
 		createCustBtn.addActionListener( new ActionListener()
 		{
@@ -438,6 +438,7 @@ class CustomerPanel extends JPanel {
 						//Get the customer ID as a paramater to feed into the SQL procedure 
 						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
 						displayClientDetails(param);
+						rowSelected = true;
 						//txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
 					} catch (IndexOutOfBoundsException e){
 
