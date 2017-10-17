@@ -140,7 +140,6 @@ public class AdminPanel extends JFrame {
 		model1 = new DefaultTableModel();  
 		model1.setRowCount(0);
 		adminTbl = new JTable(model1);
-		adminTbl.setPreferredSize(new Dimension(0, 300));
 		adminTbl.setAutoCreateRowSorter(true);
 
 		JScrollPane scrollPane = new JScrollPane(adminTbl);
@@ -561,9 +560,7 @@ public class AdminPanel extends JFrame {
 			stm.setInt(17, getRanked());
 			stm.setString(18, getRoleType());
 			stm.setBoolean(19, getAccStatus());
-
 			
-
 			stm.executeUpdate();
 		}
 		catch (SQLServerException sqex)
@@ -620,7 +617,8 @@ public class AdminPanel extends JFrame {
 		councNumtxtBx.setEditable(false);
 		reeseNumbtxtBx.setEditable(false);
 		chckbxAccAct.setEnabled(false);
-		roleTypeCmbBx.setEditable(false);
+		roleTypeCmbBx.setEnabled(false);
+		roleTypeCmbBx.setBackground(Color.LIGHT_GRAY);
 		rankTxtBx.setEditable(false);
 	}
 
@@ -640,7 +638,8 @@ public class AdminPanel extends JFrame {
 		councNumtxtBx.setEditable(true);
 		reeseNumbtxtBx.setEditable(true);
 		chckbxAccAct.setEnabled(true);
-		roleTypeCmbBx.setEditable(true);
+		roleTypeCmbBx.setEnabled(true);
+		roleTypeCmbBx.setBackground(Color.WHITE);
 		rankTxtBx.setEditable(true);
 	}
 

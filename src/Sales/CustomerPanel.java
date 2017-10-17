@@ -39,9 +39,9 @@ class CustomerPanel extends JPanel {
 	//private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String qryCustDetails = "EXEC AWS_WCH_DB.dbo.[s_CustomerDetails] ";
 	private String upReceived = "call AWS_WCH_DB.dbo.s_SalesUpdateCustomer";
-	private String qryFNSearch = "EXEC AWS_WCH_DB.dbo.[s_SalesSearchFNCustomer]";
-	private String qryLNSearch = "EXEC AWS_WCH_DB.dbo.[s_SalesSearchLNCustomer]";
-	private String qryFNLNSearch = "call AWS_WCH_DB.dbo.s_SalesSearchFNLNCustomer";
+	private String qryOneValSearch = "call AWS_WCH_DB.dbo.s_SalesSearchValOneCustomer";
+	private String qryTwoValSearch = "call AWS_WCH_DB.dbo.s_SalesSearchValTwoCustomer";
+	private String qryAllValSearch = "call AWS_WCH_DB.dbo.s_SalesSearchValAllCustomer";
 	private String param = "";  
 	private ResultSet rs;
 	private ResultSet rs2;
@@ -57,7 +57,7 @@ class CustomerPanel extends JPanel {
 	private DefaultTableModel model1;
 	private Boolean rowSelected;
 	private ConnDetails conDets;
-	
+
 	private JTextField mobileNumTxtBx;
 	private JTextField sFNameTxtBx;
 	private JTextField sLNameTxtBx;
@@ -88,7 +88,6 @@ class CustomerPanel extends JPanel {
 	private JLabel sLNameLbl;
 	private JCheckBox pAddChbx;
 	private JButton btnSearch;
-	private JButton searchCustBtn;
 	private JButton cancelBtn;
 	private JButton updateBtn;
 	private JButton createCustBtn;
@@ -96,6 +95,7 @@ class CustomerPanel extends JPanel {
 	private SalesPane sp;
 	private ConnDetails conDeets;
 	private JButton clearSchBtn;
+	private JTextField reesTxtBx;
 
 
 	public CustomerPanel(ConnDetails conDeets, SalesPane sp) {
@@ -108,7 +108,6 @@ class CustomerPanel extends JPanel {
 		model1 = new DefaultTableModel();  
 		model1.setRowCount(0);
 		salesTbl = new JTable(model1);
-		salesTbl.setPreferredSize(new Dimension(0, 600));
 		salesTbl.setAutoCreateRowSorter(true);
 
 		JScrollPane scrollPane = new JScrollPane(salesTbl);
@@ -116,92 +115,43 @@ class CustomerPanel extends JPanel {
 		header= salesTbl.getTableHeader();
 		columnModel = header.getColumnModel();
 		add(header); 
-		
+
 		searchPanel = new JPanel();
 		searchPanel.setBounds(0, 0, 611, 77);
 		searchPanel.setLayout(null);
-		
+
 		//Search Panel contents
 		searchLbl = new JLabel("Search");
 		searchLbl.setFont(new Font("Arial", Font.BOLD, 20));
 		searchLbl.setBounds(20, 11, 122, 20);
 		searchPanel.add(searchLbl);
-		
+
 		sFNameLbl = new JLabel("First Name:");
 		sFNameLbl.setBounds(20, 42, 68, 14);
 		searchPanel.add(sFNameLbl);
-		
+
 		sLNameLbl = new JLabel("Last Name:");
-		sLNameLbl.setBounds(318, 42, 68, 14);
+		sLNameLbl.setBounds(217, 42, 68, 14);
 		searchPanel.add(sLNameLbl);
-		
+
 		sFNameTxtBx = new JTextField();
-		sFNameTxtBx.setBounds(87, 39, 210, 20);
+		sFNameTxtBx.setBounds(87, 39, 120, 20);
 		searchPanel.add(sFNameTxtBx);
 		sFNameTxtBx.setColumns(10);
-		
+
 		sLNameTxtBx = new JTextField();
 		sLNameTxtBx.setColumns(10);
-		sLNameTxtBx.setBounds(385, 39, 210, 20);
+		sLNameTxtBx.setBounds(282, 39, 120, 20);
 		searchPanel.add(sLNameTxtBx);
-		
+
 		btnSearch = new JButton("Search");
-		btnSearch.setBounds(472, 6, 120, 25);
+		btnSearch.setBounds(482, 6, 120, 25);
 		searchPanel.add(btnSearch);
-		btnSearch.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0){
-				//If both first name and last name fields have content search db for both FN and LN
-				if (!sFNameTxtBx.getText().equals("") && !sLNameTxtBx.getText().equals("")){
-					CallableStatement sm = null;
-					try {					
-						String fLNQry = "{" + qryFNLNSearch +"(?,?)}";	
-						Connection conn = connecting.CreateConnection(conDeets);	        	   	
-						sm = conn.prepareCall(fLNQry);
-						sm.setString(1, sFNameTxtBx.getText());
-						sm.setString(2, sLNameTxtBx.getText());
-						ResultSet qryResults = sm.executeQuery();
-						rs = qryResults;
-						salesTbl.setModel(DbUtils.resultSetToTableModel(rs));
-					}catch (SQLServerException sqex){
-						JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
-					}catch(Exception ex){ 
-						JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
-					}		
-				}
-				//Otherwise if just FN has text search db with FN
-				else if (!sFNameTxtBx.getText().equals("") && sLNameTxtBx.getText().equals("")){
-					rs = sp.getDetails(qryFNSearch, sFNameTxtBx.getText());
-					salesTbl.setModel(DbUtils.resultSetToTableModel(rs));
-				}
-				//Otherwise just search by last name
-				else if (sFNameTxtBx.getText().equals("") && !sLNameTxtBx.getText().equals("")){
-					rs = sp.getDetails(qryLNSearch, sLNameTxtBx.getText());
-					salesTbl.setModel(DbUtils.resultSetToTableModel(rs));
-				}else {
-					JOptionPane.showMessageDialog(null, "You must enter either a first name \nor last name to search.");
-				}
-				//salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
-				//spaceHeader(columnModel, columnWidth);
-				//sentChk.setSelected(false);
-				rowSelected=false;
-				param = "";					
-			}
-		});
-		
-		
+
 		clearSchBtn = new JButton("Clear Search");
-		clearSchBtn.setBounds(328, 6, 120, 25);
+		clearSchBtn.setBounds(282, 6, 120, 25);
 		searchPanel.add(clearSchBtn);
-		clearSchBtn.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0){
-				resetTable();
-				sFNameTxtBx.setText("");
-				sLNameTxtBx.setText("");
-			}
-			});
-		
+
 		//Panel for the table
 		tablePanel = new JPanel();
 		tablePanel.setBounds(10, 78, 601, 494);      
@@ -220,7 +170,7 @@ class CustomerPanel extends JPanel {
 		infoPanel.add(contactLbl);
 
 		fNameLbl = new JLabel("First Name:");
-		fNameLbl.setBounds(55, 41, 102, 14);
+		fNameLbl.setBounds(55, 41, 101, 14);
 		infoPanel.add(fNameLbl);
 
 		fNameTxtBx = new JTextField();
@@ -229,7 +179,7 @@ class CustomerPanel extends JPanel {
 		fNameTxtBx.setColumns(10);
 
 		lNameLbl = new JLabel("Last Name:");
-		lNameLbl.setBounds(55, 81, 102, 15);
+		lNameLbl.setBounds(55, 81, 101, 15);
 		infoPanel.add(lNameLbl);
 
 		lNameTxtBx = new JTextField();
@@ -238,7 +188,7 @@ class CustomerPanel extends JPanel {
 		infoPanel.add(lNameTxtBx);
 
 		lblHomeNum = new JLabel("Home Number:");
-		lblHomeNum.setBounds(55, 121, 102, 15);
+		lblHomeNum.setBounds(55, 121, 101, 15);
 		infoPanel.add(lblHomeNum);
 
 		homeNumTxtBx = new JTextField();
@@ -247,84 +197,68 @@ class CustomerPanel extends JPanel {
 		infoPanel.add(homeNumTxtBx);
 
 		mobileNumLbl = new JLabel("Mobile Number:");
-		mobileNumLbl.setBounds(55, 167, 118, 14);
+		mobileNumLbl.setBounds(55, 158, 101, 14);
 		infoPanel.add(mobileNumLbl);
 
 		mobileNumTxtBx = new JTextField();
-		mobileNumTxtBx.setBounds(204, 164, 210, 20);
+		mobileNumTxtBx.setBounds(201, 152, 210, 20);
 		infoPanel.add(mobileNumTxtBx);
 
 		mobileNumTxtBx.setColumns(10);
 		emaillbl = new JLabel("Email:");
-		emaillbl.setBounds(55, 213, 102, 15);
+		emaillbl.setBounds(55, 198, 101, 15);
 		infoPanel.add(emaillbl);
 
 		emailTxtBx = new JTextField();
 		emailTxtBx.setColumns(10);
-		emailTxtBx.setBounds(201, 213, 210, 20);
+		emailTxtBx.setBounds(201, 195, 210, 20);
 		infoPanel.add(emailTxtBx);
 
 		//Postal Address Information
 		postAddrlbl = new JLabel("Postal Address");
 		postAddrlbl.setFont(new Font("Arial", Font.BOLD, 20));
-		postAddrlbl.setBounds(20, 239, 201, 20);
+		postAddrlbl.setBounds(20, 229, 182, 20);
 		infoPanel.add(postAddrlbl);
 
 		pAddrlbl = new JLabel("Postal Street Address:");
-		pAddrlbl.setBounds(55, 275, 173, 15);
+		pAddrlbl.setBounds(55, 265, 135, 15);
 		infoPanel.add(pAddrlbl);
 
 		pAddrTxtBx = new JTextField();
 		pAddrTxtBx.setColumns(10);
-		pAddrTxtBx.setBounds(201, 272, 210, 20);
+		pAddrTxtBx.setBounds(201, 262, 210, 20);
 		infoPanel.add(pAddrTxtBx);
 
 		pSuburblbl = new JLabel("Postal Suburb:");
-		pSuburblbl.setBounds(55, 316, 173, 15);
+		pSuburblbl.setBounds(55, 306, 132, 15);
 		infoPanel.add(pSuburblbl);
 
 		pSuburbTxtBx = new JTextField();
 		pSuburbTxtBx.setColumns(10);
-		pSuburbTxtBx.setBounds(201, 313, 210, 20);
+		pSuburbTxtBx.setBounds(201, 303, 210, 20);
 		infoPanel.add(pSuburbTxtBx);
 
 		pAreaCodelbl = new JLabel("Post Code");
-		pAreaCodelbl.setBounds(55, 354, 173, 15);
+		pAreaCodelbl.setBounds(55, 344, 132, 15);
 		infoPanel.add(pAreaCodelbl);
 
 		pAreaCodeTxtBx = new JTextField();
 		pAreaCodeTxtBx.setColumns(10);
-		pAreaCodeTxtBx.setBounds(201, 351, 210, 20);
+		pAreaCodeTxtBx.setBounds(201, 341, 210, 20);
 		infoPanel.add(pAreaCodeTxtBx);
 
 		//Site Address Information
 
 		siteAddrLbl = new JLabel("Site Address");
-		siteAddrLbl.setBounds(20, 380, 201, 20);
+		siteAddrLbl.setBounds(29, 411, 158, 20);
 		siteAddrLbl.setFont(new java.awt.Font("Arial", Font.BOLD, 20));
 		infoPanel.add(siteAddrLbl);
 
 		pAddChbx = new JCheckBox("Postal Address is Site Address");
-		pAddChbx.setBounds(55, 414, 210, 23);
+		pAddChbx.setBounds(201, 413, 210, 23);
 		infoPanel.add(pAddChbx);
 
-		//When check box is selected
-		pAddChbx.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				if (pAddChbx.isSelected()){
-					if (pAddrTxtBx.getText().equals("") || pSuburbTxtBx.getText().equals("")){
-						JOptionPane.showMessageDialog(null, "You must enter a postal address first.");
-					}else {
-						//Get the text from postal address and add it to the sit address
-						sAddrTxtBx.setText(pAddrTxtBx.getText());
-						sSuburbTxtBx.setText(pSuburbTxtBx.getText());
-					}
-				}else {
-					sAddrTxtBx.setText("");
-					sSuburbTxtBx.setText("");
-				}
-			}
-		});
+
 
 		sAddrlbl = new JLabel("Site Street Address:");
 		sAddrlbl.setBounds(55, 458, 135, 15);
@@ -344,35 +278,78 @@ class CustomerPanel extends JPanel {
 		sSuburbTxtBx.setBounds(201, 494, 210, 20);
 		infoPanel.add(sSuburbTxtBx);
 
-		/*		searchCustBtn = new JButton("Search for Existing Customer");
-		searchCustBtn.setBounds(23, 533, 185, 25);
-		infoPanel.add(searchCustBtn);*/
-
 		cancelBtn = new JButton("Cancel");
 		cancelBtn.setBounds(22, 533, 120, 25);
 		infoPanel.add(cancelBtn);
-		cancelBtn.addActionListener(new ActionListener(){
+
+
+		updateBtn = new JButton("Update");
+		updateBtn.setBounds(161, 533, 120, 25);
+		infoPanel.add(updateBtn);
+
+		createCustBtn = new JButton("Create Customer");
+		createCustBtn.setBounds(237, 372, 135, 25);
+		infoPanel.add(createCustBtn);
+
+		this.setLayout(null);
+		this.add(searchPanel);
+		
+		JLabel reesLbl = new JLabel("Reese #:");
+		reesLbl.setBounds(425, 42, 62, 14);
+		searchPanel.add(reesLbl);
+		
+		reesTxtBx = new JTextField();
+		reesTxtBx.setColumns(10);
+		reesTxtBx.setBounds(482, 39, 120, 20);
+		searchPanel.add(reesTxtBx);
+		this.add(tablePanel); 
+		this.add(infoPanel);
+		
+		JButton createSaleBtn = new JButton("Create Sale");
+		createSaleBtn.setBounds(291, 533, 120, 25);
+		infoPanel.add(createSaleBtn);
+		
+		salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
-			public void actionPerformed(ActionEvent arg0){
-				//Do any of the text boxes contain data
-				if(!fNameTxtBx.getText().equals("") || !lNameTxtBx.getText().equals("") || !homeNumTxtBx.getText().equals("") 
-						|| !mobileNumTxtBx.getText().equals("") || !emailTxtBx.getText().equals("") || !pAddrTxtBx.getText().equals("") 
-						|| !pSuburbTxtBx.getText().equals("") || !pAreaCodeTxtBx.getText().equals("") || pAddChbx.isSelected()
-						|| !sAddrTxtBx.getText().equals("") || sSuburbTxtBx.getText().equals("")){
-					int dialogButton = JOptionPane.YES_NO_OPTION;
-					int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to cancel?","Warning",dialogButton);
-					if(dialogResult == JOptionPane.YES_OPTION){
-						resetTable();
-						clearFields();
-						createCustBtn.setEnabled(true);
+			public void valueChanged(ListSelectionEvent arg0) {
+				if (!arg0.getValueIsAdjusting()){
+					rowSelected=true;
+					createCustBtn.setEnabled(false);
+					try{
+						//Get the customer ID as a paramater to feed into the SQL procedure 
+						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
+						displayClientDetails(param);
+						rowSelected = true;
+						//txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
+					} catch (IndexOutOfBoundsException e){
+
 					}
 				}
 			}
 		});
 		
-		updateBtn = new JButton("Update");
-		updateBtn.setBounds(150, 533, 120, 25);
-		infoPanel.add(updateBtn);
+		//Display the initial table
+		rs = sp.getResults(0);		
+		salesTbl.setModel(DbUtils.resultSetToTableModel(rs));  
+
+		//When check box is selected
+		pAddChbx.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (pAddChbx.isSelected()){
+					if (pAddrTxtBx.getText().equals("") || pSuburbTxtBx.getText().equals("")){
+						JOptionPane.showMessageDialog(null, "You must enter a postal address first.");
+					}else {
+						//Get the text from postal address and add it to the sit address
+						sAddrTxtBx.setText(pAddrTxtBx.getText());
+						sSuburbTxtBx.setText(pSuburbTxtBx.getText());
+					}
+				}else {
+					sAddrTxtBx.setText("");
+					sSuburbTxtBx.setText("");
+				}
+			}
+		});
+
 		updateBtn.addActionListener( new ActionListener()
 		{
 			@Override
@@ -398,11 +375,7 @@ class CustomerPanel extends JPanel {
 			}
 		});
 
-		createCustBtn = new JButton("Create Customer");
-		createCustBtn.setBounds(276, 533, 135, 25);
-		infoPanel.add(createCustBtn);
-		createCustBtn.addActionListener( new ActionListener()
-		{
+		createCustBtn.addActionListener( new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				{ 
@@ -413,7 +386,7 @@ class CustomerPanel extends JPanel {
 						int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to create this customer","Warning",dialogButton);
 						if(dialogResult == JOptionPane.YES_OPTION){
 							// Saving code here -- add customer to the database
-							sp.showMessage("Updating Consent Received");
+							sp.showMessage("Updating Customer Details");
 							//createCustomer();
 							resetTable();
 							clearFields();
@@ -423,48 +396,169 @@ class CustomerPanel extends JPanel {
 				}					
 			}
 		});
-		
-		this.setLayout(null);
-		this.add(searchPanel);
-		this.add(tablePanel); 
-		this.add(infoPanel);		
-		salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			@Override
-			public void valueChanged(ListSelectionEvent arg0) {
-				if (!arg0.getValueIsAdjusting()){
-					rowSelected=true;
-					createCustBtn.setEnabled(false);
-					try{
-						//Get the customer ID as a paramater to feed into the SQL procedure 
-						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
-						displayClientDetails(param);
-						rowSelected = true;
-						//txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
-					} catch (IndexOutOfBoundsException e){
 
+		cancelBtn.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0){
+				//Do any of the text boxes contain data
+				if(!fNameTxtBx.getText().equals("") || !lNameTxtBx.getText().equals("") || !homeNumTxtBx.getText().equals("") 
+						|| !mobileNumTxtBx.getText().equals("") || !emailTxtBx.getText().equals("") || !pAddrTxtBx.getText().equals("") 
+						|| !pSuburbTxtBx.getText().equals("") || !pAreaCodeTxtBx.getText().equals("") || pAddChbx.isSelected()
+						|| !sAddrTxtBx.getText().equals("") || sSuburbTxtBx.getText().equals("")){
+					int dialogButton = JOptionPane.YES_NO_OPTION;
+					int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to cancel?","Warning",dialogButton);
+					if(dialogResult == JOptionPane.YES_OPTION){
+						resetTable();
+						clearFields();
+						createCustBtn.setEnabled(true);
 					}
 				}
 			}
 		});
-		//Display the initial table
-		rs = sp.getResults(0);		
-		salesTbl.setModel(DbUtils.resultSetToTableModel(rs));  
-	}
 
+		clearSchBtn.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0){
+				resetTable();
+				clearFields();
+				createCustBtn.setEnabled(true);
+				sFNameTxtBx.setText("");
+				sLNameTxtBx.setText("");
+			}
+		});
+
+		btnSearch.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0){
+				
+				if (!sFNameTxtBx.getText().equals("") && !sLNameTxtBx.getText().equals("") && !reesTxtBx.getText().equals("")){
+					try {	
+						CallableStatement sm = null;				
+						String qry = "{" + qryTwoValSearch +"(?,?,?)}";	
+						Connection conn = connecting.CreateConnection(conDeets);	        	   	
+						sm = conn.prepareCall(qry);
+					
+							sm.setString(1, sFNameTxtBx.getText());
+							sm.setString(2, sFNameTxtBx.getText());
+							sm.setString(3, reesTxtBx.getText());
+							ResultSet qryResults = sm.executeQuery();
+							rs = qryResults;
+						
+					}catch (SQLServerException sqex){
+						JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+					}catch(Exception ex){ 
+						JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+					}	
+				}		
+				else if ((!sFNameTxtBx.getText().equals("") && !sLNameTxtBx.getText().equals("")) //If there is text in 2 text boxes  
+					||	(!sFNameTxtBx.getText().equals("") && !reesTxtBx.getText().equals("")) 
+					||	(!sLNameTxtBx.getText().equals("") && !reesTxtBx.getText().equals(""))){
+					
+					try {	
+						CallableStatement sm = null;				
+						String qry = "{" + qryTwoValSearch +"(?,?,?)}";	
+						Connection conn = connecting.CreateConnection(conDeets);	        	   	
+						sm = conn.prepareCall(qry);
+						//if the FN has text use it otherwise send null
+						if (!sFNameTxtBx.getText().equals("")){
+							sm.setString(1, sFNameTxtBx.getText());
+							System.out.println("///////////////");
+						}else{
+							sm.setString(1, null);
+						}
+						
+						if (!sLNameTxtBx.getText().equals("")){
+							sm.setString(2, sFNameTxtBx.getText());
+							System.out.println("-------------");
+						}else{
+							sm.setString(2, null);
+						}
+						
+						if (!reesTxtBx.getText().equals("")){
+							sm.setString(3, reesTxtBx.getText());
+							System.out.println("555");
+						}else{
+							sm.setString(3, null);
+						}
+						ResultSet qryResults = sm.executeQuery();
+						rs = qryResults;
+						
+					}catch (SQLServerException sqex){
+						JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+					}catch(Exception ex){ 
+						JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+					}	
+					
+				}
+				
+			else{
+				
+					try {	
+						CallableStatement sm = null;
+						String fLNQry = "{" + qryOneValSearch +"(?,?,?)}";	
+						Connection conn = connecting.CreateConnection(conDeets);	        	   	
+						sm = conn.prepareCall(fLNQry);
+						//if the FN has text use it otherwise send null
+						if (!sFNameTxtBx.getText().equals("")){
+							sm.setString(1, sFNameTxtBx.getText());
+						}else{
+							sm.setString(1, null);
+						}
+						
+						if (!sLNameTxtBx.getText().equals("")){
+							sm.setString(2, sFNameTxtBx.getText());
+						}else{
+							sm.setString(2, null);
+						}
+						
+						if (!reesTxtBx.getText().equals("")){
+							sm.setString(3, reesTxtBx.getText());
+						}else{
+							sm.setString(3, null);
+						}
+						
+						ResultSet qryResults = sm.executeQuery();
+						rs = qryResults;
+						
+					}catch (SQLServerException sqex){
+						JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+					}catch(Exception ex){ 
+						JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+					}		
+				
+			}
+				salesTbl.setModel(DbUtils.resultSetToTableModel(rs));
+				/*//Otherwise if just FN has text search db with FN
+				else if (!sFNameTxtBx.getText().equals("") && sLNameTxtBx.getText().equals("")){
+					rs = sp.getDetails(qryFNSearch, sFNameTxtBx.getText());
+				}
+				//Otherwise just search by last name
+				else if (sFNameTxtBx.getText().equals("") && !sLNameTxtBx.getText().equals("")){
+					rs = sp.getDetails(qryLNSearch, sLNameTxtBx.getText());
+				}else {
+					JOptionPane.showMessageDialog(null, "You must enter either a first name \nor last name to search.");
+				}
+				*/
+				//spaceHeader(columnModel, columnWidth);
+				//sentChk.setSelected(false);
+				rowSelected=false;
+				param = "";					
+			}
+		});
+
+	}
 	private void displayClientDetails(String parameter) {
 		rs2 = sp.getDetails(qryCustDetails, param);
 		try {
 			while(rs2.next()){
 				String customerFName 	= rs2.getString("customerFName");
 				String customerLName 	= rs2.getString("customerLName");
-				String customerAddress = rs2.getString("customerPStreetAddress");
+				String customerAddress 	= rs2.getString("customerPStreetAddress");
 				String customerSuburb 	= rs2.getString("customerPSuburb");
-				String customerPostCode= rs2.getString("customerPostCode");
+				String customerPostCode = rs2.getString("customerPostCode");
 				String customerPhone 	= rs2.getString("customerPhone");
 				String customerMobile 	= rs2.getString("customerMobile");
-				String customerEmail 	= rs2.getString("customerEmail");
-				String streetAddress 	= rs2.getString("customerSStreetAddress");
-				String suburb 			= rs2.getString("customerSSuburb");					 						
+				String customerEmail 	= rs2.getString("customerEmail");				 						
 
 				fNameTxtBx.setText(customerFName);
 				lNameTxtBx.setText(customerLName);			 
@@ -474,8 +568,6 @@ class CustomerPanel extends JPanel {
 				pAddrTxtBx.setText(customerAddress);
 				pSuburbTxtBx.setText(customerSuburb);
 				pAreaCodeTxtBx.setText(customerPostCode);
-				sAddrTxtBx.setText(streetAddress);
-				sSuburbTxtBx.setText(suburb);
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -483,7 +575,7 @@ class CustomerPanel extends JPanel {
 		}
 	} 
 
-	
+
 	protected void resetTable() {
 		ResultSet rs = sp.getResults(0);
 		salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	

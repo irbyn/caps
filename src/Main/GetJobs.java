@@ -10,10 +10,11 @@ import DB_Comms.CreateConnection;
 
 
 public class GetJobs {
-	
-	private String installers = "EXEC AWS_WCH_DB.dbo.m_getInstallers ";
-	private String sellers = "EXEC AWS_WCH_DB.dbo.m_getSellers ";
-	private String checkers = "EXEC AWS_WCH_DB.dbo.m_getCheckers ";
+
+	private String installers = "EXEC AWS_WCH_DB.dbo.m_getInstallers";
+	private String sellers = "EXEC AWS_WCH_DB.dbo.m_getSellers";
+	private String checkers = "EXEC AWS_WCH_DB.dbo.m_getCheckers";
+	private String installTypes = "EXEC AWS_WCH_DB.dbo.m_getInstallType";
 	public CreateConnection connecting;
 	private String[] users; 
 
@@ -25,101 +26,130 @@ public class GetJobs {
 	private int i = 0;
 
 
-public GetJobs(ConnDetails conDeets){
+	public GetJobs(ConnDetails conDeets){
 		this.conDeets = conDeets;
-		  connecting = new CreateConnection();
+		connecting = new CreateConnection();
 
-}
+	}
 
-public String[] getInstallers(){
-	i=0;
-	users = new String[10];
-    try
-    {
-    	Connection conn = connecting.CreateConnection(conDeets);
-    	PreparedStatement st2 =conn.prepareStatement(installers);	    	
-    	qryResults = st2.executeQuery();
-    	if (qryResults==null){
+	public String[] getInstallers(){
+		i=0;
+		users = new String[10];
+		try
+		{
+			Connection conn = connecting.CreateConnection(conDeets);
+			PreparedStatement st2 =conn.prepareStatement(installers);	    	
+			qryResults = st2.executeQuery();
+			if (qryResults==null){
 
-			  JOptionPane.showMessageDialog(null, "null query");
-    	}
-    	else{
-			while(qryResults.next()){
-
-	        	String installer 	= qryResults.getString("INST");
-
-	        	users[i] = installer;
-	        	i++;
+				JOptionPane.showMessageDialog(null, "null query");
 			}
-    	}
-    }
-    catch(Exception ex)
-    { 
-    JOptionPane.showMessageDialog(null, ex.toString());
-    }      		            
-	return users;
-}
+			else{
+				while(qryResults.next()){
 
+					String installer 	= qryResults.getString("INST");
 
-public String[] getSiteChecker(){
-	i=0;
-	users = new String[10];
-    try
-    {
-    	Connection conn = connecting.CreateConnection(conDeets);
-    	PreparedStatement st2 =conn.prepareStatement(checkers);	    	
-    	qryResults = st2.executeQuery();
-    	if (qryResults==null){
-
-			  JOptionPane.showMessageDialog(null, "null query");
-    	}
-    	else{
-			while(qryResults.next()){
-
-	        	String installer 	= qryResults.getString("SC");
-
-	        	users[i] = installer;
-	        	i++;
+					users[i] = installer;
+					i++;
+				}
 			}
-    	}
-    }
-    catch(Exception ex)
-    { 
-    JOptionPane.showMessageDialog(null, ex.toString());
-    }      		            
-	return users;
-}
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, ex.toString());
+		}      		            
+		return users;
+	}
 
 
-public String[] getSales(){
-	i=0;
-	users = new String[10];
-    try
-    {
-    	Connection conn = connecting.CreateConnection(conDeets);
-    	PreparedStatement st2 =conn.prepareStatement(sellers);	    	
-    	qryResults = st2.executeQuery();
-    	if (qryResults==null){
+	public String[] getSiteChecker(){
+		i=0;
+		users = new String[10];
+		try
+		{
+			Connection conn = connecting.CreateConnection(conDeets);
+			PreparedStatement st2 =conn.prepareStatement(checkers);	    	
+			qryResults = st2.executeQuery();
+			if (qryResults==null){
 
-			  JOptionPane.showMessageDialog(null, "null query");
-    	}
-    	else{
-			while(qryResults.next()){
-
-	        	String installer 	= qryResults.getString("SELL");
-
-	        	users[i] = installer;
-	        	i++;
+				JOptionPane.showMessageDialog(null, "null query");
 			}
-    	}
-    }
-    catch(Exception ex)
-    { 
-    JOptionPane.showMessageDialog(null, ex.toString());
-    }      		            
-	return users;
-}
-	    
+			else{
+				while(qryResults.next()){
+
+					String installer 	= qryResults.getString("SC");
+
+					users[i] = installer;
+					i++;
+				}
+			}
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, ex.toString());
+		}      		            
+		return users;
+	}
+
+
+	public String[] getSales(){
+		i=0;
+		users = new String[10];
+		try
+		{
+			Connection conn = connecting.CreateConnection(conDeets);
+			PreparedStatement st2 =conn.prepareStatement(sellers);	    	
+			qryResults = st2.executeQuery();
+			if (qryResults==null){
+
+				JOptionPane.showMessageDialog(null, "null query");
+			}
+			else{
+				while(qryResults.next()){
+
+					String installer 	= qryResults.getString("SELL");
+
+					users[i] = installer;
+					i++;
+				}
+			}
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, ex.toString());
+		}      		            
+		return users;
+	}
+
+	public String[] getInstallType(){
+		i=0;
+		users = new String[10];
+		try
+		{
+			Connection conn = connecting.CreateConnection(conDeets);
+			PreparedStatement st2 =conn.prepareStatement(installTypes);	    	
+			qryResults = st2.executeQuery();
+			if (qryResults==null){
+
+				JOptionPane.showMessageDialog(null, "null query");
+			}
+			else{
+				while(qryResults.next()){
+
+					String installer 	= qryResults.getString("InstallDescription");
+
+					users[i] = installer;
+					i++;
+				}
+			}
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, ex.toString());
+		}      		            
+		return users;
+	}
+
 }
 
 

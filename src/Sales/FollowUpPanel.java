@@ -1,6 +1,7 @@
 package Sales;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -42,6 +44,7 @@ class FollowUpPanel extends JPanel {
 	private SalesPane sp;
 	private JTableHeader header;
 	private TableColumnModel columnModel;
+	private Color LtGray = Color.decode("#eeeeee");
 	private JPanel tablePanel;
 	private JPanel infoPanel;
 	private JTable salesTbl;
@@ -72,7 +75,6 @@ class FollowUpPanel extends JPanel {
 		    model1 = new DefaultTableModel();  
 		    model1.setRowCount(0);
 	        salesTbl = new JTable(model1);
-	        salesTbl.setPreferredSize(new Dimension(0, 300));
 	        salesTbl.setAutoCreateRowSorter(true);
 	        
 	        JScrollPane scrollPane = new JScrollPane(salesTbl);
@@ -91,10 +93,14 @@ class FollowUpPanel extends JPanel {
 	        infoPanel.setBounds(0, 280, 1077, 289);  //setPreferredSize(new Dimension(0, 300));
 	        infoPanel.setLayout(null);
 			
-			txtAreaCustInfo = new JTextArea();
+	        txtAreaCustInfo = new JTextArea("");
+			txtAreaCustInfo.setBounds(20, 20, 250, 260);
+			txtAreaCustInfo.setBorder(BorderFactory.createEtchedBorder());
+			txtAreaCustInfo.setBackground(LtGray);
+			txtAreaCustInfo.setLineWrap(true);
 			txtAreaCustInfo.setEditable(false);
-			txtAreaCustInfo.setBounds(23, 24, 382, 237);
-			infoPanel.add(txtAreaCustInfo);
+		        infoPanel.add(txtAreaCustInfo);
+
 			
 			SimpleDateFormat dt = new SimpleDateFormat("dd.MMM.yyyy");
 			spnTimeDate = new JSpinner(new SpinnerDateModel());

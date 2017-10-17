@@ -42,6 +42,7 @@ public class SalesPane extends JPanel
 	private SiteCheckPanel siteCheck;
 
 	private Boolean lockForm;
+	//private String custDetails = "EXEC AWS_WCH_DB.dbo.p_CustomerDetails";
 	private String custDetails = "EXEC AWS_WCH_DB.dbo.s_CustomerDetails";
 
 	// Stored procedures to fill tables (Triggered by tab selection)
@@ -137,7 +138,57 @@ public class SalesPane extends JPanel
 		}
 	}   
 	
-	 public String DisplayClientDetails(String parameter){
+	public String DisplayClientDetails(String parameter){
+    	
+        try
+        {
+        	
+        	Connection conn = connecting.CreateConnection(conDeets);
+        	PreparedStatement st2 =conn.prepareStatement(custDetails + ' ' +  parameter);	    	
+        	qryResults = st2.executeQuery();
+        	if (qryResults==null){
+
+    			  JOptionPane.showMessageDialog(null, "null query");
+        	}
+        	else{
+				while(qryResults.next()){
+					
+		        	//String invoice 			= qryResults.getString("Invoice");
+		        	 String rees				= qryResults.getString("customerReeseCode");
+					 String customerFName 	= qryResults.getString("CustomerFName");
+					 String customerLName 	= qryResults.getString("CustomerLName");
+					 String customerAddress = qryResults.getString("customerPStreetAddress");
+					 String customerSuburb 	= qryResults.getString("CustomerPSuburb");
+					 String customerPostCode= qryResults.getString("CustomerPostCode");
+					 String customerPhone 	= qryResults.getString("CustomerPhone");
+					 String customerMobile 	= qryResults.getString("CustomerMobile");
+					 String customerEmail 	= qryResults.getString("CustomerEmail");
+					 String streetAddress 	= qryResults.getString("StreetAddress");
+					 String suburb 			= qryResults.getString("Suburb");
+										
+			        String str = //" INVOICE:\t" + parameter + "\n" +
+			        		     " REES CODE:\t" + rees +"\n\n" +
+		        				 " CLIENT:\t" + customerFName +  " " + customerLName + "\n\n" + 
+							 	 " SITE:\t" + streetAddress + "\n" +
+							 	 "\t" + suburb + "\n\n" + 
+							 	 " POSTAL:\t" + customerAddress + "\n" +
+							 	 "\t" + customerSuburb + "\n" + 
+							 	 "\t" + customerPostCode + "\n\n" +
+							 	 " PHONE:\t" + customerPhone + "\n" + 
+							 	 " MOBILE:\t" + customerMobile + "\n\n" +
+							 	 " EMAIL:\t" + customerEmail + "\n";	        		
+        		return str;
+				}
+        	}
+        }
+        catch(Exception ex)
+        { 
+        JOptionPane.showMessageDialog(null, ex.toString());
+        }      		            
+		return "";
+    }
+	
+	 /*public String DisplayClientDetails(String parameter){
 	        try
 	        {
 	        	Connection conn = connecting.CreateConnection(conDeets);
@@ -175,12 +226,12 @@ public class SalesPane extends JPanel
 	        }
 	        catch(Exception ex)
 	        { 
-	        	
+	        	System.out.println("+++++++++++++++++++++++++");
 	        JOptionPane.showMessageDialog(null, ex.toString());
 	        }      		            
 			return "";
 	    }	
-	
+	*/
 	public ResultSet getResults(int ind){      		
 		try
 		{

@@ -24,6 +24,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
@@ -32,6 +33,7 @@ import Main.ConnDetails;
 import Main.GetJobs;
 import net.proteanit.sql.DbUtils;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -39,6 +41,7 @@ import javax.swing.JCheckBox;
 class SiteCheckPanel extends JPanel {
 	//private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
 	//private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
+	private int [] columnWidth = { 50, 50, 100, 100, 100};
 	private String param = "";  
 	private ResultSet rs;
 
@@ -51,6 +54,7 @@ class SiteCheckPanel extends JPanel {
 	private JTable salesTbl;
 	private DefaultTableModel model1;
 	private JTextArea txtAreaCustInfo;
+	private Color LtGray = Color.decode("#eeeeee");
 	private SalesPane sp;
 	private ConnDetails conDeets;
 
@@ -73,7 +77,6 @@ class SiteCheckPanel extends JPanel {
 		model1 = new DefaultTableModel();  
 		model1.setRowCount(0);
 		salesTbl = new JTable(model1);
-		salesTbl.setPreferredSize(new Dimension(0, 300));
 		salesTbl.setAutoCreateRowSorter(true);
 
 		JScrollPane scrollPane = new JScrollPane(salesTbl);
@@ -92,17 +95,18 @@ class SiteCheckPanel extends JPanel {
 		infoPanel.setBounds(0, 280, 1077, 289);  //setPreferredSize(new Dimension(0, 300));
 		infoPanel.setLayout(null);
 
-		txtAreaCustInfo = new JTextArea();
+/*		txtAreaCustInfo = new JTextArea();
 		txtAreaCustInfo.setEditable(false);
 		txtAreaCustInfo.setBounds(23, 24, 382, 237);
-		infoPanel.add(txtAreaCustInfo);
-
-		/*	JTextArea txtAreaCustInfo = new JTextArea();
-		txtAreaCustInfo.setEditable(false);
-		txtAreaCustInfo.setBounds(165, 299, 382, 237);
 		infoPanel.add(txtAreaCustInfo);*/
-
-
+		
+		txtAreaCustInfo = new JTextArea("");
+		txtAreaCustInfo.setBounds(20, 20, 250, 260);
+		txtAreaCustInfo.setBorder(BorderFactory.createEtchedBorder());
+		txtAreaCustInfo.setBackground(LtGray);
+		txtAreaCustInfo.setLineWrap(true);
+		txtAreaCustInfo.setEditable(false);
+	        infoPanel.add(txtAreaCustInfo);
 
 		lblSChkBooking = new JLabel("Site Check Booking:");
 		lblSChkBooking.setBounds(478, 68, 128, 14);
@@ -120,7 +124,7 @@ class SiteCheckPanel extends JPanel {
 		infoPanel.add(comBxSChkDoneBy);
 		GetJobs job = new GetJobs(conDeets);
 
-		String[] installUr = job.getInstallers();
+		//String[] installUr = job.getInstallers();
 
 		/*DefaultComboBoxModel model = new DefaultComboBoxModel( installUr );
 			      comBxSChkDoneBy.setModel( model );   
@@ -129,6 +133,16 @@ class SiteCheckPanel extends JPanel {
 
 		DefaultComboBoxModel modelSC = new DefaultComboBoxModel( SC );
 		comBxSChkDoneBy.setModel( modelSC );
+		
+		//GetJobs job = new GetJobs(conDeets);
+/*		String[] installType = job.getInstallers();
+		
+		DefaultComboBoxModel model = new DefaultComboBoxModel( installType );
+		comBxSChkDoneBy.setModel( model );*/
+		/*		
+		String[] SC = job.getSiteChecker();
+		DefaultComboBoxModel<String> modelSC = new DefaultComboBoxModel<String>( SC );
+		comBxSChkDoneBy.setModel( modelSC );*/
 
 
 		lblSiteCheckBy = new JLabel("Site Check By:");
@@ -161,7 +175,7 @@ class SiteCheckPanel extends JPanel {
 				}					
 			}
 		});
-
+		
 		btnSave = new JButton("Save Details");
 		btnSave.setBounds(770, 209, 148, 23);
 		infoPanel.add(btnSave);
@@ -193,9 +207,9 @@ class SiteCheckPanel extends JPanel {
 
 	protected void resetTable() {
 		//Fix this little null error 
-		ResultSet rs = sp.getResults(3);
+		ResultSet rs = sp.getResults(2);
 		salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
-		//spaceHeader(columnModel, columnWidth);
+		spaceHeader();
 		//sentChk.setSelected(false);
 
 		//rowSelected=false;
@@ -217,5 +231,15 @@ class SiteCheckPanel extends JPanel {
 		}
 		return newData;
 	}
+	
+    public void spaceHeader() {
+        int i;
+        TableColumn tabCol = columnModel.getColumn(0);
+        for (i=0; i<columnWidth.length; i++){
+             tabCol = columnModel.getColumn(i);
+            tabCol.setPreferredWidth(columnWidth[i]);
+        }
+        header.repaint();
+  }
 
 }
