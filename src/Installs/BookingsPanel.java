@@ -36,7 +36,7 @@ import net.proteanit.sql.DbUtils;
 class BookingsPanel extends JPanel {
 
 	
-	private int [] columnWidth = {30, 100, 120, 80, 40, 40, 40, 40, 40}; 	
+	private int [] columnWidth = {30, 100, 100, 80, 40, 40, 40, 40}; 	
 	private String upCCCClient = "{Call AWS_WCH_DB.dbo.[p_PermitUpdateCCCToClient] (?,?)}";
 	private Color LtGray = Color.decode("#eeeeee");
 	
@@ -54,7 +54,7 @@ class BookingsPanel extends JPanel {
 	private JTable permitsTbl;
 	private DefaultTableModel model1;
 	
-//	private JTextArea detailsTxtArea;
+	private JTextArea detailsTxtArea;
 	
 //	private JLabel sentLbl;
 //	private JCheckBox sentChk;
@@ -62,15 +62,11 @@ class BookingsPanel extends JPanel {
 //	private JLabel sentDateLbl;
 //	private JSpinner sentDate;
 	
-//	private JButton cancelPermitReqBtn; 
-//	private JButton savePermitReqBtn; 
+	private JButton cancelPermitReqBtn; 
+	private JButton savePermitReqBtn; 
 	
 	private CreateConnection conn;
-	
-	private JLabel fuelLbl;
-	private JComboBox fireCmbo;
-	private JComboBox fuelCmbo;
-	
+		
 	private Boolean lockForm;
 	private ConnDetails conDeets;
 	private InstallsPane ip;
@@ -78,99 +74,57 @@ class BookingsPanel extends JPanel {
 
 public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 
-	  this.lockForm = lockForm;
-	  this.conDeets = conDetts;
-	  this.ip = ipn;
-	  
-  
+		this.lockForm = lockForm;
+		this.conDeets = conDetts;
+		this.ip = ipn;
 
-	  connecting = new CreateConnection();
+		connecting = new CreateConnection();
 		  	
 	    model1 = new DefaultTableModel();  
 	    model1.setRowCount(0);
-      permitsTbl = new JTable(model1);
-      permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-      permitsTbl.setAutoCreateRowSorter(true);
+	    permitsTbl = new JTable(model1);
+	    permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+	    permitsTbl.setAutoCreateRowSorter(true);
       
-      JScrollPane scrollPane = new JScrollPane(permitsTbl);
+	    JScrollPane scrollPane = new JScrollPane(permitsTbl);
 	  
-      header= permitsTbl.getTableHeader();
-      columnModel = header.getColumnModel();
-      add(header); 
+	    header= permitsTbl.getTableHeader();
+	    columnModel = header.getColumnModel();
+	    add(header); 
               	        
-      tablePanel = new JPanel();
-      tablePanel.setBounds(20, 20, 1025, 260);  //setPreferredSize(new Dimension(0, 300));      
-      tablePanel.setLayout(new BorderLayout());
+	    tablePanel = new JPanel();
+	    tablePanel.setBounds(20, 20, 1025, 260);  //setPreferredSize(new Dimension(0, 300));      
+	    tablePanel.setLayout(new BorderLayout());
       
-      infoPanel = new JPanel();
-      infoPanel.setBounds(0, 280, 1100, 300);  //setPreferredSize(new Dimension(0, 300));
-      infoPanel.setLayout(null);
- /*     
-      detailsTxtArea = new JTextArea("");
-      detailsTxtArea.setBounds(20, 20, 250, 260);
-      detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
-      detailsTxtArea.setBackground(LtGray);
-      detailsTxtArea.setLineWrap(true);
-      detailsTxtArea.setEditable(false);
-      infoPanel.add(detailsTxtArea);
+	    infoPanel = new JPanel();
+	    infoPanel.setBounds(0, 280, 1100, 300);  //setPreferredSize(new Dimension(0, 300));
+	    infoPanel.setLayout(null);
       
-      cancelPermitReqBtn = new JButton("Cancel");
-      cancelPermitReqBtn.setBounds(720, 260, 150, 25);
-      infoPanel.add(cancelPermitReqBtn);
+	    detailsTxtArea = new JTextArea("");
+	    detailsTxtArea.setBounds(20, 20, 250, 260);
+	    detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
+	    detailsTxtArea.setBackground(LtGray);
+	    detailsTxtArea.setLineWrap(true);
+	    detailsTxtArea.setEditable(false);
+	    infoPanel.add(detailsTxtArea);
       
-      savePermitReqBtn = new JButton("Save Permit Details");
-      savePermitReqBtn.setBounds(895, 260, 150, 25);
-      infoPanel.add(savePermitReqBtn);
-*/
+	    cancelPermitReqBtn = new JButton("Cancel");
+	    cancelPermitReqBtn.setBounds(720, 260, 150, 25);
+	    infoPanel.add(cancelPermitReqBtn);
+      
+	    savePermitReqBtn = new JButton("Save Permit Details");
+	    savePermitReqBtn.setBounds(895, 260, 150, 25);
+	    infoPanel.add(savePermitReqBtn);
 
       
-
-
       
- //     job.getInstallers()
-      fireCmbo = new JComboBox();
-      fireCmbo.setBackground(Color.WHITE);
-      fireCmbo.setBounds(635, 200, 150, 20);
-      infoPanel.add(fireCmbo);
-      
-
-      fuelCmbo = new JComboBox();
- //     fuelCmbo.setSelectedIndex(0);
-      fuelCmbo.setBackground(Color.WHITE);
-      fuelCmbo.setBounds(895, 200, 150, 20);
-      infoPanel.add(fuelCmbo);
-      
-      GetJobs job = new GetJobs(conDeets);
-      
-      
-      
-      String[] installUr = job.getInstallers();
-      
-      DefaultComboBoxModel model = new DefaultComboBoxModel( installUr );
-      fireCmbo.setModel( model );   
-      
-    
- /*     String[] SC = job.getSiteChecker();
-      
-      DefaultComboBoxModel modelSC = new DefaultComboBoxModel( SC );
-      fuelCmbo.setModel( modelSC );   
- */     
-
-      String[] SELL = job.getSales();
-      
-      DefaultComboBoxModel modelSELL = new DefaultComboBoxModel( SELL );
-      fuelCmbo.setModel( modelSELL );   
-    
-      
-      
-      
-      this.setLayout(null);
-      this.add(tablePanel); 
-      this.add(infoPanel);
+	    this.setLayout(null);
+	    this.add(tablePanel); 
+	    this.add(infoPanel);
       
 	  	tablePanel.add(scrollPane, BorderLayout.CENTER);
 	  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);        
-/*
+
 		cancelPermitReqBtn.addActionListener( new ActionListener()
 		{
 			@Override
@@ -207,7 +161,6 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 					}
 				}
 		  	});
-		  	*/
 }
 
 public void spaceHeader(TableColumnModel colM, int[] colW) {

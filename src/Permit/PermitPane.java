@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Enumeration;
+import java.util.Formatter;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -210,15 +211,7 @@ public class PermitPane extends JPanel
 	        }      		            
 			return "";
         }
-        	
-        	
-        	
-        	
-        	
-        	
-        	
-        	
-        
+        	       	    
         
         public ResultSet getResults(int ind){      	
         	
@@ -258,31 +251,4 @@ public class PermitPane extends JPanel
         		return qryResults;       		            
         }
  
-               
-/*    	protected void updatePermit(String update, String param, ConnDetails connDeets) {
-
-    		JOptionPane.showMessageDialog(null, update);
-            try	// Attempt update
-            {
-            	Connection conn = connecting.CreateConnection(connDeets);	        	   	
-            	Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);           	
-    //Create Update String
-                stmt.execute(update); 
-
-                JOptionPane.showMessageDialog(null, "Permit "+ param + " Updated successfully");
-           }
-            catch (SQLServerException sqex)
-            {
-  //          	if (sqex.getErrorCode() == 547){
-  //          		JOptionPane.showMessageDialog(null, "Fire ID NOT IN SYSTEM!");
-   //         	}else {
-            	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
-  //          	}
-            }
-            catch(Exception ex)
-            { 
-            JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
-            }
-    	}
-*/
 }

@@ -5,6 +5,7 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -44,6 +45,10 @@ public class InstallsPane extends JPanel
 		private PlaceOrdPanel placeOrderPnl;
 		private RecvOrderPanel recvOrderPnl;
 		private BookingsPanel bookingPnl;
+		
+		private String stockRcvd   = "{CALL AWS_WCH_DB.dbo.i_InstallsReportReceived (?)}";
+		private StringBuilder sb;
+		private String str;
 
 		private Boolean lockForm;
 		private String custDetails = "EXEC AWS_WCH_DB.dbo.p_CustomerDetails";				
@@ -58,7 +63,7 @@ private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.i_InstallsToLoad
 private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// procedure[0]
 										 {30, 100, 120, 80, 40, 40, 40, 40},	 		// procedure[1]
 										 {20, 100, 120, 20, 80, 400}, 					// procedure[2]
-										 {30, 100, 120, 80, 40, 40, 40, 40, 40}, 		// procedure[3]
+										 {20, 100, 100, 40, 20, 80, 300, 50}, 				// procedure[3]
 										 {30, 100, 120, 80, 40, 40, 40, 40, 40}};		// procedure[4]
 		
 
@@ -68,7 +73,8 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
     	this.conDeets = conDeets;
     	lockForm = false;
 		
-		  	connecting = new CreateConnection();
+		connecting = new CreateConnection();
+		sb = new StringBuilder();
     	
 		//Adding Jpanels to the SAles panel area 
 		JTabbedPane permitP = new JTabbedPane();
@@ -258,67 +264,55 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
         }
 	}
 	
-	/*
-	 * Checks if this install (and sale), have files in the file system
-	 * updates Boolean values invExists, siteExists, photoExists, 
-	 */
-/*		protected void checkForFiles() {
-	
-	String folder;
-	
-	String saleID;
-	String invoiceNum;
-	String invPfx;
-	String sitePfx;
-	String photoPfx;
-	
-	JButton viewInvBtn;
-	JButton viewSiteBtn;
-	JButton viewPhotoBtn;
-	
-	boolean invExists;
-	boolean siteExists;
-	boolean photoExists;
-	
-	File inv;
-	File site;
-	File[] photosArr;
-			
-		//Check for stored Invoice
-		inv = new File(folder+invPfx+invoiceNum+".pdf");//Uses InstallID/Invoice number
-		if (inv.exists()){
-			viewInvBtn.setVisible(true);
-			invExists = true;
-		}else{
-			viewInvBtn.setVisible(false);
-			invExists = false;
-		}	
-		//Check for stored SiteCheck Forms	
-		site = new File(folder+sitePfx+saleID+".pdf");//Uses SaleID number
-		if (site.exists()){
-			viewSiteBtn.setVisible(true);
-			siteExists = true;
-		}else{
-			viewSiteBtn.setVisible(false);
-			siteExists = false;
-		}
-		//Check for stored Photo(s)	
-		//Create array of photos
-		File f = new File(folder);					
-			photosArr = f.listFiles(new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				return name.startsWith(photoPfx+saleID+"_");	//Uses SaleID number
-			}
-		});
 
-		if (photosArr.length>0){
-			viewPhotoBtn.setVisible(true);
-			photoExists = true;
-		}else{
-			viewPhotoBtn.setVisible(false);
-			photoExists = false;
-		}
+    public StringBuilder reportStockReceived(String date){
+    	sb.setLength(0);
+		sb.append("STOCK RECEIVED SINCE " + date); 
+		sb.append(System.getProperty("line.separator"));
 		
-	}
-*/
+    	sb.append("----------------------------------------------------------------------------------");
+    	sb.append(System.getProperty("line.separator"));
+
+        try
+        {
+        	
+        	Connection conn = connecting.CreateConnection(conDeets);
+        	PreparedStatement st2 =conn.prepareStatement(stockRcvd);
+        	st2.setString(1, date);
+        	qryResults = st2.executeQuery();
+        	if (qryResults==null){
+
+    			  JOptionPane.showMessageDialog(null, "null query");
+        	}
+        	else{
+				while(qryResults.next()){
+					
+					String invoice			= qryResults.getString("Invoice");
+		        	String po				= qryResults.getString("Number");
+		        	String installDate	 	= qryResults.getString("InstallDate");
+					String customerName 	= qryResults.getString("CustomerName");
+					String site		 		= qryResults.getString("Site");
+					String qty			 	= qryResults.getString("Quantity");
+					String item 			= qryResults.getString("Desc");
+					String recvdDate	 	= qryResults.getString("Received");
+	
+					sb.append(String.format("%-15s %-20.12s %-32s", "PO: "+po, "Rcvd: "+recvdDate, customerName)); 
+					sb.append(System.getProperty("line.separator"));
+					sb.append(String.format("%-15s %-20.12s %-32s ", "INV:"+invoice, "Inst: "+installDate, site)); 
+					sb.append(System.getProperty("line.separator"));
+					sb.append(String.format("%3s %-11s %-50s", " ", qty, item )); 
+					sb.append(System.getProperty("line.separator"));
+					sb.append(System.getProperty("line.separator"));
+				}
+				return sb;
+        	}
+        }
+        catch(Exception ex)
+        { 
+        JOptionPane.showMessageDialog(null, ex.toString());
+        }      		            
+		return sb;
+    }
+
+	
 }

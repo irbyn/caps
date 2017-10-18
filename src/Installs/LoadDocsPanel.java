@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
@@ -163,8 +165,8 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 		  	
 	    model1 = new DefaultTableModel();  
 	    model1.setRowCount(0);
+	    
 	    permitsTbl = new JTable(model1);
-
 	    permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	    permitsTbl.setAutoCreateRowSorter(true);
       
@@ -188,6 +190,7 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 	    detailsTxtArea.setBackground(LtGray);
 	    detailsTxtArea.setLineWrap(true);
 	    detailsTxtArea.setEditable(false);
+	    detailsTxtArea.setFont(new Font("Arial", Font.BOLD, 12));
 	    infoPanel.add(detailsTxtArea);
       
 	    invPanel = new JPanel();
@@ -376,7 +379,14 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 			   { 
-				   resetTable();
+				    String fonts[] = 
+				    	      GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+
+				    	    for ( int i = 0; i < fonts.length; i++ )
+				    	    {
+				    	      System.out.println(fonts[i]);
+				    	    }
+		//		   resetTable();
 				}					
 			}
 		});

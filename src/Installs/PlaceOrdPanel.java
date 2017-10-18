@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.ResultSet;
 
 import javax.swing.BorderFactory;
@@ -20,6 +22,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -29,6 +32,8 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
+import com.microsoft.sqlserver.jdbc.SQLServerException;
+
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Permit.PermitPane;
@@ -37,15 +42,12 @@ import net.proteanit.sql.DbUtils;
 class PlaceOrdPanel extends JPanel {
 	
 	private int [] columnWidth = {20, 100, 120, 20, 80, 400};	
-	private String[] colNames = {"Invoice","Customer","Address", "Qty", "Stock Code", "Description"};
-	private int [] colWidth =	{20, 100, 120, 20, 80, 400};//{30, 10, 80, 400};// {0, 20, 100, 120, 20, 80, 400}; 
-	private String upCCCClient = "{Call AWS_WCH_DB.dbo.[p_PermitUpdateCCCToClient] (?,?)}";
+	private String[] colNames = {"Invoice","Customer Name","Street Address", "Qty", "Stock Code", "Description"};
+	private String upPONum = "{Call AWS_WCH_DB.dbo.[i_updateStockPONumber] (?,?,?)}";
+	private String[][] poItems;
 	
 	private String param = "";  
 	private ResultSet rs;
-	private Color LtGray = Color.decode("#eeeeee");
-	
-	private Boolean rowSelected = false;
 	
 	private CreateConnection connecting;
 	
@@ -65,14 +67,16 @@ class PlaceOrdPanel extends JPanel {
 	
 //	private JTextArea detailsTxtArea;
 	
-	private JLabel sentLbl;
-	private JCheckBox sentChk;
+	private JLabel poLbl;
+	private JTextField poTxtBx;
 	
-	private JLabel sentDateLbl;
-	private JSpinner sentDate;
+	private JButton cancelPONumBtn; 
+	private JButton savePONumBtn; 
 	
-	private JButton cancelPermitReqBtn; 
-	private JButton savePermitReqBtn; 
+	private String inv; 
+	private String stk; 
+	private String po; 
+
 	
 	private CreateConnection conn;
 	
@@ -92,7 +96,6 @@ public PlaceOrdPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 	  model1 = new DefaultTableModel();  
 	  model1.setRowCount(0);
 	  installTbl = new JTable(model1);
-//      permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	  installTbl.setRowSelectionAllowed(false);
 	  installTbl.setAutoCreateRowSorter(true);
       
@@ -100,63 +103,56 @@ public PlaceOrdPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 	  
       header= installTbl.getTableHeader();
       columnModel = header.getColumnModel();
-//	    permitsTbl.removeColumn(columnModel.getColumn(0));
       add(header); 
               	        
       tablePanel = new JPanel();
-      tablePanel.setBounds(20, 20, 1025, 260);  //    
+      tablePanel.setBounds(20, 20, 1025, 260);      
       tablePanel.setLayout(new BorderLayout());
       
       infoPanel = new JPanel();
-      infoPanel.setBounds(0, 280, 1100, 300);  //
+      infoPanel.setBounds(0, 280, 1100, 300);  
       infoPanel.setLayout(null);
       
       poPanel = new JPanel();
-      poPanel.setBounds(20, 20, 1025, 200);		//	(290, 20, 755, 200);  
+      poPanel.setBounds(20, 20, 1025, 170);		  
       poPanel.setLayout(new BorderLayout());
+           
+	  tmod2 = new DefaultTableModel(colNames,0);
+      poTbl = new JTable(tmod2);
+      poTbl.setAutoCreateRowSorter(true);        
+      JScrollPane sp = new JScrollPane(poTbl);	  
+      hd2= poTbl.getTableHeader();        
+      cmod2 = hd2.getColumnModel();
+	  spaceHeader(cmod2, columnWidth);
+      add(hd2);
+       
+      poLbl = new JLabel("PO Number:");
+      poLbl.setBounds(825, 200, 70, 20);
+      infoPanel.add(poLbl);
+      poTxtBx = new JTextField(10);
+      poTxtBx.setBounds(895, 200, 150, 20);
+      infoPanel.add(poTxtBx);
+     
+      cancelPONumBtn = new JButton("Cancel");
+      cancelPONumBtn.setBounds(720, 260, 150, 25);
+      infoPanel.add(cancelPONumBtn);
       
-/*      detailsTxtArea = new JTextArea("");
-      detailsTxtArea.setBounds(20, 20, 250, 260);
-      detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
-      detailsTxtArea.setBackground(LtGray);
-      detailsTxtArea.setLineWrap(true);
-      detailsTxtArea.setEditable(false);
-      infoPanel.add(detailsTxtArea);
-*/      
-	    tmod2 = new DefaultTableModel(colNames,0);
-        poTbl = new JTable(tmod2);
-        poTbl.setAutoCreateRowSorter(true);
-        
-        JScrollPane sp = new JScrollPane(poTbl);
-	  
-        hd2= poTbl.getTableHeader();
-        
-        cmod2 = hd2.getColumnModel();
-	  	spaceHeader(cmod2, colWidth);
-        add(hd2);
-        
-
-      
-      cancelPermitReqBtn = new JButton("Cancel");
-      cancelPermitReqBtn.setBounds(720, 260, 150, 25);
-      infoPanel.add(cancelPermitReqBtn);
-      
-      savePermitReqBtn = new JButton("Save Permit Details");
-      savePermitReqBtn.setBounds(895, 260, 150, 25);
-      infoPanel.add(savePermitReqBtn);
+      savePONumBtn = new JButton("Save Permit Details");
+      savePONumBtn.setBounds(895, 260, 150, 25);
+      infoPanel.add(savePONumBtn);
 
       this.setLayout(null);
       this.add(tablePanel); 
       infoPanel.add(poPanel);
       this.add(infoPanel);
       
-	  	poPanel.add(sp, BorderLayout.CENTER);
-	  	poPanel.add(poTbl.getTableHeader(), BorderLayout.NORTH); 
+	  poPanel.add(sp, BorderLayout.CENTER);
+	  poPanel.add(poTbl.getTableHeader(), BorderLayout.NORTH); 
       
-	  	tablePanel.add(scrollPane, BorderLayout.CENTER);
-	  	tablePanel.add(installTbl.getTableHeader(), BorderLayout.NORTH);        
+	  tablePanel.add(scrollPane, BorderLayout.CENTER);
+	  tablePanel.add(installTbl.getTableHeader(), BorderLayout.NORTH);        
 
-		cancelPermitReqBtn.addActionListener( new ActionListener()
+	  cancelPONumBtn.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -165,12 +161,14 @@ public PlaceOrdPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 				}					
 			}
 		});
-		savePermitReqBtn.addActionListener( new ActionListener()
+	  savePONumBtn.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 			   { 
-				   if(rowSelected){
+				   if(tmod2.getRowCount()!=-1){ 
+					   saveStock();
+					   
 				   }
 			   }
 			}
@@ -179,13 +177,8 @@ public PlaceOrdPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {
 				if (!arg0.getValueIsAdjusting()){
-					rowSelected=true;
-		//			pp.setFormsLocked();
 					try{
-					param = installTbl.getValueAt(installTbl.getSelectedRow(), 0).toString();
-					
-//					detailsTxtArea.setText(ip.DisplayClientDetails(param));
-					
+					param = installTbl.getValueAt(installTbl.getSelectedRow(), 0).toString();			
 					} catch (IndexOutOfBoundsException e){
 						//Ignoring IndexOutOfBoundsExceptions!
 					}
@@ -196,8 +189,9 @@ public PlaceOrdPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 	  	    @Override
 	  	    public void mouseClicked(MouseEvent evt) {
 	  	        if (evt.getClickCount() == 2) {
+	  	        	
 	  	        	int actualRow = installTbl.convertRowIndexToModel(installTbl.rowAtPoint(evt.getPoint())); 
-	  	        	int clickedRow = installTbl.rowAtPoint(evt.getPoint());	  	        	
+	  	        	int clickedRow = installTbl.rowAtPoint(evt.getPoint());	
 	  	        	moveRow(clickedRow);		
 	  	        	((DefaultTableModel)installTbl.getModel()).removeRow(actualRow);	
 	  	         }		  	      
@@ -208,13 +202,66 @@ public PlaceOrdPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 	  	    public void mouseClicked(MouseEvent evt) {
 	  	        if (evt.getClickCount() == 2) {
 	  	        	int actualRow = poTbl.convertRowIndexToModel(poTbl.rowAtPoint(evt.getPoint()));
-	  	        	int clickedRow = poTbl.rowAtPoint(evt.getPoint());
-	  	        	returnRow(actualRow);
-	  	        	tmod2.removeRow(clickedRow);	
+	  	        	int clickedRow = poTbl.rowAtPoint(evt.getPoint());	  	        	
+	  	        	returnRow(clickedRow);
+	  	        	tmod2.removeRow(actualRow);	
 	  	         }		  	      
 	  	    }
 	  	});	
 	  	resetTable();
+}
+
+
+protected void saveStock() {
+	   if (poTxtBx.getText().isEmpty()){
+		   ip.showMessage("Please Enter a PO Number");
+	   }else{
+
+		   int rows = tmod2.getRowCount();
+		   int i;
+		   inv = ""; 
+		   stk = "";
+		   po = "";
+
+
+		   for (i = 0; i < rows; i++ ){
+			   inv = tmod2.getValueAt(i, 0).toString(); 
+			   stk = tmod2.getValueAt(i, 4).toString();
+			   po = poTxtBx.getText();
+			   updateStockItem();
+		   }		
+		   
+		   resetTable();
+	   }
+	
+}
+
+
+protected void updateStockItem() {
+	CallableStatement pm = null;
+
+	try {
+				
+	    Connection conn = connecting.CreateConnection(conDeets);	        	   	
+	
+	    pm = conn.prepareCall(upPONum);
+		
+	    pm.setInt(1, Integer.parseInt(inv));
+	    pm.setString(2, stk);
+	    pm.setString(3,	po);
+
+	    
+	    
+	    pm.executeUpdate();
+	    }
+        catch (SQLServerException sqex)
+        {
+           	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+        }
+        catch(Exception ex)
+        { 
+           JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+        }			
 }
 
 
@@ -254,11 +301,10 @@ protected void resetTable() {
 	ResultSet rs = ip.getResults(2,  conDeets);
 	installTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
   	spaceHeader(columnModel, columnWidth);
-  	
-	rowSelected=false;
 	tmod2.setRowCount(0);
-	
+	poTxtBx.setText("");
 	param = "";
+	
 //	detailsTxtArea.setText("");
 
 }		

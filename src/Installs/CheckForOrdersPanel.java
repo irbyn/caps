@@ -344,10 +344,9 @@ public CheckForOrdersPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane 
 						invoiceNum = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
 					
 						detailsTxtArea.setText(ip.DisplayClientDetails(invoiceNum));
-						displayClientDetails(invoiceNum);
+						getExtraClientDetails(invoiceNum);
 						readInvoice();
-						checkForFiles();
-					
+						checkForFiles();					
 					} catch (IndexOutOfBoundsException e){
 						//Ignoring IndexOutOfBoundsExceptions!
 					}
@@ -386,7 +385,6 @@ protected void updateStockList() {
 	    pm.setString(2, getFireCode());
 	    pm.setString(3,	getStockList());
 	    pm.setInt(4, omodel.getRowCount());
-	    
 	    pm.executeUpdate();
 	    }
         catch (SQLServerException sqex)
@@ -506,7 +504,7 @@ protected void readInvoice() {
 
 		      //Retrieving text from PDF document
 		      text = pdfStripper.getText(document); 
-		      
+		      document.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -554,7 +552,7 @@ protected void readInvoice() {
 	        	}	
 	        }	
 	      }
-}
+	}
 
 /*
  * Checks if this install (and sale), have files in the file system
@@ -598,7 +596,8 @@ protected void readInvoice() {
 	
 }
 
-	private void displayClientDetails(String parameter) {
+	
+	private void getExtraClientDetails(String parameter) {
 	
 	rs = ip.getDetails(getSaleID, invoiceNum);
 	

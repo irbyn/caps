@@ -56,7 +56,7 @@ class PermitsReqPanel extends JPanel {
 	private String upConsent = "call AWS_WCH_DB.dbo.p_PermitUpdateConsent ";
 	private String upSent = "{call AWS_WCH_DB.dbo.p_PermitUpdateSent (?)}";
 	private String upFire = "{call AWS_WCH_DB.dbo.p_PermitUpdateFire (?,?,?,?,?,?,?,?)}";
-	private Color LtGray = Color.decode("#eeeeee");
+	private Color LtGray = Color.decode("#e8e8ff");
 	private CreateConnection connecting;
 	
 	private String param = "";  
