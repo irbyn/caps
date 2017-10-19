@@ -203,6 +203,7 @@ class EstimationPanel extends JPanel {
 		String[] installType = job.getInstallType();
 		DefaultComboBoxModel<String> modelInst = new DefaultComboBoxModel<String>( installType );
 		comBxInstType.setModel( modelInst );
+		comBxInstType.setSelectedItem(null);
 		/*		
 		String[] SC = job.getSiteChecker();
 		DefaultComboBoxModel<String> modelSC = new DefaultComboBoxModel<String>( SC );
@@ -214,6 +215,7 @@ class EstimationPanel extends JPanel {
 		String[] SELL = job.getSales();
 		DefaultComboBoxModel<String> modelSell = new DefaultComboBoxModel<String>( SELL );
 		comBxSlsPerson.setModel( modelSell ); 
+		comBxSlsPerson.setSelectedItem(null);
 
 		this.setLayout(null);
 		this.add(tablePanel); 
@@ -251,13 +253,13 @@ class EstimationPanel extends JPanel {
 						//reset all the blank fields within the estimation tab
 						txtBxFire.setText(null);
 						txtBxPrice.setText(null);
-						//comBxInstType.setSelectedIndex(0);
+						comBxInstType.setSelectedItem(null);
 						//chckBxToBook.setSelected(false);
-						//comBxSChkDoneBy.setSelectedIndex(0);
+						//comBxSChkDoneBy.setSelectedItem(null);
 						//spnTimeDate.setEditor(new JSpinner.DateEditor(spnTimeDate, dt.toPattern()));
 						//chckBxSChkComp.setSelected(false);
 						txtBxComment.setText(null);
-						//comBxSlsPerson.setSelectedItem(0);
+						comBxSlsPerson.setSelectedItem(null);
 					}
 				}				
 			}
@@ -311,7 +313,7 @@ class EstimationPanel extends JPanel {
 		Boolean newData = false;
 		//add in combx for Install type and the date spinner 
 		if (!txtAreaCustInfo.getText().equals("") || !txtBxFire.getText().equals("") || txtBxPrice.getText().equals("")
-			|| comBxInstType.getSelectedIndex() == 0 || !txtBxComment.getText().equals("") || !(comBxSlsPerson.getSelectedIndex() == 0 )){
+			|| !(comBxInstType.getSelectedItem()== null) || !txtBxComment.getText().equals("") || !(comBxSlsPerson.getSelectedItem() == null )){
 			newData = true;
 		}
 		return newData;

@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -115,15 +116,21 @@ class FollowUpPanel extends JPanel {
 			rdBtnInvoice = new JRadioButton("Invoice");
 			rdBtnInvoice.setBounds(563, 55, 109, 23);
 			infoPanel.add(rdBtnInvoice);
+						
+			rdBtnSoldEls = new JRadioButton("Sold Elsewhere");
+			rdBtnSoldEls.setBounds(563, 83, 151, 23);
+			infoPanel.add(rdBtnSoldEls);
+			
+			ButtonGroup group = new ButtonGroup();
+			group.add(rdBtnNxtFlwUp);
+			group.add(rdBtnInvoice);
+			group.add(rdBtnSoldEls);
 			
 			txtBxInvNumb = new JTextField();
 			txtBxInvNumb.setBounds(753, 58, 208, 20);
 			infoPanel.add(txtBxInvNumb);
 			txtBxInvNumb.setColumns(10);
-			
-			rdBtnSoldEls = new JRadioButton("Sold Elsewhere");
-			rdBtnSoldEls.setBounds(563, 83, 151, 23);
-			infoPanel.add(rdBtnSoldEls);
+
 			
 			btnCancel = new JButton("Cancel");
 			btnCancel.setBounds(563, 204, 148, 23);

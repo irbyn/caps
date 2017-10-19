@@ -39,6 +39,8 @@ class CustomerPanel extends JPanel {
 	//private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String qryCustDetails = "EXEC AWS_WCH_DB.dbo.[s_CustomerDetails] ";
 	private String upReceived = "call AWS_WCH_DB.dbo.s_SalesUpdateCustomer";
+	private String createCustSale = "call AWS_WCH_DB.dbo.s_CreateCustomerSale";
+	private String createNewCust = "call AWS_WCH_DB.dbo.s_CreateNewCustomer";
 	private String qryOneValSearch = "call AWS_WCH_DB.dbo.s_SalesSearchValOneCustomer";
 	private String qryTwoValSearch = "call AWS_WCH_DB.dbo.s_SalesSearchValTwoCustomer";
 	private String qryAllValSearch = "call AWS_WCH_DB.dbo.s_SalesSearchValAllCustomer";
@@ -258,8 +260,6 @@ class CustomerPanel extends JPanel {
 		pAddChbx.setBounds(201, 413, 210, 23);
 		infoPanel.add(pAddChbx);
 
-
-
 		sAddrlbl = new JLabel("Site Street Address:");
 		sAddrlbl.setBounds(55, 458, 135, 15);
 		infoPanel.add(sAddrlbl);
@@ -307,7 +307,44 @@ class CustomerPanel extends JPanel {
 		
 		JButton createSaleBtn = new JButton("Create Sale");
 		createSaleBtn.setBounds(291, 533, 120, 25);
-		infoPanel.add(createSaleBtn);
+		infoPanel.add(createSaleBtn);	
+		createSaleBtn.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				
+					Boolean errorChk = false;
+					String error = " ";
+					//otherwise the email field should be valid
+					if (sAddrTxtBx.getText().equals("")){
+						errorChk = true;
+						error = error + "STREET ADDRESS: can not be empty\n";
+					}else if (pAddrTxtBx.getText().length() > 30 || sAddrTxtBx.getText().length() > 30){
+						errorChk = true;
+						error = error + "STREET ADDRESS: can not be longer than 30 letters\n";
+					}
+
+					if (sSuburbTxtBx.getText().equals("")){
+						errorChk = true;
+						error = error + "SUBURB: can not be empty\n";
+					} else if(sAddrTxtBx.getText().length() > 20){
+						errorChk = true;
+						error = error + "SUBURB: can not be longer than 30 letters\n";
+					}
+
+					//Check to see if any errors has occured
+					if (errorChk == true){
+						JOptionPane.showMessageDialog(null, error);
+					}else if (validatedata() == false){
+						createSale();
+						sp.showMessage("Creating new Sale");
+						resetTable();
+						clearFields();
+						createCustBtn.setEnabled(true);
+					}
+					
+				}
+			});
 		
 		salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
@@ -360,10 +397,10 @@ class CustomerPanel extends JPanel {
 						if (validatedata() == false){
 							//Check to see if the user is sure about creating the customer
 							int dialogButton = JOptionPane.YES_NO_OPTION;
-							int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to create this customer","Warning",dialogButton);
+							int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to modify this customer","Warning",dialogButton);
 							if(dialogResult == JOptionPane.YES_OPTION){
 								// Saving code here -- add customer to the database
-								sp.showMessage("Updating Consent Received");
+								sp.showMessage("Updating Customer Details");
 								updateCustomer();
 								resetTable();
 								clearFields();
@@ -385,8 +422,9 @@ class CustomerPanel extends JPanel {
 						int dialogButton = JOptionPane.YES_NO_OPTION;
 						int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to create this customer","Warning",dialogButton);
 						if(dialogResult == JOptionPane.YES_OPTION){
+							createNewCustomer();
 							// Saving code here -- add customer to the database
-							sp.showMessage("Updating Customer Details");
+							sp.showMessage("Creating new customer");
 							//createCustomer();
 							resetTable();
 							clearFields();
@@ -655,18 +693,18 @@ class CustomerPanel extends JPanel {
 		}
 
 		//otherwise the email field should be valid
-		if (pAddrTxtBx.getText().equals("") || sAddrTxtBx.getText().equals("")){
+		if (pAddrTxtBx.getText().equals("")){
 			errorChk = true;
 			error = error + "STREET ADDRESS: can not be empty\n";
-		}else if (pAddrTxtBx.getText().length() > 30 || sAddrTxtBx.getText().length() > 30){
+		}else if (pAddrTxtBx.getText().length() > 30){
 			errorChk = true;
 			error = error + "STREET ADDRESS: can not be longer than 30 letters\n";
 		}
 
-		if (pSuburbTxtBx.getText().equals("") || sSuburbTxtBx.getText().equals("")){
+		if (pSuburbTxtBx.getText().equals("")){
 			errorChk = true;
 			error = error + "SUBURB: can not be empty\n";
-		} else if(pSuburbTxtBx.getText().length() > 20 || sAddrTxtBx.getText().length() > 20){
+		} else if(pSuburbTxtBx.getText().length() > 20){
 			errorChk = true;
 			error = error + "SUBURB: can not be longer than 30 letters\n";
 		}
@@ -707,6 +745,72 @@ class CustomerPanel extends JPanel {
 		sAddrTxtBx.setText("");
 		sSuburbTxtBx.setText("");
 	}
+	
+	protected void createSale() {
+
+		CallableStatement sm = null;
+		try {
+
+			String update = "{" + createCustSale +"(?,?,?,?,?,?,?,?,?,?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+
+			sm = conn.prepareCall(update);
+
+			sm.setString(1, getFName());
+			sm.setString(2, getLName());
+			sm.setString(3, getPAddr());
+			sm.setString(4, getPSuburb());
+			sm.setString(5, getPAreaCode());
+			sm.setString(6, getPhone());
+			sm.setString(7, getMobile());
+			sm.setString(8, getEmail());
+			sm.setString(9, getSAddr());
+			sm.setString(10, getSSuburb());
+
+			sm.executeUpdate();
+		}
+		catch (SQLServerException sqex)
+		{
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}			
+	}
+	
+	protected void createNewCustomer() {
+
+		CallableStatement sm = null;
+		try {
+
+			String update = "{" + createNewCust +"(?,?,?,?,?,?,?,?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+
+			sm = conn.prepareCall(update);
+
+			sm.setString(1, getFName());
+			sm.setString(2, getLName());
+			sm.setString(3, getPAddr());
+			sm.setString(4, getPSuburb());
+			sm.setString(5, getPAreaCode());
+			sm.setString(6, getPhone());
+			sm.setString(7, getMobile());
+			sm.setString(8, getEmail());
+
+			sm.executeUpdate();
+		}
+		catch (SQLServerException sqex)
+		{
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}			
+	}
+	
+	
 
 	protected void updateCustomer() {
 
