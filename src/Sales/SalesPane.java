@@ -188,50 +188,6 @@ public class SalesPane extends JPanel
 		return "";
     }
 	
-	 /*public String DisplayClientDetails(String parameter){
-	        try
-	        {
-	        	Connection conn = connecting.CreateConnection(conDeets);
-	        	PreparedStatement st2 =conn.prepareStatement(custDetails + ' ' +  parameter);	    	
-	        	qryResults = st2.executeQuery();
-	        	if (qryResults==null){
-	    			  JOptionPane.showMessageDialog(null, "null query");
-	        	}
-	        	else{
-					while(qryResults.next()){
-						//Only displays the first one and not the 
-		        		 //String invoice 		= qryResults.getString("Sale ID");
-						 String customerFName 	= qryResults.getString("customerFName");
-						 String customerLName 	= qryResults.getString("customerLName");
-						 String customerAddress = qryResults.getString("customerPStreetAddress");
-						 String customerSuburb 	= qryResults.getString("customerPSuburb");
-						 String customerPostCode= qryResults.getString("customerPostCode");
-						 String customerPhone 	= qryResults.getString("customerPhone");
-						// String customerMobile 	= qryResults.getString("customerMobile");
-						 String customerEmail 	= qryResults.getString("customerEmail");
-						 //String streetAddress 	= qryResults.getString("StreetAddress");
-						 //String suburb 			= qryResults.getString("Suburb");
-						 //String status 			= qryResults.getString("PermitStatus");
-						 
-						 String str = "INVOICE:\t\t" + parameter + "\n\n"
-								 + "CLIENT:\t\t" + customerFName + ' ' + customerLName + "\n\n"
-								 + "SITE ADDRESS:\t" + customerAddress + "\n\n"
-								 + "SUBURB:\t\t" + customerSuburb + "\n\n"
-								 + "POST CODE:\t\t" + customerPostCode + "\n\n"
-								 + "PHONE NUMBER:\t" + customerPhone + "\n\n"
-								 + "EMAIL:\t\t" + customerEmail;
-						 return str;
-					}
-	        	}
-	        }
-	        catch(Exception ex)
-	        { 
-	        	System.out.println("+++++++++++++++++++++++++");
-	        JOptionPane.showMessageDialog(null, ex.toString());
-	        }      		            
-			return "";
-	    }	
-	*/
 	public ResultSet getResults(int ind){      		
 		try
 		{

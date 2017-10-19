@@ -462,6 +462,7 @@ class CustomerPanel extends JPanel {
 				createCustBtn.setEnabled(true);
 				sFNameTxtBx.setText("");
 				sLNameTxtBx.setText("");
+				reesTxtBx.setText("");
 			}
 		});
 
@@ -472,12 +473,12 @@ class CustomerPanel extends JPanel {
 				if (!sFNameTxtBx.getText().equals("") && !sLNameTxtBx.getText().equals("") && !reesTxtBx.getText().equals("")){
 					try {	
 						CallableStatement sm = null;				
-						String qry = "{" + qryTwoValSearch +"(?,?,?)}";	
+						String qry = "{" + qryAllValSearch +"(?,?,?)}";	
 						Connection conn = connecting.CreateConnection(conDeets);	        	   	
 						sm = conn.prepareCall(qry);
 					
 							sm.setString(1, sFNameTxtBx.getText());
-							sm.setString(2, sFNameTxtBx.getText());
+							sm.setString(2, sLNameTxtBx.getText());
 							sm.setString(3, reesTxtBx.getText());
 							ResultSet qryResults = sm.executeQuery();
 							rs = qryResults;
@@ -500,21 +501,21 @@ class CustomerPanel extends JPanel {
 						//if the FN has text use it otherwise send null
 						if (!sFNameTxtBx.getText().equals("")){
 							sm.setString(1, sFNameTxtBx.getText());
-							System.out.println("///////////////");
+							System.out.println("///////////////");//------------------------------------------------------Comment--------------
 						}else{
 							sm.setString(1, null);
 						}
 						
 						if (!sLNameTxtBx.getText().equals("")){
-							sm.setString(2, sFNameTxtBx.getText());
-							System.out.println("-------------");
+							sm.setString(2, sLNameTxtBx.getText());
+							System.out.println("-------------");//------------------------------------------------------Comment--------------
 						}else{
 							sm.setString(2, null);
 						}
 						
 						if (!reesTxtBx.getText().equals("")){
 							sm.setString(3, reesTxtBx.getText());
-							System.out.println("555");
+							System.out.println("555");//------------------------------------------------------Comment--------------
 						}else{
 							sm.setString(3, null);
 						}
@@ -544,7 +545,7 @@ class CustomerPanel extends JPanel {
 						}
 						
 						if (!sLNameTxtBx.getText().equals("")){
-							sm.setString(2, sFNameTxtBx.getText());
+							sm.setString(2, sLNameTxtBx.getText());
 						}else{
 							sm.setString(2, null);
 						}
@@ -810,8 +811,6 @@ class CustomerPanel extends JPanel {
 		}			
 	}
 	
-	
-
 	protected void updateCustomer() {
 
 		CallableStatement sm = null;
