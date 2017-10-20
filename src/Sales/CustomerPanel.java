@@ -39,8 +39,11 @@ class CustomerPanel extends JPanel {
 	//private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String qryCustDetails = "EXEC AWS_WCH_DB.dbo.[s_CustomerDetails] ";
 	private String upReceived = "call AWS_WCH_DB.dbo.s_SalesUpdateCustomer";
-	private String createCustSale = "call AWS_WCH_DB.dbo.s_CreateCustomerSale";
+	private String getCustID = "call AWS_WCH_DB.dbo.s_SaleGetCustID";
+	private String createCustANDSale = "call AWS_WCH_DB.dbo.s_CreateCustomerSale";
 	private String createNewCust = "call AWS_WCH_DB.dbo.s_CreateNewCustomer";
+	private String createNewSale = "call AWS_WCH_DB.dbo.s_CreateNewSale";
+	private String searchExstCust = "call AWS_WCH_DB.dbo.s_SalesSearchExistingCust";
 	private String qryOneValSearch = "call AWS_WCH_DB.dbo.s_SalesSearchValOneCustomer";
 	private String qryTwoValSearch = "call AWS_WCH_DB.dbo.s_SalesSearchValTwoCustomer";
 	private String qryAllValSearch = "call AWS_WCH_DB.dbo.s_SalesSearchValAllCustomer";
@@ -285,6 +288,7 @@ class CustomerPanel extends JPanel {
 
 		updateBtn = new JButton("Update");
 		updateBtn.setBounds(161, 533, 120, 25);
+		updateBtn.setEnabled(false);
 		infoPanel.add(updateBtn);
 
 		createCustBtn = new JButton("Create Customer");
@@ -293,18 +297,18 @@ class CustomerPanel extends JPanel {
 
 		this.setLayout(null);
 		this.add(searchPanel);
-		
+
 		JLabel reesLbl = new JLabel("Reese #:");
 		reesLbl.setBounds(425, 42, 62, 14);
 		searchPanel.add(reesLbl);
-		
+
 		reesTxtBx = new JTextField();
 		reesTxtBx.setColumns(10);
 		reesTxtBx.setBounds(482, 39, 120, 20);
 		searchPanel.add(reesTxtBx);
 		this.add(tablePanel); 
 		this.add(infoPanel);
-		
+
 		JButton createSaleBtn = new JButton("Create Sale");
 		createSaleBtn.setBounds(291, 533, 120, 25);
 		infoPanel.add(createSaleBtn);	
@@ -312,30 +316,41 @@ class CustomerPanel extends JPanel {
 		{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				
-					Boolean errorChk = false;
-					String error = " ";
-					//otherwise the email field should be valid
-					if (sAddrTxtBx.getText().equals("")){
-						errorChk = true;
-						error = error + "STREET ADDRESS: can not be empty\n";
-					}else if (pAddrTxtBx.getText().length() > 30 || sAddrTxtBx.getText().length() > 30){
-						errorChk = true;
-						error = error + "STREET ADDRESS: can not be longer than 30 letters\n";
-					}
 
-					if (sSuburbTxtBx.getText().equals("")){
-						errorChk = true;
-						error = error + "SUBURB: can not be empty\n";
-					} else if(sAddrTxtBx.getText().length() > 20){
-						errorChk = true;
-						error = error + "SUBURB: can not be longer than 30 letters\n";
-					}
+				Boolean errorChk = false;
+				String error = " ";
+				//otherwise the email field should be valid
+				if (sAddrTxtBx.getText().equals("")){
+					errorChk = true;
+					error = error + "STREET ADDRESS: can not be empty\n";
+				}else if (pAddrTxtBx.getText().length() > 30 || sAddrTxtBx.getText().length() > 30){
+					errorChk = true;
+					error = error + "STREET ADDRESS: can not be longer than 30 letters\n";
+				}
 
-					//Check to see if any errors has occured
-					if (errorChk == true){
-						JOptionPane.showMessageDialog(null, error);
-					}else if (validatedata() == false){
+				if (sSuburbTxtBx.getText().equals("")){
+					errorChk = true;
+					error = error + "SUBURB: can not be empty\n";
+				} else if(sAddrTxtBx.getText().length() > 20){
+					errorChk = true;
+					error = error + "SUBURB: can not be longer than 30 letters\n";
+				}
+
+				//Check to see if any errors has occured
+				if (errorChk == true){
+					JOptionPane.showMessageDialog(null, error);
+				}else if (validatedata() == false){
+					//If the customer doesn't yet exist create a new customer and sale
+					if (rowSelected=false){
+						//getID();
+						createCustAndSale();
+					sp.showMessage("Creating New Customer and Sale");
+					resetTable();
+					clearFields();
+					createCustBtn.setEnabled(true);
+					}
+					//Otherwise just create a new sale
+					else{
 						createSale();
 						sp.showMessage("Creating new Sale");
 						resetTable();
@@ -344,27 +359,30 @@ class CustomerPanel extends JPanel {
 					}
 					
 				}
-			});
-		
+
+			}
+		});
+
 		salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {
 				if (!arg0.getValueIsAdjusting()){
 					rowSelected=true;
 					createCustBtn.setEnabled(false);
+					updateBtn.setEnabled(true);
 					try{
 						//Get the customer ID as a paramater to feed into the SQL procedure 
 						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
 						displayClientDetails(param);
 						rowSelected = true;
-						//txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
+						updateBtn.setEnabled(true);
 					} catch (IndexOutOfBoundsException e){
 
 					}
 				}
 			}
 		});
-		
+
 		//Display the initial table
 		rs = sp.getResults(0);		
 		salesTbl.setModel(DbUtils.resultSetToTableModel(rs));  
@@ -422,12 +440,23 @@ class CustomerPanel extends JPanel {
 						int dialogButton = JOptionPane.YES_NO_OPTION;
 						int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to create this customer","Warning",dialogButton);
 						if(dialogResult == JOptionPane.YES_OPTION){
-							createNewCustomer();
-							// Saving code here -- add customer to the database
-							sp.showMessage("Creating new customer");
-							//createCustomer();
-							resetTable();
-							clearFields();
+							//Check to see if customer already exists
+							try {
+								//if the statement doesn't return any customers then create a new customer
+								if (!checkDBForCust().isBeforeFirst()){
+									createNewCustomer();
+									sp.showMessage("Creating new customer");
+									//createCustomer();
+									resetTable();
+									clearFields();
+								}else{
+									JOptionPane.showMessageDialog(null, "This customer already exists! \nPlease search and edit them.");
+								}
+							} catch (SQLException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
 						}
 
 					}
@@ -449,6 +478,7 @@ class CustomerPanel extends JPanel {
 						resetTable();
 						clearFields();
 						createCustBtn.setEnabled(true);
+						updateBtn.setEnabled(false);
 					}
 				}
 			}
@@ -460,6 +490,7 @@ class CustomerPanel extends JPanel {
 				resetTable();
 				clearFields();
 				createCustBtn.setEnabled(true);
+				updateBtn.setEnabled(false);
 				sFNameTxtBx.setText("");
 				sLNameTxtBx.setText("");
 				reesTxtBx.setText("");
@@ -469,123 +500,38 @@ class CustomerPanel extends JPanel {
 		btnSearch.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0){
-				
-				if (!sFNameTxtBx.getText().equals("") && !sLNameTxtBx.getText().equals("") && !reesTxtBx.getText().equals("")){
-					try {	
-						CallableStatement sm = null;				
-						String qry = "{" + qryAllValSearch +"(?,?,?)}";	
-						Connection conn = connecting.CreateConnection(conDeets);	        	   	
-						sm = conn.prepareCall(qry);
-					
-							sm.setString(1, sFNameTxtBx.getText());
-							sm.setString(2, sLNameTxtBx.getText());
-							sm.setString(3, reesTxtBx.getText());
-							ResultSet qryResults = sm.executeQuery();
-							rs = qryResults;
-						
-					}catch (SQLServerException sqex){
-						JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
-					}catch(Exception ex){ 
-						JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
-					}	
-				}		
-				else if ((!sFNameTxtBx.getText().equals("") && !sLNameTxtBx.getText().equals("")) //If there is text in 2 text boxes  
-					||	(!sFNameTxtBx.getText().equals("") && !reesTxtBx.getText().equals("")) 
-					||	(!sLNameTxtBx.getText().equals("") && !reesTxtBx.getText().equals(""))){
-					
-					try {	
-						CallableStatement sm = null;				
-						String qry = "{" + qryTwoValSearch +"(?,?,?)}";	
-						Connection conn = connecting.CreateConnection(conDeets);	        	   	
-						sm = conn.prepareCall(qry);
-						//if the FN has text use it otherwise send null
-						if (!sFNameTxtBx.getText().equals("")){
-							sm.setString(1, sFNameTxtBx.getText());
-							System.out.println("///////////////");//------------------------------------------------------Comment--------------
-						}else{
-							sm.setString(1, null);
-						}
-						
-						if (!sLNameTxtBx.getText().equals("")){
-							sm.setString(2, sLNameTxtBx.getText());
-							System.out.println("-------------");//------------------------------------------------------Comment--------------
-						}else{
-							sm.setString(2, null);
-						}
-						
-						if (!reesTxtBx.getText().equals("")){
-							sm.setString(3, reesTxtBx.getText());
-							System.out.println("555");//------------------------------------------------------Comment--------------
-						}else{
-							sm.setString(3, null);
-						}
-						ResultSet qryResults = sm.executeQuery();
-						rs = qryResults;
-						
-					}catch (SQLServerException sqex){
-						JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
-					}catch(Exception ex){ 
-						JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
-					}	
-					
-				}
-				
-			else{
-				
-					try {	
-						CallableStatement sm = null;
-						String fLNQry = "{" + qryOneValSearch +"(?,?,?)}";	
-						Connection conn = connecting.CreateConnection(conDeets);	        	   	
-						sm = conn.prepareCall(fLNQry);
-						//if the FN has text use it otherwise send null
-						if (!sFNameTxtBx.getText().equals("")){
-							sm.setString(1, sFNameTxtBx.getText());
-						}else{
-							sm.setString(1, null);
-						}
-						
-						if (!sLNameTxtBx.getText().equals("")){
-							sm.setString(2, sLNameTxtBx.getText());
-						}else{
-							sm.setString(2, null);
-						}
-						
-						if (!reesTxtBx.getText().equals("")){
-							sm.setString(3, reesTxtBx.getText());
-						}else{
-							sm.setString(3, null);
-						}
-						
-						ResultSet qryResults = sm.executeQuery();
-						rs = qryResults;
-						
-					}catch (SQLServerException sqex){
-						JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
-					}catch(Exception ex){ 
-						JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
-					}		
-				
-			}
-				salesTbl.setModel(DbUtils.resultSetToTableModel(rs));
-				/*//Otherwise if just FN has text search db with FN
-				else if (!sFNameTxtBx.getText().equals("") && sLNameTxtBx.getText().equals("")){
-					rs = sp.getDetails(qryFNSearch, sFNameTxtBx.getText());
-				}
-				//Otherwise just search by last name
-				else if (sFNameTxtBx.getText().equals("") && !sLNameTxtBx.getText().equals("")){
-					rs = sp.getDetails(qryLNSearch, sLNameTxtBx.getText());
-				}else {
-					JOptionPane.showMessageDialog(null, "You must enter either a first name \nor last name to search.");
-				}
-				*/
-				//spaceHeader(columnModel, columnWidth);
-				//sentChk.setSelected(false);
-				rowSelected=false;
-				param = "";					
-			}
-		});
+				//If there is actually something in the search boxes
+				if (sFNameTxtBx.getText().equals("") && sLNameTxtBx.getText().equals("") && reesTxtBx.getText().equals(""))
+				{
+					JOptionPane.showMessageDialog(null, "You have not choosen anything to search! \nPlease try again.");	
+				}else{
+					String qry;	
 
+					if (!sFNameTxtBx.getText().equals("") && !sLNameTxtBx.getText().equals("") && !reesTxtBx.getText().equals("")){
+						qry = qryAllValSearch;	
+					}		
+					else if ((!sFNameTxtBx.getText().equals("") && !sLNameTxtBx.getText().equals("")) //If there is text in 2 text boxes  
+							||	(!sFNameTxtBx.getText().equals("") && !reesTxtBx.getText().equals("")) 
+							||	(!sLNameTxtBx.getText().equals("") && !reesTxtBx.getText().equals(""))){				
+						qry = qryTwoValSearch;	
+					}
+					else{
+						qry = qryOneValSearch;
+					}
+
+					ResultSet rs = searchCust(qry);
+					salesTbl.setModel(DbUtils.resultSetToTableModel(rs));
+					//spaceHeader(columnModel, columnWidth);
+					rowSelected=false;
+					param = "";		
+				}	
+			}
+
+
+		});
 	}
+
+
 	private void displayClientDetails(String parameter) {
 		rs2 = sp.getDetails(qryCustDetails, param);
 		try {
@@ -613,7 +559,6 @@ class CustomerPanel extends JPanel {
 			e.printStackTrace();
 		}
 	} 
-
 
 	protected void resetTable() {
 		ResultSet rs = sp.getResults(0);
@@ -746,13 +691,102 @@ class CustomerPanel extends JPanel {
 		sAddrTxtBx.setText("");
 		sSuburbTxtBx.setText("");
 	}
-	
+
+	protected ResultSet checkDBForCust(){
+
+		try {
+			CallableStatement sm = null;
+
+			String search = "{" + searchExstCust +"(?,?,?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   
+			sm = conn.prepareCall(search);
+
+			sm.setString(1, getFName());
+			sm.setString(2, getLName());
+			sm.setString(3, getEmail());
+
+			ResultSet qryResults = sm.executeQuery();
+			rs = qryResults;
+
+		}catch (SQLServerException sqex){
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}catch(Exception ex){ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}	 
+
+		return rs;
+	}
+
+	protected ResultSet searchCust(String query){
+		try {	
+			CallableStatement sm = null;
+
+			String qry = "{" + query +"(?,?,?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+			sm = conn.prepareCall(qry);
+
+			if (!sFNameTxtBx.getText().equals("")){
+				sm.setString(1, sFNameTxtBx.getText());
+			}else{
+				sm.setString(1, null);
+			}
+			if (!sLNameTxtBx.getText().equals("")){
+				sm.setString(2, sLNameTxtBx.getText());
+			}else{
+				sm.setString(2, null);
+			}
+			if (!reesTxtBx.getText().equals("")){
+				sm.setString(3, reesTxtBx.getText());
+			}else{
+				sm.setString(3, null);
+			}
+			ResultSet qryResults = sm.executeQuery();
+			rs = qryResults;
+
+		}catch (SQLServerException sqex){
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}catch(Exception ex){ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}				
+		return rs;
+	}
+
 	protected void createSale() {
 
 		CallableStatement sm = null;
 		try {
 
-			String update = "{" + createCustSale +"(?,?,?,?,?,?,?,?,?,?)}";	
+			String update = "{" + createNewSale +"(?,?,?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+
+			sm = conn.prepareCall(update);
+
+			sm.setInt(1, getID());
+//			sm.setInt(1, 20);
+			System.out.println(getID());
+			sm.setString(2, getSAddr());
+			sm.setString(3, getSSuburb());
+
+			sm.executeUpdate();
+			System.out.println("22222222222222222222");
+		}
+		catch (SQLServerException sqex)
+		{
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}	
+		System.out.println("++++++++++++++++++++++++++++++++++");
+	}
+	
+	protected void createCustAndSale() {
+
+		CallableStatement sm = null;
+		try {
+
+			String update = "{" + createCustANDSale +"(?,?,?,?,?,?,?,?,?,?)}";	
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
 
 			sm = conn.prepareCall(update);
@@ -779,7 +813,7 @@ class CustomerPanel extends JPanel {
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}			
 	}
-	
+
 	protected void createNewCustomer() {
 
 		CallableStatement sm = null;
@@ -810,7 +844,7 @@ class CustomerPanel extends JPanel {
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}			
 	}
-	
+
 	protected void updateCustomer() {
 
 		CallableStatement sm = null;
@@ -845,6 +879,39 @@ class CustomerPanel extends JPanel {
 		}			
 	}
 
+	public int getID(){
+		int customerID = 0;
+		try {
+			CallableStatement sm = null;
+			System.out.println("33333333333333333333333");
+			String search = "{" + getCustID +"(?,?,?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   
+			sm = conn.prepareCall(search);
+
+			sm.setString(1, getFName());
+			sm.setString(2, getLName());
+			sm.setString(3, getEmail());
+			System.out.println("4444444444444444444444444444");
+			ResultSet qryResults = sm.executeQuery();
+			System.out.println("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
+			rs = qryResults;
+			System.out.println("eeeeeeeeeeeeeeee");
+			while(qryResults.next()){
+			customerID	= qryResults.getInt("customerID");
+			System.out.println(customerID);
+			System.out.println("-------------------");
+			}
+			System.out.println("88888888888888888888888");
+			
+			
+		}catch (SQLServerException sqex){
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}catch(Exception ex){ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}	 
+		System.out.println("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
+		return customerID;
+	}
 
 	public String getFName(){
 		return fNameTxtBx.getText();
