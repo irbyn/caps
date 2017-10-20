@@ -52,6 +52,13 @@ public class SalesPane extends JPanel
 			"EXEC AWS_WCH_DB.dbo.s_SalesQuote", // procedure[3]
 	"EXEC AWS_WCH_DB.dbo.s_SalesFollowUp"};// procedure[4]
 
+	
+	private int[][] spacing = new int[][]	{{50, 70, 150, 100, 100, 100}, // procedure[0]
+		 {30, 100, 120, 80, 40, 40, 40, 40},// procedure[1]
+		 {20, 100, 120, 20, 80, 400},// procedure[2]
+		 {20, 100, 100, 40, 20, 80, 300, 50},// procedure[3]
+		 {30, 100, 120, 80, 40, 40, 40, 40, 40}};// procedure[4]
+
 	public SalesPane(ConnDetails conDeets, Homescreen hs)
 	{
 		this.hs = hs;
@@ -103,12 +110,18 @@ public class SalesPane extends JPanel
 					tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));
 
 					TableColumnModel tcm = tablez[tabIndex].getColumnModel();
+					spaceHeader(spacing[tabIndex], tcm);
+					
 					int cols = tcm.getColumnCount();
 
 					if (cols == 5){
 						int[] colWidths = new int[]{20, 150, 150, 100, 100}; 
 						spaceHeader(colWidths, tcm);
-					} else if (cols == 7){
+					}else if (cols == 6){
+						int[] colWidths = new int[]{50, 70, 150, 100, 100, 100};  
+						spaceHeader(colWidths, tcm);
+						}
+					 else if (cols == 7){
 						int[] colWidths = new int[]{20, 150, 150, 100, 100, 100, 100};   
 						spaceHeader(colWidths, tcm);                         
 					} else if (cols == 9){
@@ -163,14 +176,14 @@ public class SalesPane extends JPanel
 					 String customerPhone 	= qryResults.getString("CustomerPhone");
 					 String customerMobile 	= qryResults.getString("CustomerMobile");
 					 String customerEmail 	= qryResults.getString("CustomerEmail");
-					 String streetAddress 	= qryResults.getString("StreetAddress");
-					 String suburb 			= qryResults.getString("Suburb");
+					 String siteStreetAddress 	= qryResults.getString("StreetAddress");
+					 String siteSuburb			= qryResults.getString("Suburb");
 										
 			        String str = //" INVOICE:\t" + parameter + "\n" +
 			        		     " REES CODE:\t" + rees +"\n\n" +
 		        				 " CLIENT:\t" + customerFName +  " " + customerLName + "\n\n" + 
-							 	 " SITE:\t" + streetAddress + "\n" +
-							 	 "\t" + suburb + "\n\n" + 
+							 	 " SITE:\t" + siteStreetAddress + "\n" +
+							 	 "\t" + siteSuburb + "\n\n" + 
 							 	 " POSTAL:\t" + customerAddress + "\n" +
 							 	 "\t" + customerSuburb + "\n" + 
 							 	 "\t" + customerPostCode + "\n\n" +

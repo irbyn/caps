@@ -19,6 +19,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import com.microsoft.sqlserver.jdbc.SQLServerException;
@@ -35,8 +36,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JCheckBox;
 
 class CustomerPanel extends JPanel {
-	//private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
-	//private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String qryCustDetails = "EXEC AWS_WCH_DB.dbo.[s_CustomerDetails] ";
 	private String upReceived = "call AWS_WCH_DB.dbo.s_SalesUpdateCustomer";
 	private String getCustID = "call AWS_WCH_DB.dbo.s_SaleGetCustID";
@@ -47,6 +46,7 @@ class CustomerPanel extends JPanel {
 	private String qryOneValSearch = "call AWS_WCH_DB.dbo.s_SalesSearchValOneCustomer";
 	private String qryTwoValSearch = "call AWS_WCH_DB.dbo.s_SalesSearchValTwoCustomer";
 	private String qryAllValSearch = "call AWS_WCH_DB.dbo.s_SalesSearchValAllCustomer";
+	private int [] columnWidth = {50, 70, 150, 100, 100, 100}; 	
 	private String param = "";  
 	private ResultSet rs;
 	private ResultSet rs2;
@@ -61,7 +61,6 @@ class CustomerPanel extends JPanel {
 	private JTable salesTbl;
 	private DefaultTableModel model1;
 	private Boolean rowSelected;
-	private ConnDetails conDets;
 
 	private JTextField mobileNumTxtBx;
 	private JTextField sFNameTxtBx;
@@ -560,11 +559,20 @@ class CustomerPanel extends JPanel {
 		}
 	} 
 
+	public void spaceHeader(TableColumnModel colM, int[] colW) {
+	    int i;
+	   	TableColumn tabCol = colM.getColumn(0);
+	   	for (i=0; i<colW.length; i++){
+	      	tabCol = colM.getColumn(i);
+	      	tabCol.setPreferredWidth(colW[i]);
+	   	}
+	  	header.repaint();
+	  } 
+	
 	protected void resetTable() {
 		ResultSet rs = sp.getResults(0);
 		salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
-		//spaceHeader(columnModel, columnWidth);
-		//sentChk.setSelected(false);
+		spaceHeader(columnModel, columnWidth);
 		rowSelected=false;
 		param = "";
 	}
@@ -768,7 +776,6 @@ class CustomerPanel extends JPanel {
 			sm.setString(3, getSSuburb());
 
 			sm.executeUpdate();
-			System.out.println("22222222222222222222");
 		}
 		catch (SQLServerException sqex)
 		{
@@ -778,7 +785,6 @@ class CustomerPanel extends JPanel {
 		{ 
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}	
-		System.out.println("++++++++++++++++++++++++++++++++++");
 	}
 	
 	protected void createCustAndSale() {
@@ -883,7 +889,6 @@ class CustomerPanel extends JPanel {
 		int customerID = 0;
 		try {
 			CallableStatement sm = null;
-			System.out.println("33333333333333333333333");
 			String search = "{" + getCustID +"(?,?,?)}";	
 			Connection conn = connecting.CreateConnection(conDeets);	        	   
 			sm = conn.prepareCall(search);
@@ -891,25 +896,19 @@ class CustomerPanel extends JPanel {
 			sm.setString(1, getFName());
 			sm.setString(2, getLName());
 			sm.setString(3, getEmail());
-			System.out.println("4444444444444444444444444444");
+
 			ResultSet qryResults = sm.executeQuery();
-			System.out.println("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
 			rs = qryResults;
-			System.out.println("eeeeeeeeeeeeeeee");
+
 			while(qryResults.next()){
 			customerID	= qryResults.getInt("customerID");
-			System.out.println(customerID);
-			System.out.println("-------------------");
 			}
-			System.out.println("88888888888888888888888");
-			
 			
 		}catch (SQLServerException sqex){
 			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
 		}catch(Exception ex){ 
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}	 
-		System.out.println("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
 		return customerID;
 	}
 
