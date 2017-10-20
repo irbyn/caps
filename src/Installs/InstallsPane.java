@@ -159,7 +159,7 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
 					
 		        	String invoice 			= qryResults.getString("Invoice");
 		        	String rees				= qryResults.getString("Rees");
-					 String customerName 	= qryResults.getString("CustomerName");
+	 	     		 String customerName 	= qryResults.getString("CustomerName");
 					 String customerAddress = qryResults.getString("CustomerAddress");
 					 String customerSuburb 	= qryResults.getString("CustomerSuburb");
 					 String customerPostCode= qryResults.getString("CustomerPostCode");
