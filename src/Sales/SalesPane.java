@@ -40,6 +40,8 @@ public class SalesPane extends JPanel
 	private FollowUpPanel followUp;
 	private QuotePanel quote;
 	private SiteCheckPanel siteCheck;
+	private String custEmail;
+	private String custName;
 
 	private Boolean lockForm;
 	//private String custDetails = "EXEC AWS_WCH_DB.dbo.p_CustomerDetails";
@@ -54,7 +56,7 @@ public class SalesPane extends JPanel
 
 	
 	private int[][] spacing = new int[][]	{{50, 70, 150, 100, 100, 100}, // procedure[0]
-		 {30, 100, 120, 80, 40, 40, 40, 40},// procedure[1]
+		 {50, 50, 70, 150, 100, 100, 100, 50, 100},// procedure[1]
 		 {20, 100, 120, 20, 80, 400},// procedure[2]
 		 {50, 50, 100, 70, 100, 100, 60, 50, 50, 50},// procedure[3]
 		 {30, 100, 120, 80, 40, 40, 40, 40, 40}};// procedure[4]
@@ -99,7 +101,7 @@ public class SalesPane extends JPanel
 			public void stateChanged(ChangeEvent e) {
 				if (e.getSource() instanceof JTabbedPane) {
 					//  	if(!lockForm){
-
+					
 					JTabbedPane pane = (JTabbedPane) e.getSource();
 					tabIndex = pane.getSelectedIndex();
 
@@ -108,10 +110,8 @@ public class SalesPane extends JPanel
 
 					// add ResultSet into Selected Tab JTable.
 					tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));
-
-					TableColumnModel tcm = tablez[tabIndex].getColumnModel();
+					TableColumnModel tcm = tablez[tabIndex].getColumnModel();					
 					spaceHeader(spacing[tabIndex], tcm);
-					
 					int cols = tcm.getColumnCount();
 
 					if (cols == 5){
@@ -189,7 +189,11 @@ public class SalesPane extends JPanel
 							 	 "\t" + customerPostCode + "\n\n" +
 							 	 " PHONE:\t" + customerPhone + "\n" + 
 							 	 " MOBILE:\t" + customerMobile + "\n\n" +
-							 	 " EMAIL:\t" + customerEmail + "\n";	        		
+							 	 " EMAIL:\t" + customerEmail + "\n";	
+			        
+			        setCustName(customerFName + ' ' + customerLName);
+			        setEmailAddr(customerEmail);
+			        
         		return str;
 				}
         	}
@@ -250,4 +254,21 @@ public class SalesPane extends JPanel
 	public void showMessage(String msg) {
 		hs.showMsg(msg);
 	}
+	
+	public void setCustName(String CustName){
+		custName = CustName;
+	}
+	
+	public String getCustName(){
+		return custName;
+	}
+	
+	public void setEmailAddr(String CustEmail){
+		custEmail = CustEmail;
+	}
+	
+	public String getEmailAddr(){
+		return custEmail;
+	}
+
 }

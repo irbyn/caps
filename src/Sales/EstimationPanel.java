@@ -20,6 +20,10 @@ import net.proteanit.sql.DbUtils;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -31,8 +35,10 @@ import javax.swing.JTextField;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.ResultSet;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -41,10 +47,12 @@ class EstimationPanel extends JPanel {
 	private JTextField txtBxFire;
 	private JTextField txtBxPrice;
 	private JTextField txtBxComment;	
-	private int [] columnWidth = {135, 100, 150, 80, 40, 40, 40, 40, 400}; 
-	private String addEstimation = "call AWS_WCH_DB.dbo.s_SalesUpdateEstimation";
-	private String getInstID = "call AWS_WCH_DB.dbo.s_SaleGetInstID";
+	private int [] columnWidth = {50, 50, 70, 150, 100, 100, 100, 50, 100}; 
+	private String updateEstimation = "call AWS_WCH_DB.dbo.s_SalesUpdateEstimation";
+	private String addEstimationDate = "call AWS_WCH_DB.dbo.s_SalesUpdateEstimationDate";
+	private String getInstID = "call AWS_WCH_DB.dbo.s_SaleGetInstTypeID";
 	private String getSlsID = "call AWS_WCH_DB.dbo.s_SaleGetSlsID";
+	private String getEmBody = "call AWS_WCH_DB.dbo.s_SaleGetEmailBody";
 	private String param = ""; 
 	private String paramSID = ""; 
 	private ResultSet rs;
@@ -73,6 +81,8 @@ class EstimationPanel extends JPanel {
 	private JComboBox<String> comBxSlsPerson;
 	private JLabel lblFire;
 	private String error;
+	private int instTypeID;
+	private String emailLetterForm;
 	private JButton btnSendEmail;
 	private JButton btnCancel;
 	private JButton btnSave;
@@ -93,7 +103,7 @@ class EstimationPanel extends JPanel {
 		model1.setRowCount(0);
 		salesTbl = new JTable(model1);
 		model1.setRowCount(0);
-		
+
 		salesTbl.setAutoCreateRowSorter(true);
 
 		JScrollPane scrollPane = new JScrollPane(salesTbl);
@@ -123,7 +133,7 @@ class EstimationPanel extends JPanel {
 		txtAreaCustInfo.setBackground(LtGray);
 		txtAreaCustInfo.setLineWrap(true);
 		txtAreaCustInfo.setEditable(false);
-	        infoPanel.add(txtAreaCustInfo);
+		infoPanel.add(txtAreaCustInfo);
 
 
 		txtBxFire = new JTextField();
@@ -199,16 +209,16 @@ class EstimationPanel extends JPanel {
 		infoPanel.add(lblFire);
 
 		btnSendEmail = new JButton("Send Email");
-		btnSendEmail.setBounds(451, 255, 148, 23);
+		btnSendEmail.setBounds(868, 255, 148, 23);
 		infoPanel.add(btnSendEmail);
 
 		btnCancel = new JButton("Cancel");
-		btnCancel.setBounds(644, 255, 148, 23);
+		btnCancel.setBounds(451, 255, 148, 23);
 		infoPanel.add(btnCancel);
 
 
 		btnSave = new JButton("Save Details");
-		btnSave.setBounds(855, 255, 148, 23);
+		btnSave.setBounds(658, 255, 148, 23);
 		infoPanel.add(btnSave);
 
 		GetJobs job = new GetJobs(conDeets);
@@ -245,7 +255,7 @@ class EstimationPanel extends JPanel {
 						//Get the customer ID as a paramater to feed into the SQL procedure 
 						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 1).toString();
 						paramSID = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
-						
+
 						txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
 					} catch (IndexOutOfBoundsException e){
 
@@ -253,14 +263,51 @@ class EstimationPanel extends JPanel {
 				}
 			}
 		});
-		
-		btnSave.addActionListener(new ActionListener(){
+
+		btnSendEmail.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0){
-				
+				//Validating that the email can actually be sent
+				if (emailCanBeSent()){
+						
+					
+					int dialogButton = JOptionPane.YES_NO_OPTION;
+					int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to mark this email as sent?\n"
+							+ "There is no going back!\n"
+							+ "This customer will be moved to Site checks.","Warning",dialogButton);
+					if(dialogResult == JOptionPane.YES_OPTION){
+	
+						Desktop desktop;
+						if (Desktop.isDesktopSupported() 
+								&& (desktop = Desktop.getDesktop()).isSupported(Desktop.Action.MAIL)) {
+							
+							String custEmail = sp.getEmailAddr();
+							String emailBody = getEmailBody();
+							
+							URI mailto;
+							try {
+								mailto = new URI("mailto:" + custEmail + "?subject=Fire%20Estimation&body=" + emailBody);
+								desktop.mail(mailto);
+							} catch (URISyntaxException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+							updateEstimistionDate();
+							resetTable();
+						
+						} else {
+							// TODO fallback to some Runtime.exec(..) voodoo?
+							throw new RuntimeException("desktop doesn't support mailto; mail is dead anyway ;)");
+						}
+					}
+				}
 			}
 		});
-		
+
 		btnCancel.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0){
@@ -284,7 +331,7 @@ class EstimationPanel extends JPanel {
 				}				
 			}
 		});
-	
+
 		btnSave.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0){
@@ -300,13 +347,14 @@ class EstimationPanel extends JPanel {
 			}
 		});
 	}
-	
-	
+
+
 	protected void resetTable() {
 		ResultSet rs = sp.getResults(1);
 		salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 		spaceHeader(columnModel, columnWidth);
 		rowSelected=false;
+		error = "";
 		param = "";
 		txtAreaCustInfo.setText("");
 	}
@@ -329,7 +377,7 @@ class EstimationPanel extends JPanel {
 		CallableStatement sm = null;
 		try {
 
-			String update = "{" + addEstimation +"(?,?,?,?,?)}";	
+			String update = "{" + updateEstimation +"(?,?,?,?,?)}";	
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
 
 			sm = conn.prepareCall(update);
@@ -339,7 +387,7 @@ class EstimationPanel extends JPanel {
 			sm.setString(3, getPrice());
 			sm.setInt(4, getInstTypeID());
 			sm.setInt(5, getSlsPerson());
-			
+
 			sm.executeUpdate();
 		}
 		catch (SQLServerException sqex)
@@ -351,7 +399,32 @@ class EstimationPanel extends JPanel {
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}	
 	}
-	
+
+	private void updateEstimistionDate() {
+		CallableStatement sm = null;
+		try {
+
+			String update = "{" + addEstimationDate +"(?,?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+
+			sm = conn.prepareCall(update);
+
+			sm.setString(1, paramSID);
+			sm.setDate(2, getDate());
+
+			sm.executeUpdate();
+		}
+		catch (SQLServerException sqex)
+		{
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}
+
+	}
+
 	public void clearFields(){
 		txtBxFire.setText("");
 		txtBxPrice.setText("");
@@ -359,7 +432,7 @@ class EstimationPanel extends JPanel {
 		txtBxComment.setText("");
 		comBxSlsPerson.setSelectedItem(null);
 	}
-	
+
 	public boolean validateData(){
 		Boolean isError = false;
 		error = " ";
@@ -390,7 +463,7 @@ class EstimationPanel extends JPanel {
 		Boolean newData = false;
 		//add in combx for Install type and the date spinner 
 		if (!txtAreaCustInfo.getText().equals("") || !txtBxFire.getText().equals("") || txtBxPrice.getText().equals("")
-			|| !(comBxInstType.getSelectedItem()== null) || !txtBxComment.getText().equals("") || !(comBxSlsPerson.getSelectedItem() == null )){
+				|| !(comBxInstType.getSelectedItem()== null) || !txtBxComment.getText().equals("") || !(comBxSlsPerson.getSelectedItem() == null )){
 			newData = true;
 		}
 		return newData;
@@ -413,12 +486,13 @@ class EstimationPanel extends JPanel {
 			String update = "{" + getInstID +"(?)}";	
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
 			sm = conn.prepareCall(update);
-			
+
 			sm.setString(1, instType);
-			
+
 			ResultSet rs = sm.executeQuery();
 			while (rs.next()){
 				instID = rs.getString("InstallTypeID");
+				emailLetterForm = rs.getString("EmailLetterFrom");
 			}
 		}
 		catch (SQLServerException sqex)
@@ -430,15 +504,14 @@ class EstimationPanel extends JPanel {
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}
 		int ID = Integer.parseInt(instID);
-		System.out.println("--- INST " + ID);
 		return ID;
-		
+
 	}
-	
+
 	public String getComment(){
 		return txtBxComment.getText();
 	}
-	
+
 	public int getSlsPerson(){
 		String slsID = "";
 		String slSName = (String) comBxSlsPerson.getSelectedItem();
@@ -466,6 +539,65 @@ class EstimationPanel extends JPanel {
 		int ID = Integer.parseInt(slsID);
 		System.out.println("--- SLS " + ID);
 		return ID;
+
+	}
+
+	public Date getDate(){
+		java.sql.Date sqlDate = new java.sql.Date(new java.util.Date().getTime());
+		return sqlDate;
+	}
+
+	public boolean emailCanBeSent(){
+		//Check if all the datails are filled out correctly
+
+		//check to get the inst description
+		
+		//If the combo box hasn't been selected
+		if (comBxInstType.getSelectedItem()== null){
+			instTypeID = getInstTypeID();
+		}else{
+			
+		}
+		return true;
+	}
+	
+	public String getEmailBody(){
+		String form = "";
+		String instType = (String) comBxInstType.getSelectedItem();
+		CallableStatement sm = null;
+		try {
+
+			String search = "{" + getEmBody +"(?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+			sm = conn.prepareCall(search);
+
+			sm.setString(1, instType);
+
+			ResultSet rs = sm.executeQuery();
+			while (rs.next()){
+				form = rs.getString("EmailFromLetter");
+			}
+		}
+		catch (SQLServerException sqex)
+		{
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}
+		
+		String custName = sp.getCustName();
+		String comment = txtBxComment.getText();
+		String email = "";
+		if (comment.equals("")){
+			email = "Hello " + custName + "\n\n--------------------------------------------\n\n" + form + "\n\n--------------------------------------------\n\n";
+		}else{
+			email = "Hello%20" + custName + "\n\n" + comment  + "\n\n--------------------------------------------\n\n" + form + "\n\n--------------------------------------------\n\n" ;
+		}		
+		String emailBody = email.replaceAll(" ", "%20");
+		emailBody = emailBody.replaceAll("\n", "%0D");
+		return emailBody;
 
 	}
 }
