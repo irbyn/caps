@@ -41,10 +41,14 @@ public class SchedulePane extends JPanel
 	private Boolean lockForm;
 	private String custDetails = "EXEC AWS_WCH_DB.dbo.p_CustomerDetails";
 	
-	// Stored procedures to fill tables (Triggered by tab selection)
-	private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.aPRACTICE '2017-10-15'", // procedure[0]
-												"EXEC AWS_WCH_DB.dbo.p_PermitsReceived"}; // procedure[1]
+	private String sunDate = "'2017-10-01";
 	
+	// Stored procedures to fill tables (Triggered by tab selection)
+	private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.aPRACTICE ", // procedure[0]
+												"EXEC AWS_WCH_DB.dbo.aPRACTICE "}; // procedure[1]
+	private int[][] spacing = new int[][]	{{80, 20, 50, 100, 100, 100, 100, 100, 50}, 	// procedure[0]
+											 {30, 100, 120, 80, 40, 40, 40, 40}};	 		// procedure[1]
+
 	public SchedulePane(ConnDetails conDeets, Homescreen hs) {	
 		
 	       
@@ -55,26 +59,25 @@ public class SchedulePane extends JPanel
 	  		  	connecting = new CreateConnection();
 	        	
 	    		//Adding Jpanels to the SAles panel area 
-	    		JTabbedPane permitP = new JTabbedPane();
-	    		permitP.setPreferredSize(new Dimension(1070, 610));
+	    		JTabbedPane scheduleP = new JTabbedPane();
+	    		scheduleP.setPreferredSize(new Dimension(1070, 610));
 	 
 	    		ttpanel = new TimeTablePanel(lockForm, conDeets, this);
 	    		scpanel = new ViewSiteChecksPanel();
 
 	    		
-	    		 JTable[] tablez = new JTable[]{ttpanel.getPermitsTbl() 
+	    		 JTable[] tablez = new JTable[]{ttpanel.getPermitsTbl(), ttpanel.getPermitsTbl() 
 	    				 				//		,scpanel.getPermitsTbl()
 	    				 						};
 	    
-	    		permitP.addTab("Permits Required", ttpanel);
-	    		permitP.addTab("Receive Permits", scpanel);
+	    		 scheduleP.addTab("Permits Required", ttpanel);
+	    		 scheduleP.addTab("Receive Permits", scpanel);
 
-	    		add(permitP); 
+	    		add(scheduleP); 
 
 	    //		getResults(0);  
 	    		
-	    		permitP.addChangeListener(new ChangeListener() {
-
+	    		scheduleP.addChangeListener(new ChangeListener() {
 	                @Override
 	                public void stateChanged(ChangeEvent e) {
 	                    if (e.getSource() instanceof JTabbedPane) {
@@ -83,24 +86,16 @@ public class SchedulePane extends JPanel
 	                        JTabbedPane pane = (JTabbedPane) e.getSource();
 	                        tabIndex = pane.getSelectedIndex();
 	                        
-	                        getResults(tabIndex); 
-	                 //       ResultSet r1 = results;
-	                        
-	                        // add ResultSet into Selected Tab JTable.
-	                        tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));         
-	                        
+	                        getResults(tabIndex, sunDate); 
+
+	                        tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));   
+	                        ttpanel.renderTable();
 	                        TableColumnModel tcm = tablez[tabIndex].getColumnModel();
 	                         int cols = tcm.getColumnCount();
 
 	                         if (cols == 9){
-	                        	 int[] colWidths = new int[]{80, 20, 100, 100, 100, 100, 100, 100, 100}; 
+	                        	 int[] colWidths = new int[]{80, 20, 50, 100, 100, 100, 100, 100, 50};
 	                        	 spaceHeader(colWidths, tcm);
-	                         } else if (cols == 7){
-	                        	 int[] colWidths = new int[]{20, 150, 150, 100, 100, 100, 100};   
-	                        	 spaceHeader(colWidths, tcm);                         
-	                         } else if (cols == 9){
-	                            	 int[] colWidths = new int[]{30, 100, 120, 80, 40, 40, 40, 40, 40};   
-	                            	 spaceHeader(colWidths, tcm);
 	                         }else {
 	                        	 int[] colWidths = new int[]{20, 80, 100, 80, 30, 30, 40, 40, 60, 30, 30};    
 	                        	 spaceHeader(colWidths, tcm);
@@ -179,15 +174,17 @@ public class SchedulePane extends JPanel
 	        }
 	        	       	    
 	        
-	        public ResultSet getResults(int ind){      	
-	        	
+	        public ResultSet getResults(int ind, String sunDate){      	
+	        	this.sunDate = sunDate;
 	            try
 		        {
 		        	Connection conn = connecting.CreateConnection(conDeets);
-		        	PreparedStatement st =conn.prepareStatement(procedure[ind]);	//ind]);
+		        	PreparedStatement st =conn.prepareStatement(procedure[ind] + sunDate);	//ind]);
+		        	
+		        	
 		        	results = st.executeQuery();
 		        	if (results==null){
-		        		getResults(0);
+		        		getResults(0, sunDate);
 		        	}
 		        }
 		        catch(Exception ex)
