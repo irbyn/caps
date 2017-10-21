@@ -56,7 +56,7 @@ public class SalesPane extends JPanel
 	private int[][] spacing = new int[][]	{{50, 70, 150, 100, 100, 100}, // procedure[0]
 		 {30, 100, 120, 80, 40, 40, 40, 40},// procedure[1]
 		 {20, 100, 120, 20, 80, 400},// procedure[2]
-		 {20, 100, 100, 40, 20, 80, 300, 50},// procedure[3]
+		 {50, 50, 100, 70, 100, 100, 60, 50, 50, 50},// procedure[3]
 		 {30, 100, 120, 80, 40, 40, 40, 40, 40}};// procedure[4]
 
 	public SalesPane(ConnDetails conDeets, Homescreen hs)
@@ -125,10 +125,10 @@ public class SalesPane extends JPanel
 						int[] colWidths = new int[]{20, 150, 150, 100, 100, 100, 100};   
 						spaceHeader(colWidths, tcm);                         
 					} else if (cols == 9){
-						int[] colWidths = new int[]{30, 100, 120, 80, 40, 40, 40, 40, 40};   
+						int[] colWidths = new int[]{135, 100, 150, 80, 40, 40, 40, 40, 400};    
 						spaceHeader(colWidths, tcm);
 					}else {
-						int[] colWidths = new int[]{20, 80, 100, 80, 30, 30, 40, 40, 60, 30, 30};    
+						int[] colWidths = new int[]{50, 50, 100, 70, 100, 100, 60, 50, 50, 50};    
 						spaceHeader(colWidths, tcm);
 					}
 				}
@@ -166,8 +166,8 @@ public class SalesPane extends JPanel
         	else{
 				while(qryResults.next()){
 					
-		        	//String invoice 			= qryResults.getString("Invoice");
-		        	 String rees				= qryResults.getString("customerReeseCode");
+		        	 String quote 			= qryResults.getString("Quote");
+		        	 String rees			= qryResults.getString("customerReeseCode");
 					 String customerFName 	= qryResults.getString("CustomerFName");
 					 String customerLName 	= qryResults.getString("CustomerLName");
 					 String customerAddress = qryResults.getString("customerPStreetAddress");
@@ -179,7 +179,7 @@ public class SalesPane extends JPanel
 					 String siteStreetAddress 	= qryResults.getString("StreetAddress");
 					 String siteSuburb			= qryResults.getString("Suburb");
 										
-			        String str = //" INVOICE:\t" + parameter + "\n" +
+			        String str = " QUOTE:\t" + quote + "\n" +
 			        		     " REES CODE:\t" + rees +"\n\n" +
 		        				 " CLIENT:\t" + customerFName +  " " + customerLName + "\n\n" + 
 							 	 " SITE:\t" + siteStreetAddress + "\n" +
@@ -231,7 +231,6 @@ public class SalesPane extends JPanel
 
 	//Get the results set for the customer details
 	public ResultSet getDetails(String qry, String param){      	
-		System.out.println(qry);
 		try
 		{
 			Connection conn = connecting.CreateConnection(conDeets);

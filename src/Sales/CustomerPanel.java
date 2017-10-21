@@ -343,10 +343,10 @@ class CustomerPanel extends JPanel {
 					if (rowSelected=false){
 						//getID();
 						createCustAndSale();
-					sp.showMessage("Creating New Customer and Sale");
-					resetTable();
-					clearFields();
-					createCustBtn.setEnabled(true);
+						sp.showMessage("Creating New Customer and Sale");
+						resetTable();
+						clearFields();
+						createCustBtn.setEnabled(true);
 					}
 					//Otherwise just create a new sale
 					else{
@@ -356,7 +356,7 @@ class CustomerPanel extends JPanel {
 						clearFields();
 						createCustBtn.setEnabled(true);
 					}
-					
+
 				}
 
 			}
@@ -560,15 +560,15 @@ class CustomerPanel extends JPanel {
 	} 
 
 	public void spaceHeader(TableColumnModel colM, int[] colW) {
-	    int i;
-	   	TableColumn tabCol = colM.getColumn(0);
-	   	for (i=0; i<colW.length; i++){
-	      	tabCol = colM.getColumn(i);
-	      	tabCol.setPreferredWidth(colW[i]);
-	   	}
-	  	header.repaint();
-	  } 
-	
+		int i;
+		TableColumn tabCol = colM.getColumn(0);
+		for (i=0; i<colW.length; i++){
+			tabCol = colM.getColumn(i);
+			tabCol.setPreferredWidth(colW[i]);
+		}
+		header.repaint();
+	} 
+
 	protected void resetTable() {
 		ResultSet rs = sp.getResults(0);
 		salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
@@ -603,7 +603,7 @@ class CustomerPanel extends JPanel {
 			errorChk = true;
 			error = error + "LAST NAME: can not be more than 15 letters\n";
 		}
-		if (homeNumTxtBx.getText().equals("") && !mobileNumTxtBx.getText().equals("")){
+		if (homeNumTxtBx.getText().equals("") && mobileNumTxtBx.getText().equals("")){
 			errorChk = true;
 			error = error + "NUMBERS: either home number or mobile number can not be empty\n";
 		}
@@ -770,8 +770,6 @@ class CustomerPanel extends JPanel {
 			sm = conn.prepareCall(update);
 
 			sm.setInt(1, getID());
-//			sm.setInt(1, 20);
-			System.out.println(getID());
 			sm.setString(2, getSAddr());
 			sm.setString(3, getSSuburb());
 
@@ -786,7 +784,7 @@ class CustomerPanel extends JPanel {
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}	
 	}
-	
+
 	protected void createCustAndSale() {
 
 		CallableStatement sm = null;
@@ -901,9 +899,9 @@ class CustomerPanel extends JPanel {
 			rs = qryResults;
 
 			while(qryResults.next()){
-			customerID	= qryResults.getInt("customerID");
+				customerID	= qryResults.getInt("customerID");
 			}
-			
+
 		}catch (SQLServerException sqex){
 			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
 		}catch(Exception ex){ 

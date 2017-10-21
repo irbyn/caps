@@ -48,7 +48,7 @@ class SiteCheckPanel extends JPanel {
 	//private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
 	//private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
 	private String updateSite = "call AWS_WCH_DB.dbo.s_SalesUpdateSiteCheck";
-	private int [] columnWidth = { 50, 50, 100, 100, 100};
+	private int [] columnWidth = {50, 50, 100, 100, 100};
 	private String param = "";  
 	private ResultSet rs;
 	private Color LtGray = Color.decode("#eeeeee");
@@ -261,7 +261,7 @@ class SiteCheckPanel extends JPanel {
 				if (!arg0.getValueIsAdjusting()){
 					//rowSelected=true;
 					try{
-						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 1).toString();
+						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
 						//displayClientDetails(param);
 						txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
 						rowSelected=true;

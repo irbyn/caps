@@ -6,7 +6,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+
+import com.microsoft.sqlserver.jdbc.SQLServerException;
+
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Main.GetJobs;
@@ -27,6 +31,8 @@ import javax.swing.JTextField;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -35,8 +41,12 @@ class EstimationPanel extends JPanel {
 	private JTextField txtBxFire;
 	private JTextField txtBxPrice;
 	private JTextField txtBxComment;	
-	//private String spResults = "EXEC AWS_WCH_DB.dbo.[s_SalesGetSalesPerson]";
-	private String param = "";  
+	private int [] columnWidth = {135, 100, 150, 80, 40, 40, 40, 40, 400}; 
+	private String addEstimation = "call AWS_WCH_DB.dbo.s_SalesUpdateEstimation";
+	private String getInstID = "call AWS_WCH_DB.dbo.s_SaleGetInstID";
+	private String getSlsID = "call AWS_WCH_DB.dbo.s_SaleGetSlsID";
+	private String param = ""; 
+	private String paramSID = ""; 
 	private ResultSet rs;
 	private Boolean rowSelected = false;
 	private CreateConnection connecting;
@@ -62,11 +72,13 @@ class EstimationPanel extends JPanel {
 	//private JSpinner spnTimeDate;
 	private JComboBox<String> comBxSlsPerson;
 	private JLabel lblFire;
+	private String error;
 	private JButton btnSendEmail;
 	private JButton btnCancel;
 	private JButton btnSave;
 	private SalesPane sp;
 	private validator vv;
+	private GetJobs gj;
 	private ConnDetails conDeets;
 
 	public EstimationPanel(ConnDetails ConDeets, SalesPane sp) {
@@ -169,7 +181,7 @@ class EstimationPanel extends JPanel {
 		infoPanel.add(txtBxComment);
 		txtBxComment.setColumns(10);
 
-		lblComment = new JLabel("Comment:");
+		lblComment = new JLabel("Email Comment:");
 		lblComment.setBounds(454, 151, 124, 14);
 		infoPanel.add(lblComment);
 
@@ -231,13 +243,21 @@ class EstimationPanel extends JPanel {
 					rowSelected=true;
 					try{
 						//Get the customer ID as a paramater to feed into the SQL procedure 
-						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 2).toString();
+						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 1).toString();
+						paramSID = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
 						
 						txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
 					} catch (IndexOutOfBoundsException e){
 
 					}
 				}
+			}
+		});
+		
+		btnSave.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0){
+				
 			}
 		});
 		
@@ -264,49 +284,106 @@ class EstimationPanel extends JPanel {
 				}				
 			}
 		});
+	
+		btnSave.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0){
+				//If there isn't an error add the details
+				if (validateData() == false){
+					addEstimation();
+					sp.showMessage("Adding the Estimation Details");
+					resetTable();
+					clearFields();
+				}else{
+					JOptionPane.showMessageDialog(null, error);
+				}
+			}
+		});
 	}
-
+	
+	
 	protected void resetTable() {
 		ResultSet rs = sp.getResults(1);
 		salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
-		//spaceHeader(columnModel, columnWidth);
-		//sentChk.setSelected(false);
-
+		spaceHeader(columnModel, columnWidth);
 		rowSelected=false;
 		param = "";
 		txtAreaCustInfo.setText("");
 	}
 
+	public void spaceHeader(TableColumnModel colM, int[] colW) {
+		int i;
+		TableColumn tabCol = colM.getColumn(0);
+		for (i=0; i<colW.length; i++){
+			tabCol = colM.getColumn(i);
+			tabCol.setPreferredWidth(colW[i]);
+		}
+		header.repaint();
+	} 
+
 	public JTable getSalesTbl(){
 		return salesTbl;
 	}
 
-	public void validateData(){
-		Boolean errorChk = false;
-		String error = " ";
+	public void addEstimation(){
+		CallableStatement sm = null;
+		try {
+
+			String update = "{" + addEstimation +"(?,?,?,?,?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+
+			sm = conn.prepareCall(update);
+
+			sm.setString(1, paramSID);
+			sm.setString(2, getFire());
+			sm.setString(3, getPrice());
+			sm.setInt(4, getInstTypeID());
+			sm.setInt(5, getSlsPerson());
+			
+			sm.executeUpdate();
+		}
+		catch (SQLServerException sqex)
+		{
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}	
+	}
+	
+	public void clearFields(){
+		txtBxFire.setText("");
+		txtBxPrice.setText("");
+		comBxInstType.setSelectedItem(null);
+		txtBxComment.setText("");
+		comBxSlsPerson.setSelectedItem(null);
+	}
+	
+	public boolean validateData(){
+		Boolean isError = false;
+		error = " ";
 		if (txtBxFire.getText().equals("")){
-			errorChk = true;
+			isError = true;
 			//Cannot be null or more than 15 chars
 			error = error + "FIRE: can not be empty\n";
 		}else if(txtBxFire.getText().length() > 30){
-			errorChk = true;
+			isError = true;
 			error = error + "FIRE: can not be more than 30 letters\n";
 		}
-		
-		
-		
 		try {
 			Integer.parseInt(txtBxPrice.getText());
 			if(4 <= txtBxPrice.getText().length() && txtBxPrice.getText().length() >= 5){
-				errorChk = true;
+				isError = true;
 				error = error + "PRCIE: must be between 2000 - 99999\n";
 			}
 		}
 		catch (NumberFormatException e) {
 			//Display number error message 
-			errorChk = true;
+			isError = true;
 			error = error + "PRICE: can only contain numbers\n";
 		}
+		return isError;
 	}
 
 	public Boolean checkTxtBx(){
@@ -317,5 +394,78 @@ class EstimationPanel extends JPanel {
 			newData = true;
 		}
 		return newData;
+	}
+
+	public String getFire(){
+		return txtBxFire.getText();
+	}
+
+	public String getPrice(){
+		return txtBxPrice.getText();
+	}
+
+	public int getInstTypeID(){
+		String instID = "";
+		String instType = (String) comBxInstType.getSelectedItem();
+		CallableStatement sm = null;
+		try {
+
+			String update = "{" + getInstID +"(?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+			sm = conn.prepareCall(update);
+			
+			sm.setString(1, instType);
+			
+			ResultSet rs = sm.executeQuery();
+			while (rs.next()){
+				instID = rs.getString("InstallTypeID");
+			}
+		}
+		catch (SQLServerException sqex)
+		{
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}
+		int ID = Integer.parseInt(instID);
+		System.out.println("--- INST " + ID);
+		return ID;
+		
+	}
+	
+	public String getComment(){
+		return txtBxComment.getText();
+	}
+	
+	public int getSlsPerson(){
+		String slsID = "";
+		String slSName = (String) comBxSlsPerson.getSelectedItem();
+		CallableStatement sm = null;
+		try {
+			String update = "{" + getSlsID +"(?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+			sm = conn.prepareCall(update);
+
+			sm.setString(1, slSName);
+
+			ResultSet rs = sm.executeQuery();
+			while (rs.next()){
+				slsID = rs.getString("UserID");
+			}
+		}
+		catch (SQLServerException sqex)
+		{
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}
+		int ID = Integer.parseInt(slsID);
+		System.out.println("--- SLS " + ID);
+		return ID;
+
 	}
 }
