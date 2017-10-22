@@ -39,6 +39,7 @@ import java.awt.Desktop;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -47,7 +48,8 @@ class EstimationPanel extends JPanel {
 	private JTextField txtBxFire;
 	private JTextField txtBxPrice;
 	private JTextField txtBxComment;	
-	private int [] columnWidth = {50, 50, 70, 150, 100, 100, 100, 50, 100}; 
+	private int [] columnWidth = {50, 50, 70, 150, 100, 100, 100, 50, 50, 50}; 
+	private String getEstimationDetails = "call AWS_WCH_DB.dbo.s_SalesEstimationDetails";
 	private String updateEstimation = "call AWS_WCH_DB.dbo.s_SalesUpdateEstimation";
 	private String addEstimationDate = "call AWS_WCH_DB.dbo.s_SalesUpdateEstimationDate";
 	private String getInstID = "call AWS_WCH_DB.dbo.s_SaleGetInstTypeID";
@@ -81,8 +83,7 @@ class EstimationPanel extends JPanel {
 	private JComboBox<String> comBxSlsPerson;
 	private JLabel lblFire;
 	private String error;
-	private int instTypeID;
-	private String emailLetterForm;
+
 	private JButton btnSendEmail;
 	private JButton btnCancel;
 	private JButton btnSave;
@@ -216,14 +217,13 @@ class EstimationPanel extends JPanel {
 		btnCancel.setBounds(451, 255, 148, 23);
 		infoPanel.add(btnCancel);
 
-
 		btnSave = new JButton("Save Details");
 		btnSave.setBounds(658, 255, 148, 23);
 		infoPanel.add(btnSave);
 
 		GetJobs job = new GetJobs(conDeets);
 		String[] installType = job.getInstallType();
-		DefaultComboBoxModel<String> modelInst = new DefaultComboBoxModel<String>( installType );
+		DefaultComboBoxModel<String> modelInst = new DefaultComboBoxModel<String>(installType);
 		comBxInstType.setModel( modelInst );
 		comBxInstType.setSelectedItem(null);
 		/*		
@@ -235,8 +235,8 @@ class EstimationPanel extends JPanel {
 		comBxSlsPerson.setModel( modelSC ); */
 
 		String[] SELL = job.getSales();
-		DefaultComboBoxModel<String> modelSell = new DefaultComboBoxModel<String>( SELL );
-		comBxSlsPerson.setModel( modelSell ); 
+		DefaultComboBoxModel<String> modelSell = new DefaultComboBoxModel<String>(SELL);
+		comBxSlsPerson.setModel(modelSell); 
 		comBxSlsPerson.setSelectedItem(null);
 
 		this.setLayout(null);
@@ -255,8 +255,8 @@ class EstimationPanel extends JPanel {
 						//Get the customer ID as a paramater to feed into the SQL procedure 
 						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 1).toString();
 						paramSID = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
-
 						txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
+						getEstDetails(paramSID);
 					} catch (IndexOutOfBoundsException e){
 
 					}
@@ -269,21 +269,21 @@ class EstimationPanel extends JPanel {
 			public void actionPerformed(ActionEvent arg0){
 				//Validating that the email can actually be sent
 				if (emailCanBeSent()){
-						
-					
+
+
 					int dialogButton = JOptionPane.YES_NO_OPTION;
 					int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to mark this email as sent?\n"
 							+ "There is no going back!\n"
 							+ "This customer will be moved to Site checks.","Warning",dialogButton);
 					if(dialogResult == JOptionPane.YES_OPTION){
-	
+
 						Desktop desktop;
 						if (Desktop.isDesktopSupported() 
 								&& (desktop = Desktop.getDesktop()).isSupported(Desktop.Action.MAIL)) {
-							
+
 							String custEmail = sp.getEmailAddr();
 							String emailBody = getEmailBody();
-							
+
 							URI mailto;
 							try {
 								mailto = new URI("mailto:" + custEmail + "?subject=Fire%20Estimation&body=" + emailBody);
@@ -295,10 +295,10 @@ class EstimationPanel extends JPanel {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-							
+
 							updateEstimistionDate();
 							resetTable();
-						
+
 						} else {
 							// TODO fallback to some Runtime.exec(..) voodoo?
 							throw new RuntimeException("desktop doesn't support mailto; mail is dead anyway ;)");
@@ -337,7 +337,7 @@ class EstimationPanel extends JPanel {
 			public void actionPerformed(ActionEvent arg0){
 				//If there isn't an error add the details
 				if (validateData() == false){
-					addEstimation();
+					updateEstimation();
 					sp.showMessage("Adding the Estimation Details");
 					resetTable();
 					clearFields();
@@ -373,7 +373,7 @@ class EstimationPanel extends JPanel {
 		return salesTbl;
 	}
 
-	public void addEstimation(){
+	public void updateEstimation(){
 		CallableStatement sm = null;
 		try {
 
@@ -386,7 +386,7 @@ class EstimationPanel extends JPanel {
 			sm.setString(2, getFire());
 			sm.setString(3, getPrice());
 			sm.setInt(4, getInstTypeID());
-			sm.setInt(5, getSlsPerson());
+			sm.setInt(5, getSlsPersonID());
 
 			sm.executeUpdate();
 		}
@@ -423,6 +423,43 @@ class EstimationPanel extends JPanel {
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}
 
+	}
+
+	public void getEstDetails(String parameter){
+		CallableStatement sm = null;
+		try {
+
+			String update = "{" + getEstimationDetails +"(?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+
+			sm = conn.prepareCall(update);
+			sm.setInt(1, Integer.parseInt(parameter));
+
+			rs = sm.executeQuery();	 
+			
+			if (rs==null){
+				JOptionPane.showMessageDialog(null, "null query");
+			}
+			else
+			{	
+				while (rs.next()){
+				
+					String fire 			= rs.getString("Fire");
+					String price 			= rs.getString("Price");
+					String instType 		= rs.getString("Install Type");
+					String salesPerson 		= rs.getString("Salesperson");
+					
+					txtBxFire.setText(fire);
+					txtBxPrice.setText(price);
+					comBxInstType.setSelectedItem(instType);
+					comBxSlsPerson.setSelectedItem(salesPerson);
+				}
+			}
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, ex.toString());
+		}      		            
 	}
 
 	public void clearFields(){
@@ -477,8 +514,9 @@ class EstimationPanel extends JPanel {
 		return txtBxPrice.getText();
 	}
 
+	//get the ID from what's in the combo box 
 	public int getInstTypeID(){
-		String instID = "";
+		int instID = 0;
 		String instType = (String) comBxInstType.getSelectedItem();
 		CallableStatement sm = null;
 		try {
@@ -491,8 +529,7 @@ class EstimationPanel extends JPanel {
 
 			ResultSet rs = sm.executeQuery();
 			while (rs.next()){
-				instID = rs.getString("InstallTypeID");
-				emailLetterForm = rs.getString("EmailLetterFrom");
+				instID = rs.getInt("InstallTypeID");
 			}
 		}
 		catch (SQLServerException sqex)
@@ -503,17 +540,14 @@ class EstimationPanel extends JPanel {
 		{ 
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}
-		int ID = Integer.parseInt(instID);
-		return ID;
+
+		return instID;
 
 	}
 
-	public String getComment(){
-		return txtBxComment.getText();
-	}
-
-	public int getSlsPerson(){
-		String slsID = "";
+	//get the ID from what's in the combo box
+	public int getSlsPersonID(){
+		int slsID = 0;
 		String slSName = (String) comBxSlsPerson.getSelectedItem();
 		CallableStatement sm = null;
 		try {
@@ -525,7 +559,7 @@ class EstimationPanel extends JPanel {
 
 			ResultSet rs = sm.executeQuery();
 			while (rs.next()){
-				slsID = rs.getString("UserID");
+				slsID = rs.getInt("UserID");
 			}
 		}
 		catch (SQLServerException sqex)
@@ -536,11 +570,13 @@ class EstimationPanel extends JPanel {
 		{ 
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}
-		int ID = Integer.parseInt(slsID);
-		System.out.println("--- SLS " + ID);
-		return ID;
+		return slsID;
 
 	}
+
+	public String getComment(){
+		return txtBxComment.getText();
+	}	
 
 	public Date getDate(){
 		java.sql.Date sqlDate = new java.sql.Date(new java.util.Date().getTime());
@@ -548,19 +584,19 @@ class EstimationPanel extends JPanel {
 	}
 
 	public boolean emailCanBeSent(){
-		//Check if all the datails are filled out correctly
+		getEstDetails(paramSID);
+		//if its not filled out show pop up to save details 
+		String instType = (String) comBxInstType.getSelectedItem();
+		String slsPerson = (String) comBxSlsPerson.getSelectedItem();
 
-		//check to get the inst description
-		
-		//If the combo box hasn't been selected
-		if (comBxInstType.getSelectedItem()== null){
-			instTypeID = getInstTypeID();
+		if (getFire().equals("") || getPrice().equals("") || instType.equals("") || slsPerson.equals("")){
+			JOptionPane.showMessageDialog(null, "Cannot send email! \nEnsure all fields are complete");
+			return false;
 		}else{
-			
-		}
-		return true;
+			return true;
+		}		
 	}
-	
+
 	public String getEmailBody(){
 		String form = "";
 		String instType = (String) comBxInstType.getSelectedItem();
@@ -586,7 +622,7 @@ class EstimationPanel extends JPanel {
 		{ 
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}
-		
+
 		String custName = sp.getCustName();
 		String comment = txtBxComment.getText();
 		String email = "";
