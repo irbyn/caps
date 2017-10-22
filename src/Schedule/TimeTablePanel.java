@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.io.File;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -42,6 +43,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -367,8 +369,7 @@ class TimeTablePanel extends JPanel {
 		    
 		    
 		    class installerColumnRenderer extends DefaultTableCellRenderer
-		    {
-		         
+		    {		         
 		       public installerColumnRenderer() {
 		          super();
 		       }
@@ -379,9 +380,9 @@ class TimeTablePanel extends JPanel {
 		       {
 		          Component cell = super.getTableCellRendererComponent
 		             (table, value, isSelected, hasFocus, row, column);
-		      if (column == 0 || column == 1 ){
+		      if (column == 0 || column == 1 ){	
 		          cell.setBackground( LtBlue);  
-		          cell.setForeground( DkBlue );
+		          cell.setForeground( DkBlue );		          
 		          cell.setFont(cell.getFont().deriveFont(Font.BOLD));	
 		          setHorizontalAlignment(SwingConstants.CENTER);
 		          return cell;
@@ -391,9 +392,18 @@ class TimeTablePanel extends JPanel {
 		          cell.setFont(cell.getFont().deriveFont(Font.BOLD));	
 		    	  return cell;
 		      }else {
-		    	  cell.setBackground( instColors[(row)/2]);
+		    	  JLabel l = (JLabel)cell;
+		    	  
+		    	  String contents = (String)value;
+		    	  l.setToolTipText(contents);
+		    	  		    	  
+		    	  cell.setBackground( instColors[(row/2)%4]);
 		    	  cell.setFont(cell.getFont().deriveFont(Font.BOLD));
-		    	  return cell;
+/*
+		    	  setLineWrap(true);
+		          setWrapStyleWord(true);
+		          setOpaque(true);
+*/		    	  return cell;
 		      }
 
 		       }

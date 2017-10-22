@@ -136,10 +136,6 @@ class LoadDocsPanel extends JPanel {
     private JButton removePhotoBtn;
     private JButton viewPhotoBtn;
 	
-	private JTextField installTxtBx;
-	private JTextField siteTxtBx;
-	private JTextField photoTxtBx;
-	
 	private JButton cancelPermitReqBtn; 
 	private JButton savePermitReqBtn; 
 	
