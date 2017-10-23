@@ -43,6 +43,7 @@ import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 
 public class AdminPanel extends JFrame {
+	private int[] columnWidth = new int[]{50, 70, 150, 100, 100, 100};
 	private String qryList = new String("EXEC AWS_WCH_DB.dbo.[a_UserList]");
 	private String qryDetails = new String("EXEC AWS_WCH_DB.dbo.[a_UserDetails]");
 	private String upUser = "call AWS_WCH_DB.dbo.a_UpdateUser";
@@ -169,15 +170,18 @@ public class AdminPanel extends JFrame {
 		infoPanel.add(lblAbilities);
 
 		chckbxSCheck = new JCheckBox("Site Check");
-		chckbxSCheck.setBounds(834, 172, 85, 23);
+		chckbxSCheck.setBounds(834, 172, 98, 23);
+		chckbxSCheck.setEnabled(false);
 		infoPanel.add(chckbxSCheck);
 
 		chckbxInstaller = new JCheckBox("Installer");
 		chckbxInstaller.setBounds(996, 172, 73, 23);
+		chckbxInstaller.setEnabled(false);
 		infoPanel.add(chckbxInstaller);
 
 		chckbxSales = new JCheckBox("Sales");
-		chckbxSales.setBounds(921, 172, 73, 23);
+		chckbxSales.setBounds(934, 173, 60, 23);
+		chckbxSales.setEnabled(false);
 		infoPanel.add(chckbxSales);
 
 		lblNZHHANumb = new JLabel("NZHHA Number:");
@@ -225,17 +229,17 @@ public class AdminPanel extends JFrame {
 		emailtxtBx.setBounds(121, 277, 201, 24);
 		infoPanel.add(emailtxtBx);
 		emailtxtBx.setColumns(10);
-		
+
 		roleTypeCmbBx = new JComboBox<String> ();
 		roleTypeCmbBx.setModel(new DefaultComboBoxModel<String>(new String[] {"Salesperson", "Installer", "Admin", "Shop"}));
 		roleTypeCmbBx.setBackground(Color.WHITE);
 		roleTypeCmbBx.setBounds(498, 22, 199, 20);
 		infoPanel.add(roleTypeCmbBx);
-		
+
 		roleTypelbl = new JLabel("Role Type");
 		roleTypelbl.setBounds(359, 28, 118, 14);
 		infoPanel.add(roleTypelbl);
-		
+
 		pAddrlbl = new JLabel("Postal Street Address:");
 		pAddrlbl.setBounds(359, 65, 134, 15);
 		infoPanel.add(pAddrlbl);
@@ -292,12 +296,12 @@ public class AdminPanel extends JFrame {
 		ranklbl = new JLabel("Ranked Number");
 		ranklbl.setBounds(737, 28, 109, 14);
 		infoPanel.add(ranklbl);
-		
+
 		rankTxtBx = new JTextField();
 		rankTxtBx.setBounds(857, 25, 201, 20);
 		infoPanel.add(rankTxtBx);
 		rankTxtBx.setColumns(10);
-		
+
 		JLabel councNumblbl = new JLabel("Council Number:");
 		councNumblbl.setBounds(740, 65, 95, 14);
 		infoPanel.add(councNumblbl);
@@ -322,76 +326,26 @@ public class AdminPanel extends JFrame {
 
 		modifyUserBtn = new JButton("Modify");
 		modifyUserBtn.setBounds(830, 223, 102, 23);
+		modifyUserBtn.setEnabled(false);
 		infoPanel.add(modifyUserBtn);
-		modifyUserBtn.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0){
-				int number = adminTbl.getSelectedRow();
-				if (number != -1){
-				createUserBtn.setEnabled(false);
-				saveUserBtn.setEnabled(false);
-				enableFields();
-				} else{
-					JOptionPane.showMessageDialog(null, "You must first select a row");
-				}
-				
-			}
-		});
 
 		updateBtn = new JButton("Update");
 		updateBtn.setBounds(942, 223, 127, 23);
+		updateBtn.setEnabled(false);
 		infoPanel.add(updateBtn);
-		updateBtn.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0){
-				//showMessage("Updating Consent Received");
-				updateUser();
-				disableFields();
-				clearFields();
-				resetTable();
-			}
-		});
 
 		cancelBtn = new JButton("Cancel");
 		cancelBtn.setBounds(738, 223, 85, 23);
 		infoPanel.add(cancelBtn);
-		cancelBtn.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0){
-				if (checkFields()){
-					int dialogButton = JOptionPane.YES_NO_OPTION;
-					int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to cancel?","Warning",dialogButton);
-					if(dialogResult == JOptionPane.YES_OPTION){
-
-						clearFields();
-						disableFields();
-						resetTable();
-					}
-				}
-			}
-		});
 
 		createUserBtn = new JButton("Create New User");
-		createUserBtn.setBounds(734, 273, 89, 23);
+		createUserBtn.setBounds(734, 273, 148, 23);
 		infoPanel.add(createUserBtn);
-		createUserBtn.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0){
-				clearFields();
-				enableFields();
-			}
-		});
-
+		
 		saveUserBtn= new JButton("Save New User");
 		saveUserBtn.setBounds(921, 273, 148, 23);
+		saveUserBtn.setEnabled(false);
 		infoPanel.add(saveUserBtn);
-		saveUserBtn.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0){
-				clearFields();
-				disableFields();
-			}
-		});
 
 		mobileLbl = new JLabel("Mobile:");
 		mobileLbl.setBounds(26, 242, 46, 14);
@@ -408,6 +362,69 @@ public class AdminPanel extends JFrame {
 		rs = getResults();
 		adminTbl.setModel(DbUtils.resultSetToTableModel(rs));
 
+		modifyUserBtn.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0){
+				if (rowSelected){
+					createUserBtn.setEnabled(false);
+					saveUserBtn.setEnabled(false);
+					updateBtn.setEnabled(true);
+					modifyUserBtn.setEnabled(false);
+					enableFields();
+					
+				} else{
+					JOptionPane.showMessageDialog(null, "You must first select a row");
+				}
+
+			}
+		});
+
+		updateBtn.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0){
+				//showMessage("Updating Consent Received");
+				updateUser();
+				disableFields();
+				clearFields();
+				resetTable();
+			}
+		});
+
+		cancelBtn.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0){
+				if (checkFields()){
+					int dialogButton = JOptionPane.YES_NO_OPTION;
+					int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to cancel?","Warning",dialogButton);
+					if(dialogResult == JOptionPane.YES_OPTION){
+						updateBtn.setEnabled(false);
+						modifyUserBtn.setEnabled(false);
+						createUserBtn.setEnabled(false);
+						clearFields();
+						disableFields();
+						resetTable();
+
+					}
+				}
+			}
+		});
+
+		createUserBtn.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0){
+				clearFields();
+				enableFields();
+			}
+		});
+
+		saveUserBtn.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0){
+				clearFields();
+				disableFields();
+			}
+		});
+
 		//Display admin details in the text boxes
 		adminTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
@@ -419,7 +436,8 @@ public class AdminPanel extends JFrame {
 						param = adminTbl.getValueAt(adminTbl.getSelectedRow(), 0).toString();
 						displayUserDetails(param);
 						rowSelected = true;
-						//txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
+						modifyUserBtn.setEnabled(true);
+
 					} catch (IndexOutOfBoundsException e){
 
 					}
@@ -428,7 +446,7 @@ public class AdminPanel extends JFrame {
 		});
 
 		disableFields();
-
+		
 		getContentPane().setLayout(null);
 		getContentPane().add(tablePanel); 
 		getContentPane().add(infoPanel);
@@ -456,7 +474,7 @@ public class AdminPanel extends JFrame {
 				String userActAcc 	= rs2.getString("AccountActive");
 				String userRoleTyp	= rs2.getString("RoleType");
 				String userRankedNum	= rs2.getString("Ranked");
-				
+
 				fNameTxtBx.setText(userFName);
 				lNameTxtBx.setText(userLName);			 
 				phoneTxtBx.setText(userPhone);
@@ -475,7 +493,7 @@ public class AdminPanel extends JFrame {
 				}else{
 					chckbxAccAct.setSelected(false);
 				}
-				
+
 				if (userRoleTyp.equals("Salesperson")){
 					roleTypeCmbBx.setSelectedIndex(0);
 				}else if (userRoleTyp.equals("Installer")){
@@ -485,10 +503,10 @@ public class AdminPanel extends JFrame {
 				}else {
 					roleTypeCmbBx.setSelectedIndex(3);
 				}
-				
-				
-				
-				
+
+
+
+
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -529,8 +547,6 @@ public class AdminPanel extends JFrame {
 		return qryResults;       		            
 	}
 
-
-
 	protected void updateUser() {
 
 		CallableStatement stm = null;
@@ -560,7 +576,7 @@ public class AdminPanel extends JFrame {
 			stm.setInt(17, getRanked());
 			stm.setString(18, getRoleType());
 			stm.setBoolean(19, getAccStatus());
-			
+
 			stm.executeUpdate();
 		}
 		catch (SQLServerException sqex)
@@ -572,8 +588,6 @@ public class AdminPanel extends JFrame {
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}			
 	}
-
-
 
 	public Boolean checkFields(){
 		Boolean newData = false;
@@ -592,7 +606,7 @@ public class AdminPanel extends JFrame {
 	protected void resetTable() {
 		ResultSet rs = getResults();
 		adminTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
-		//spaceHeader(columnModel, columnWidth);
+		spaceHeader(columnWidth,columnModel);
 		rowSelected=false;
 		param = "";
 	}
@@ -663,6 +677,13 @@ public class AdminPanel extends JFrame {
 		rankTxtBx.setText("");
 	}
 
+	private void spaceHeader(int[] widths, TableColumnModel tcm){
+		int cols = tcm.getColumnCount();
+		for (int i = 0; i < cols; i++){
+			tcm.getColumn(i).setPreferredWidth(widths[i]);
+		}
+	} 
+	
 	public String getFName(){
 		return fNameTxtBx.getText();
 	}
@@ -705,7 +726,7 @@ public class AdminPanel extends JFrame {
 		}else{
 			return false;
 		}
-		
+
 	}	
 	public Boolean getInstall(){
 		if (chckbxInstaller.isSelected()){
@@ -724,7 +745,7 @@ public class AdminPanel extends JFrame {
 	public int getRanked(){
 		return Integer.parseInt(rankTxtBx.getText()); 
 	}
-	
+
 	public String getRoleType(){
 		return (String) roleTypeCmbBx.getSelectedItem();
 	}
