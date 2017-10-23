@@ -347,17 +347,11 @@ class SiteCheckPanel extends JPanel {
 		//Check if all text boxes are all filled in correctly
 		//List<String> errors = new ArrayList<String>();
 
-		//Validate year 
 		if (!spnDate.getValue().equals(date)){
 			errorChk = true;
 			//Cannot be null or more than 15 chars
 			error = error + "FIRST NAME: can not be empty\n";
 		}
-
-		//validate time 
-
-
-		//validate
 		if (comBxSChkDoneBy.getSelectedItem() == null){
 			errorChk = true;
 			error = error + "DONE BY: can not be empty\n";
@@ -440,8 +434,6 @@ class SiteCheckPanel extends JPanel {
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
 
 			sm = conn.prepareCall(update);
-
-			System.out.println(userID);
 			
 			sm.setString(1, parameter);
 			sm.setString(2, getDate());
@@ -507,7 +499,6 @@ class SiteCheckPanel extends JPanel {
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}
 		
-		System.out.println(slsID + " -----------");
 		return slsID;
 
 	}
