@@ -57,7 +57,7 @@ public class SalesPane extends JPanel
 	
 	private int[][] spacing = new int[][]	{{50, 70, 150, 100, 100, 100}, // procedure[0]
 		{50, 50, 70, 150, 100, 100, 100, 50, 50, 50},// procedure[1]
-		 {20, 100, 120, 20, 80, 400},// procedure[2]
+		{50, 50, 100, 70, 100, 100, 60, 50, 50},// procedure[2]
 		 {50, 50, 100, 70, 100, 100, 60, 50, 50, 50},// procedure[3]
 		 {30, 100, 120, 80, 40, 40, 40, 40, 40}};// procedure[4]
 
@@ -124,11 +124,11 @@ public class SalesPane extends JPanel
 					 else if (cols == 7){
 						int[] colWidths = new int[]{20, 150, 150, 100, 100, 100, 100};   
 						spaceHeader(colWidths, tcm);                         
-					} else if (cols == 10){
-						int[] colWidths = new int[]{50, 50, 70, 150, 100, 100, 100, 50, 50, 50};    
+					} else if (cols == 9){
+						int[] colWidths = new int[]{50, 50, 100, 70, 100, 100, 60, 50, 50};    
 						spaceHeader(colWidths, tcm);
-					}else {
-						int[] colWidths = new int[]{50, 50, 100, 70, 100, 100, 60, 50, 50, 50};    
+					}else if (cols == 10){
+						int[] colWidths = new int[]{50, 50, 70, 150, 100, 100, 100, 50, 50, 50};    
 						spaceHeader(colWidths, tcm);
 					}
 				}
