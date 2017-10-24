@@ -87,7 +87,7 @@ class CheckForOrdersPanel extends JPanel {
 	private TableColumnModel columnModel;
 	private JPanel tablePanel;
 	private JPanel infoPanel;
-	private JTable permitsTbl;
+	private JTable installTbl;
 	private DefaultTableModel model1;
 	
 	private JTable stockTbl;
@@ -142,13 +142,13 @@ public CheckForOrdersPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane 
 		  	
 	 	model1 = new DefaultTableModel();  
 	 	model1.setRowCount(0);
-	 	permitsTbl = new JTable(model1);
-	 	permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-	 	permitsTbl.setAutoCreateRowSorter(true);
+	 	installTbl = new JTable(model1);
+	 	installTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+	 	installTbl.setAutoCreateRowSorter(true);
       
-	 	JScrollPane scrollPane = new JScrollPane(permitsTbl);
+	 	JScrollPane scrollPane = new JScrollPane(installTbl);
 	  
-	 	header= permitsTbl.getTableHeader();
+	 	header= installTbl.getTableHeader();
 	 	columnModel = header.getColumnModel();
 	 	add(header); 
               	        
@@ -243,7 +243,7 @@ public CheckForOrdersPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane 
         orderPanel.add(orderTbl.getTableHeader(), BorderLayout.NORTH); 
 	  	
 	  	tablePanel.add(scrollPane, BorderLayout.CENTER);
-	  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);        
+	  	tablePanel.add(installTbl.getTableHeader(), BorderLayout.NORTH);        
 
 	  	
 	  	viewInvBtn.addActionListener( new ActionListener()
@@ -333,7 +333,7 @@ public CheckForOrdersPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane 
 			   }
 			}
 		});
-	  	permitsTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+		installTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {
 				if (!arg0.getValueIsAdjusting()){
@@ -341,7 +341,7 @@ public CheckForOrdersPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane 
 					clearStock();
 		//			pp.setFormsLocked();
 					try{
-						invoiceNum = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
+						invoiceNum = installTbl.getValueAt(installTbl.getSelectedRow(), 0).toString();
 					
 						detailsTxtArea.setText(ip.DisplayClientDetails(invoiceNum));
 						getExtraClientDetails(invoiceNum);
@@ -396,6 +396,7 @@ protected void updateStockList() {
            JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
         }			
 }
+
 protected void updateStockItem() {
 	
 	CallableStatement pm = null;
@@ -627,7 +628,7 @@ public void spaceHeader(TableColumnModel colM, int[] colW) {
 protected void resetTable() {
 	
 	ResultSet rs = ip.getResults(1,  conDeets);
-  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+	installTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
   	spaceHeader(columnModel, columnWidth);
 	rowSelected=false;
 	invoiceNum = "";
@@ -644,13 +645,16 @@ public void clearStock(){
 	model2.setRowCount(0);
 	omodel.setRowCount(0);
 }
-public JTable getPermitsTbl(){
-	return permitsTbl;
+public JTable getInstallTbl(){
+	return installTbl;
 }
 protected String getFireCode(){
 	return fireTxtBx.getText();
 }
 protected String getStockList(){
 	return stkItems;
+}
+public JPanel getInfoPanel(){
+	return infoPanel;
 }
 }

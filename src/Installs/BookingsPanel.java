@@ -14,6 +14,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
@@ -51,16 +52,11 @@ class BookingsPanel extends JPanel {
 	private TableColumnModel columnModel;
 	private JPanel tablePanel;
 	private JPanel infoPanel;
-	private JTable permitsTbl;
-	private DefaultTableModel model1;
+	private JTable installTbl;
+	private DefaultTableModel tmod2;
 	
 	private JTextArea detailsTxtArea;
-	
-//	private JLabel sentLbl;
-//	private JCheckBox sentChk;
-	
-//	private JLabel sentDateLbl;
-//	private JSpinner sentDate;
+	private JTextArea stockTxtArea;
 	
 	private JButton cancelPermitReqBtn; 
 	private JButton savePermitReqBtn; 
@@ -80,33 +76,42 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 
 		connecting = new CreateConnection();
 		  	
-	    model1 = new DefaultTableModel();  
-	    model1.setRowCount(0);
-	    permitsTbl = new JTable(model1);
-	    permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-	    permitsTbl.setAutoCreateRowSorter(true);
+		tmod2 = new DefaultTableModel();  
+		tmod2.setRowCount(0);
+	    installTbl = new JTable(tmod2);
+	    installTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+	    installTbl.setAutoCreateRowSorter(true);
       
-	    JScrollPane scrollPane = new JScrollPane(permitsTbl);
+	    JScrollPane scrollPane = new JScrollPane(installTbl);
 	  
-	    header= permitsTbl.getTableHeader();
+	    header= installTbl.getTableHeader();
 	    columnModel = header.getColumnModel();
 	    add(header); 
               	        
 	    tablePanel = new JPanel();
-	    tablePanel.setBounds(20, 20, 1025, 260);  //setPreferredSize(new Dimension(0, 300));      
+	    tablePanel.setBounds(20, 20, 1025, 400);  //setPreferredSize(new Dimension(0, 300));      
 	    tablePanel.setLayout(new BorderLayout());
       
 	    infoPanel = new JPanel();
-	    infoPanel.setBounds(0, 280, 1100, 300);  //setPreferredSize(new Dimension(0, 300));
+	    infoPanel.setBounds(0, 420, 1100, 140);  //setPreferredSize(new Dimension(0, 300));
 	    infoPanel.setLayout(null);
       
 	    detailsTxtArea = new JTextArea("");
-	    detailsTxtArea.setBounds(20, 20, 250, 260);
+	    detailsTxtArea.setBounds(20, 20, 250, 120);
 	    detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
 	    detailsTxtArea.setBackground(LtGray);
 	    detailsTxtArea.setLineWrap(true);
 	    detailsTxtArea.setEditable(false);
 	    infoPanel.add(detailsTxtArea);
+	    
+	    stockTxtArea = new JTextArea("");
+	    stockTxtArea.setBounds(290, 20, 430, 120);
+	    stockTxtArea.setBorder(BorderFactory.createEtchedBorder());
+	    stockTxtArea.setBackground(LtGray);
+	    stockTxtArea.setTabSize(6);
+	    stockTxtArea.setLineWrap(true);
+	    stockTxtArea.setEditable(false);
+	    infoPanel.add(stockTxtArea);
       
 	    cancelPermitReqBtn = new JButton("Cancel");
 	    cancelPermitReqBtn.setBounds(720, 260, 150, 25);
@@ -123,7 +128,7 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 	    this.add(infoPanel);
       
 	  	tablePanel.add(scrollPane, BorderLayout.CENTER);
-	  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);        
+	  	tablePanel.add(installTbl.getTableHeader(), BorderLayout.NORTH);        
 
 		cancelPermitReqBtn.addActionListener( new ActionListener()
 		{
@@ -144,23 +149,29 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 			   }
 			}
 		});
-	  	permitsTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+		installTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {
 				if (!arg0.getValueIsAdjusting()){
 					rowSelected=true;
+					clearStock();
 		//			pp.setFormsLocked();
 					try{
-					param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
-					
-					detailsTxtArea.setText(ip.DisplayClientDetails(param));
-					
+					param = installTbl.getValueAt(installTbl.getSelectedRow(), 0).toString();
+					JOptionPane.showMessageDialog(null, ""+stockTxtArea.getTabSize());
+					stockTxtArea.setText(ip.DisplayStockOnOrder(param));
 					} catch (IndexOutOfBoundsException e){
 						//Ignoring IndexOutOfBoundsExceptions!
 					}
 					}
 				}
 		  	});
+}
+
+protected void clearStock() {
+	detailsTxtArea.setText("");
+	stockTxtArea.setText("");
+	tmod2.setRowCount(0);
 }
 
 public void spaceHeader(TableColumnModel colM, int[] colW) {
@@ -176,17 +187,17 @@ public void spaceHeader(TableColumnModel colM, int[] colW) {
 protected void resetTable() {
 	
 	ResultSet rs = ip.getResults(4,  conDeets);
-  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
-  	spaceHeader(columnModel, columnWidth);
- // 	sentChk.setSelected(false);
-  	
+	installTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+  	spaceHeader(columnModel, columnWidth);  	
 	rowSelected=false;
 	param = "";
-//	detailsTxtArea.setText("");
-
+	clearStock();
 }	
-public JTable getPermitsTbl(){
-	return permitsTbl;
-}
 
+public JTable getInstallTbl(){
+	return installTbl;
+}
+public JPanel getInfoPanel(){
+	return infoPanel;
+}
 }

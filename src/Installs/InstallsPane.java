@@ -1,5 +1,6 @@
 package Installs;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.io.File;
@@ -8,17 +9,25 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JViewport;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 
@@ -49,9 +58,11 @@ public class InstallsPane extends JPanel
 		private String stockRcvd   = "{CALL AWS_WCH_DB.dbo.i_InstallsReportReceived (?)}";
 		private StringBuilder sb;
 		private String str;
+		private String stock = "";
 
 		private Boolean lockForm;
-		private String custDetails = "EXEC AWS_WCH_DB.dbo.p_CustomerDetails";				
+		private String custDetails = "EXEC AWS_WCH_DB.dbo.p_CustomerDetails";	
+		private String stockDetails = "EXEC AWS_WCH_DB.dbo.i_StockDetails";	
 
 // Stored procedures to fill tables (Triggered by tab selection)
 private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.i_InstallsToLoad", 	// procedure[0]
@@ -63,7 +74,7 @@ private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.i_InstallsToLoad
 private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// procedure[0]
 										 {30, 100, 120, 80, 40, 40, 40, 40},	 		// procedure[1]
 										 {20, 100, 120, 20, 80, 400}, 					// procedure[2]
-										 {20, 100, 100, 40, 20, 80, 300, 50}, 				// procedure[3]
+										 {20, 100, 100, 40, 20, 80, 300, 50}, 			// procedure[3]
 										 {30, 100, 120, 80, 40, 40, 40, 40, 40}};		// procedure[4]
 		
 
@@ -77,8 +88,8 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
 		sb = new StringBuilder();
     	
 		//Adding Jpanels to the SAles panel area 
-		JTabbedPane permitP = new JTabbedPane();
-		permitP.setPreferredSize(new Dimension(1070, 610));
+		JTabbedPane installP = new JTabbedPane();
+		installP.setPreferredSize(new Dimension(1070, 610));
 
 		loadDocPnl = new LoadDocsPanel(lockForm, conDeets, this);
 		checkOrderPnl = new CheckForOrdersPanel(lockForm, conDeets, this);
@@ -86,28 +97,34 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
 		recvOrderPnl = new RecvOrderPanel(lockForm, conDeets, this);
 		bookingPnl = new BookingsPanel(lockForm, conDeets, this);
 		
-		 JTable[] tablez = new JTable[]{loadDocPnl.getPermitsTbl(), 
-				 						checkOrderPnl.getPermitsTbl(), 
-				 						placeOrderPnl.getInstTbl(),  
-				 						recvOrderPnl.getPermitsTbl(), 
-				 						bookingPnl.getPermitsTbl()};
+		JTable[] tablez = new JTable[]{loadDocPnl.getInstallTbl(), 
+										checkOrderPnl.getInstallTbl(), 
+										placeOrderPnl.getInstTbl(),  
+										recvOrderPnl.getInstallTbl(), 
+										bookingPnl.getInstallTbl()};
+		
+		JPanel[] fieldz = new JPanel[]{	loadDocPnl.getInfoPanel(), 
+										checkOrderPnl.getInfoPanel(), 
+										placeOrderPnl.getInfoPanel(),  
+										recvOrderPnl.getInfoPanel(), 
+										bookingPnl.getInfoPanel()};
 
-		permitP.addTab("Load Documents", loadDocPnl);
-		permitP.addTab("Check for Orders", checkOrderPnl);
-		permitP.addTab("Place Orders", placeOrderPnl);
-		permitP.addTab("Receive Orders", recvOrderPnl);
-		permitP.addTab("Bookings", bookingPnl);
-		add(permitP); 
-
+		installP.addTab("Load Documents", loadDocPnl);
+		installP.addTab("Check for Orders", checkOrderPnl);
+		installP.addTab("Place Orders", placeOrderPnl);
+		installP.addTab("Receive Orders", recvOrderPnl);
+		installP.addTab("Bookings", bookingPnl);
+		add(installP); 
+//		 JPanel[] tbs = new JPanel[]{ loadDocPnl, checkOrderPnl, placeOrderPnl, recvOrderPnl, bookingPnl};
 //		getResults(0);  
 		
-		permitP.addChangeListener(new ChangeListener() {
-
+		installP.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
                 if (e.getSource() instanceof JTabbedPane) {
               //  	if(!lockForm){
                 	
+                	ClearFields(fieldz[tabIndex]);
                     JTabbedPane pane = (JTabbedPane) e.getSource();
                     tabIndex = pane.getSelectedIndex();
                     
@@ -116,15 +133,56 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
                     // add ResultSet into Selected Tab JTable.
                     tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));               
                     TableColumnModel tcm = tablez[tabIndex].getColumnModel();
-
-                     spaceHeader(spacing[tabIndex], tcm);
-                     
+                    spaceHeader(spacing[tabIndex], tcm); 
                 }
-                }
+        	}
         });   		
     }
     
-    public void setFormsLocked() {
+	/*
+	 * Clears Contents of InfoPanel on each tab when another tab is selected
+	 */
+    protected void ClearFields(JPanel infPanel) {
+      	for(Component control : infPanel.getComponents())
+      	{	//Set TextFields to ""
+      	    if(control instanceof JTextField)
+      	    {
+      	        JTextField ctrl = (JTextField) control;
+      	        ctrl.setText("");
+      	    }
+      	    else if (control instanceof JTextArea)
+      	    {	//Set JTextArea to ""
+      	    	JTextArea ctrl = (JTextArea) control;
+      	        ctrl.setText("");
+      	    }
+      	    else if (control instanceof JPanel)
+      	    {	//IF component is a JPanel
+      	        Component s[] = ((JPanel) control).getComponents();
+      	        for (int j = 0; j < s.length; j++) {
+      	        	//Find ScrollPane
+      	     	    if (s[j] instanceof JScrollPane)
+      	      	    {// Look into scrollPane components
+      	      	    JViewport view = ((JScrollPane) s[j]).getViewport();
+      	      	    
+          	        Component v[] = view.getComponents();
+          	        for (int k = 0; k < v.length; k++) {
+          	        	// if Component is a JTable
+          	      	    if(v[k] instanceof JTable)
+          	      	    {	//Get Table model & set Rowcount to 0
+          	      	    	JTable tbl = (JTable) v[k];
+          	      	    	TableModel tm = tbl.getModel();
+          	      	    	((DefaultTableModel) tm).setRowCount(0);
+          	     // 	    System.out.println("found inner JTABLE");
+          	      	    }
+         	        }
+ 	      	    }
+   	        } 
+       	}
+   	}
+}	
+//	}
+
+	public void setFormsLocked() {
     	lockForm = true;
   }	    
     public void setFormsUnLocked() {
@@ -143,12 +201,12 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
     }
 
     
-    public String DisplayClientDetails(String parameter){
+    public String DisplayClientDetails(String instNumber){
     	
         try
         {
         	Connection conn = connecting.CreateConnection(conDeets);
-        	PreparedStatement st2 =conn.prepareStatement(custDetails + ' ' +  parameter);	    	
+        	PreparedStatement st2 =conn.prepareStatement(custDetails + ' ' +  instNumber);	    	
         	qryResults = st2.executeQuery();
         	if (qryResults==null){
 
@@ -157,29 +215,29 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
         	else{
 				while(qryResults.next()){
 					
-		        	String invoice 			= qryResults.getString("Invoice");
+					String invoice 			= qryResults.getString("Invoice");
 		        	String rees				= qryResults.getString("Rees");
-	 	     		 String customerName 	= qryResults.getString("CustomerName");
-					 String customerAddress = qryResults.getString("CustomerAddress");
-					 String customerSuburb 	= qryResults.getString("CustomerSuburb");
-					 String customerPostCode= qryResults.getString("CustomerPostCode");
-					 String customerPhone 	= qryResults.getString("CustomerPhone");
-					 String customerMobile 	= qryResults.getString("CustomerMobile");
-					 String customerEmail 	= qryResults.getString("CustomerEmail");
-					 String streetAddress 	= qryResults.getString("StreetAddress");
-					 String suburb 			= qryResults.getString("Suburb");
+	 	     		String customerName 	= qryResults.getString("CustomerName");
+					String customerAddress  = qryResults.getString("CustomerAddress");
+					String customerSuburb 	= qryResults.getString("CustomerSuburb");
+					String customerPostCode = qryResults.getString("CustomerPostCode");
+					String customerPhone 	= qryResults.getString("CustomerPhone");
+					String customerMobile 	= qryResults.getString("CustomerMobile");
+					String customerEmail 	= qryResults.getString("CustomerEmail");
+					String streetAddress 	= qryResults.getString("StreetAddress");
+					String suburb 			= qryResults.getString("Suburb");
 										
-			        String str = " INVOICE:\t" + parameter + "\n" +
-			        		     " REES CODE:\t" + rees +"\n" +
-		        				 " CLIENT:\t" + customerName + "\n\n" + 
-							 	 " SITE:\t" + streetAddress + "\n" +
-							 	 "\t" + suburb + "\n\n" + 
-							 	 " POSTAL:\t" + customerAddress + "\n" +
-							 	 "\t" + customerSuburb + "\n" + 
-							 	 "\t" + customerPostCode + "\n\n" +
-							 	 " PHONE:\t" + customerPhone + "\n" + 
-							 	 " MOBILE:\t" + customerMobile + "\n\n" +
-							 	 " EMAIL:\t" + customerEmail + "\n";	        		
+			        String str = 	" INVOICE:\t" + instNumber + "\n" +
+			        				" REES CODE:\t" + rees +"\n" +
+			        				" CLIENT:\t" + customerName + "\n\n" + 
+			        				" SITE:\t" + streetAddress + "\n" +
+			        				"\t" + suburb + "\n\n" + 
+			        				" POSTAL:\t" + customerAddress + "\n" +
+			        				"\t" + customerSuburb + "\n" + 
+			        				"\t" + customerPostCode + "\n\n" +
+			        				" PHONE:\t" + customerPhone + "\n" + 
+			        				" MOBILE:\t" + customerMobile + "\n\n" +
+			        				" EMAIL:\t" + customerEmail;	        		
         		return str;
 				}
         	}
@@ -191,7 +249,40 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
 		return "";
     }
     	
-    	
+    public String DisplayStockOnOrder(String instNumber){
+    	    		
+        try
+        {
+        	Connection conn = connecting.CreateConnection(conDeets);
+        	PreparedStatement st2 =conn.prepareStatement(stockDetails + ' ' +  instNumber);	    	
+        	qryResults = st2.executeQuery();
+        	if (qryResults==null){
+
+    			  JOptionPane.showMessageDialog(null, "null query");
+        	}
+        	else{
+        		            		
+        		stock = " PO:\tStock Item\t\n";
+		        
+				while(qryResults.next()){
+					
+		        	String po 			= qryResults.getString("POrd");
+	 	     		String desc 		= qryResults.getString("Stock");
+
+										
+			        stock = stock + po + "\t" + desc + "\n";
+				}	        		
+        		return stock;
+				
+        	}
+        	
+        }
+        catch(Exception ex)
+        { 
+        JOptionPane.showMessageDialog(null, ex.toString());
+        }      		            
+		return "";
+    }  	
     	
     	
     	
@@ -245,18 +336,13 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
         {
         	Connection conn = connecting.CreateConnection(connDeets);	        	   	
         	Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);           	
-//Create Update String
             stmt.execute(update); 
 
             JOptionPane.showMessageDialog(null, "Permit "+ param + " Updated successfully");
        }
         catch (SQLServerException sqex)
         {
-//          	if (sqex.getErrorCode() == 547){
-//          		JOptionPane.showMessageDialog(null, "Fire ID NOT IN SYSTEM!");
-//         	}else {
         	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
-//          	}
         }
         catch(Exception ex)
         { 

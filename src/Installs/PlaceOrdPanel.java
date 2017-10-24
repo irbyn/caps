@@ -2,6 +2,7 @@ package Installs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,6 +15,7 @@ import java.sql.ResultSet;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -166,9 +168,14 @@ public PlaceOrdPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 			   { 
-				   if(tmod2.getRowCount()!=-1){ 
-					   saveStock();
-					   
+				   if(tmod2.getRowCount()!=0){ 
+					   if (poTxtBx.getText().length() < 8){
+						   saveStock();
+					   } else {
+						   ip.showMessage("Purchase Order Number must be less than 8 digits");
+					   }
+				   } else {
+					   ip.showMessage("Select a Stock Item to Order");
 				   }
 			   }
 			}
@@ -177,12 +184,13 @@ public PlaceOrdPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {
 				if (!arg0.getValueIsAdjusting()){
+
 					try{
 					param = installTbl.getValueAt(installTbl.getSelectedRow(), 0).toString();			
 					} catch (IndexOutOfBoundsException e){
 						//Ignoring IndexOutOfBoundsExceptions!
 					}
-					}
+				}
 				}
 		  	});
 		installTbl.addMouseListener(new MouseAdapter() {
@@ -197,6 +205,7 @@ public PlaceOrdPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 	  	         }		  	      
 	  	    }
 	  	});
+		
 	  	poTbl.addMouseListener(new MouseAdapter() {
 	  	    @Override
 	  	    public void mouseClicked(MouseEvent evt) {
@@ -222,7 +231,6 @@ protected void saveStock() {
 		   inv = ""; 
 		   stk = "";
 		   po = "";
-
 
 		   for (i = 0; i < rows; i++ ){
 			   inv = tmod2.getValueAt(i, 0).toString(); 
@@ -250,8 +258,6 @@ protected void updateStockItem() {
 	    pm.setString(2, stk);
 	    pm.setString(3,	po);
 
-	    
-	    
 	    pm.executeUpdate();
 	    }
         catch (SQLServerException sqex)
@@ -274,6 +280,7 @@ String[] rowData = new String[]{installTbl.getValueAt(row, 0).toString(),
 								installTbl.getValueAt(row, 5).toString()};
 		tmod2.addRow(rowData);
 }
+
 private void returnRow(int row){
 	DefaultTableModel mod = (DefaultTableModel) installTbl.getModel();
 String[] rowData = new String[]{poTbl.getValueAt(row, 0).toString(),
@@ -301,14 +308,16 @@ protected void resetTable() {
 	ResultSet rs = ip.getResults(2,  conDeets);
 	installTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
   	spaceHeader(columnModel, columnWidth);
-	tmod2.setRowCount(0);
-	poTxtBx.setText("");
 	param = "";
+	poTxtBx.setText("");
+	tmod2.setRowCount(0);
 	
-//	detailsTxtArea.setText("");
 
 }		
 public JTable getInstTbl(){
 	return installTbl;
+}
+public JPanel getInfoPanel(){
+	return infoPanel;
 }
 }

@@ -126,7 +126,7 @@ class RecvOrderPanel extends JPanel {
       
 		detailsTxtArea = new JTextArea("");
 		detailsTxtArea.setBounds(20, 20, 250, 260);
-		detailsTxtArea.setBorder(BorderFactory.createLoweredBevelBorder());
+        detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
 		detailsTxtArea.setBackground(LtGray);
 		detailsTxtArea.setLineWrap(true);
 		detailsTxtArea.setEditable(false);
@@ -379,8 +379,11 @@ protected void resetTable() {
 
 
 }		
-public JTable getPermitsTbl(){
+public JTable getInstallTbl(){
 	return installTbl;
+}
+public JPanel getInfoPanel(){
+	return infoPanel;
 }
 }
 

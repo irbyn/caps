@@ -44,10 +44,10 @@ public class SchedulePane extends JPanel
 	private String sunDate = "'2017-10-01";
 	
 	// Stored procedures to fill tables (Triggered by tab selection)
-	private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.aPRACTICE ", // procedure[0]
-												"EXEC AWS_WCH_DB.dbo.aPRACTICE "}; // procedure[1]
-	private int[][] spacing = new int[][]	{{80, 20, 50, 100, 100, 100, 100, 100, 50}, 	// procedure[0]
-											 {30, 100, 120, 80, 40, 40, 40, 40}};	 		// procedure[1]
+	private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.sc_ViewSchedule ", // procedure[0]
+												"EXEC AWS_WCH_DB.dbo.sc_ViewSiteChecks "}; // procedure[1]
+	private int[][] spacing = new int[][]	{	{80, 20, 50, 100, 100, 100, 100, 100, 50}, 	// procedure[0]
+												{40, 100, 100, 60, 60, 60, 60}};	 		// procedure[1]
 
 	public SchedulePane(ConnDetails conDeets, Homescreen hs) {	
 		
@@ -63,15 +63,13 @@ public class SchedulePane extends JPanel
 	    		scheduleP.setPreferredSize(new Dimension(1070, 610));
 	 
 	    		ttpanel = new TimeTablePanel(lockForm, conDeets, this);
-	    		scpanel = new ViewSiteChecksPanel();
+	    		scpanel = new ViewSiteChecksPanel(lockForm, conDeets, this);
 
 	    		
-	    		 JTable[] tablez = new JTable[]{ttpanel.getPermitsTbl(), ttpanel.getPermitsTbl() 
-	    				 				//		,scpanel.getPermitsTbl()
-	    				 						};
+	    		 JTable[] tablez = new JTable[]{ttpanel.getScheduleTbl(),scpanel.getScheduleTbl()};
 	    
-	    		 scheduleP.addTab("Permits Required", ttpanel);
-	    		 scheduleP.addTab("Receive Permits", scpanel);
+	    		 scheduleP.addTab("Installations", ttpanel);
+	    		 scheduleP.addTab("Site Checks", scpanel);
 
 	    		add(scheduleP); 
 
@@ -88,8 +86,10 @@ public class SchedulePane extends JPanel
 	                        
 	                        getResults(tabIndex, sunDate); 
 
-	                        tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));   
+	                        tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));  
+	                        if (tabIndex==0){
 	                        ttpanel.renderTable();
+	                        }
 	                        TableColumnModel tcm = tablez[tabIndex].getColumnModel();
 	                         int cols = tcm.getColumnCount();
 
@@ -213,5 +213,5 @@ public class SchedulePane extends JPanel
 		        }
 	        		return qryResults;       		            
 	        }
-	 
+
 	}

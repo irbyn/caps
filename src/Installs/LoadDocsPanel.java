@@ -375,14 +375,7 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 			   { 
-				    String fonts[] = 
-				    	      GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-
-				    	    for ( int i = 0; i < fonts.length; i++ )
-				    	    {
-				    	      System.out.println(fonts[i]);
-				    	    }
-		//		   resetTable();
+				   resetTable();
 				}					
 			}
 		});
@@ -407,6 +400,7 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 			public void valueChanged(ListSelectionEvent arg0) {
 				if (!arg0.getValueIsAdjusting()){
 					rowSelected=true;
+					clearStock();
 					invLM.removeAllElements();
 					siteLM.removeAllElements();
 					photoLM.removeAllElements();						
@@ -428,6 +422,15 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 	  	resetTable();
 	}
 
+protected void clearStock() {
+	detailsTxtArea.setText("");
+	invExists = false;
+	siteExists = false;
+	photoExists = false;
+	viewInvBtn.setVisible(false);
+	viewSiteBtn.setVisible(false);
+	viewPhotoBtn.setVisible(false);
+}
 protected void updateInstallDocs(String invoice) {
 	
 		CallableStatement pm = null;
@@ -699,18 +702,12 @@ protected Boolean allowSave() {
 	protected void resetTable() {	
 	ResultSet rs = ip.getResults(0,  conDeets);
   	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
-  	spaceHeader(columnModel, columnWidth);
-  	
+  	spaceHeader(columnModel, columnWidth);  	
 	rowSelected=false;
 	invoiceNum = "";
 	detailsTxtArea.setText("");
 	clearDrops();
-	viewInvBtn.setVisible(false);
-	viewSiteBtn.setVisible(false);
-	viewPhotoBtn.setVisible(false);
-	invExists = false;
-	siteExists = false;
-	photoExists = false;
+	clearStock();
 }		
 
 	class FileCellRenderer extends DefaultListCellRenderer {
@@ -787,8 +784,11 @@ protected Boolean allowSave() {
     }
 }
 
-	public JTable getPermitsTbl(){
+	public JTable getInstallTbl(){
 		return permitsTbl;
+	}
+	public JPanel getInfoPanel(){
+		return infoPanel;
 	}
 	public Boolean doesInvExist(){
 		

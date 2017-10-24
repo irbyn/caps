@@ -149,7 +149,7 @@ class TimeTablePanel extends JPanel {
 				right = new ImageIcon(getClass().getResource("right.png"));
 		        
 		        backBtn = new JButton(left);
-		        backBtn.setBounds(193, 15, 85, 34);
+		        backBtn.setBounds(189, 15, 84, 34);
 		        this.add(backBtn);
 		        		        
 		        label = new JLabel();
@@ -161,7 +161,7 @@ class TimeTablePanel extends JPanel {
 		        this.add(today);	
 		     
 		        forBtn = new JButton(right);
-		        forBtn.setBounds(958, 15, 85, 34);
+		        forBtn.setBounds(943, 15, 84, 34);
 		        this.add(forBtn);
 
 		        this.setLayout(null);
@@ -186,17 +186,13 @@ class TimeTablePanel extends JPanel {
 			  	timeTbl.addMouseListener(new java.awt.event.MouseAdapter() {
 			  		@Override
 			  		 public void mouseClicked(java.awt.event.MouseEvent evt) {
-			  		    row = timeTbl.rowAtPoint(evt.getPoint());
+/*			  		    row = timeTbl.rowAtPoint(evt.getPoint());
 			  		    col = timeTbl.columnAtPoint(evt.getPoint());
-			//			JOptionPane.showMessageDialog(null, "R = "+ row + " C = " + col);
 			  		    if (col >= 2) {		
 
 								if (timeTbl.getValueAt(row, col) == null || timeTbl.getValueAt(row, col).equals("")) {
 									String inst = timeTbl.getValueAt(row,0).toString();
-									String tme = timeTbl.getValueAt(row,1).toString();
-
-						
-						
+									String tme = timeTbl.getValueAt(row,1).toString();					
 								try {
 										DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 										LocalDate date = LocalDate.parse("2017-10-22", formatter);
@@ -204,20 +200,12 @@ class TimeTablePanel extends JPanel {
 										sp.showMessage("SLOT: " + inst + ", " + tme + " ON: " + date.toString());	
 									}
 									catch (DateTimeParseException exc) {
-//
-									}
-		
-																		
-						//			sp.showMessage("SLOT: " + inst + ", " + tme + " ON: " );//+ instDate.toString());
-									
+									}								
 								}else {
 									JOptionPane.showMessageDialog(null, timeTbl.getValueAt(row, col).toString());
 								}
-									
-
-								
 							}
-			  		 }
+*/			  		 	}
 			  		});
 		    
 				// Calendar for today
@@ -381,7 +369,7 @@ class TimeTablePanel extends JPanel {
 		          Component cell = super.getTableCellRendererComponent
 		             (table, value, isSelected, hasFocus, row, column);
 		      if (column == 0 || column == 1 ){	
-		          cell.setBackground( LtBlue);  
+		    	  cell.setBackground( instColors[(row/2)%4]);  
 		          cell.setForeground( DkBlue );		          
 		          cell.setFont(cell.getFont().deriveFont(Font.BOLD));	
 		          setHorizontalAlignment(SwingConstants.CENTER);
@@ -389,27 +377,22 @@ class TimeTablePanel extends JPanel {
 		      }else if (column == 2 || column == 8 ){
 		          cell.setBackground( LtGray);  
 		          cell.setForeground( DkBlue );
-		          cell.setFont(cell.getFont().deriveFont(Font.BOLD));	
+		          cell.setFont(cell.getFont().deriveFont(12, Font.BOLD));	
 		    	  return cell;
 		      }else {
 		    	  JLabel l = (JLabel)cell;
 		    	  
 		    	  String contents = (String)value;
-		    	  l.setToolTipText(contents);
-		    	  		    	  
+		    	  l.setToolTipText(contents);		    	  		    	  
 		    	  cell.setBackground( instColors[(row/2)%4]);
-		    	  cell.setFont(cell.getFont().deriveFont(Font.BOLD));
-/*
-		    	  setLineWrap(true);
-		          setWrapStyleWord(true);
-		          setOpaque(true);
-*/		    	  return cell;
+
+		    	  return cell;
 		      }
 
 		       }
 		    }
 		    
-		    public JTable getPermitsTbl(){
+		    public JTable getScheduleTbl(){
 		    	return timeTbl;
 		    }
 
