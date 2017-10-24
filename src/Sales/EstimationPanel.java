@@ -83,7 +83,6 @@ class EstimationPanel extends JPanel {
 	private JComboBox<String> comBxSlsPerson;
 	private JLabel lblFire;
 	private String error;
-
 	private JButton btnSendEmail;
 	private JButton btnCancel;
 	private JButton btnSave;
@@ -288,6 +287,8 @@ class EstimationPanel extends JPanel {
 							try {
 								mailto = new URI("mailto:" + custEmail + "?subject=Fire%20Estimation&body=" + emailBody);
 								desktop.mail(mailto);
+								String custName = sp.getCustName();
+								JOptionPane.showMessageDialog(null,  custName +" has been moved to Site Checks!");
 							} catch (URISyntaxException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -445,7 +446,7 @@ class EstimationPanel extends JPanel {
 				while (rs.next()){
 				
 					String fire 			= rs.getString("Fire");
-					String price 			= rs.getString("Price");
+					String price 			= rs.getString("Estimate Price");
 					String instType 		= rs.getString("Install Type");
 					String salesPerson 		= rs.getString("Salesperson");
 					

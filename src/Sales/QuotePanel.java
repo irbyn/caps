@@ -64,9 +64,11 @@ class QuotePanel extends JPanel {
 
 	private int [] columnWidth = {50, 50, 100, 70, 100, 100, 60, 50, 50, 50}; 	
 	private String getSaleID = "EXEC AWS_WCH_DB.dbo.[i_InstallsGetSaleID] ";
-	private String updateDocs = "{Call AWS_WCH_DB.dbo.[s_SalesUpdateDocs] (?,?,?,?,?)}";
+	private String updateQuote = "{Call AWS_WCH_DB.dbo.[s_SalesUpdateQuote] (?,?,?,?,?,?,?)}";
+	private String rmvSiteCheck = "{Call AWS_WCH_DB.dbo.[s_SalesRmvSiteCheck] (?)}";
 
-	private String quoteNum = "";  
+	//private String slsID = "";  
+	private String custID = "";
 	private String saleID = "";  
 	private ResultSet rs;
 	private Color LtGray = Color.decode("#eeeeee");
@@ -132,6 +134,8 @@ class QuotePanel extends JPanel {
 	private JTextField txtBxReesCode;
 	private JTextField txtBxQuoteNum;
 
+	private JCheckBox chBcRmvSC;
+	private JButton removBtn;	
 	private JButton removeSiteBtn;
 	private JButton viewSiteBtn;
 	private JButton removePhotoBtn;
@@ -236,7 +240,7 @@ class QuotePanel extends JPanel {
 		qutPanel.add(removeQutBtn);
 
 		sitePanel = new JPanel();
-		sitePanel.setBounds(386, 74, 200, 175); 
+		sitePanel.setBounds(386, 74, 200, 158); 
 		sitePanel.setOpaque(true);
 		sitePanel.setVisible(true);
 		sitePanel.setLayout(null);
@@ -286,7 +290,7 @@ class QuotePanel extends JPanel {
 		cancelSaleReqBtn.setBounds(672, 260, 150, 25);
 		infoPanel.add(cancelSaleReqBtn);
 
-		saveSaleReqBtn = new JButton("Save Documents");
+		saveSaleReqBtn = new JButton("Save Details");
 		saveSaleReqBtn.setBounds(895, 260, 150, 25);
 		infoPanel.add(saveSaleReqBtn);
 
@@ -297,6 +301,14 @@ class QuotePanel extends JPanel {
 		infoPanel.add(photoPanel);
 		this.add(infoPanel);
 
+		chBcRmvSC = new JCheckBox("Remove Site Check");
+		chBcRmvSC.setBounds(436, 231, 141, 23);
+		infoPanel.add(chBcRmvSC);
+
+		removBtn = new JButton("Remove");
+		removBtn.setBounds(436, 261, 150, 23);
+		infoPanel.add(removBtn);
+
 		tablePanel.add(scrollPane, BorderLayout.CENTER);
 		tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);        
 
@@ -304,80 +316,77 @@ class QuotePanel extends JPanel {
 		viewQutBtn.addActionListener( new ActionListener()
 		{	@Override
 			public void actionPerformed(ActionEvent arg0) {
-			{ 				   
-				if (qutExists){
-					if (Desktop.isDesktopSupported()) {
-						try {
-							Desktop.getDesktop().open(quote);
-						} catch (IOException ex) {
-						}
+
+			if (qutExists){
+				if (Desktop.isDesktopSupported()) {
+					try {
+						Desktop.getDesktop().open(quote);
+					} catch (IOException ex) {
 					}
-				}			   
-			}
+				}
+			}			   
 		}
+
 		});
 
 		viewSiteBtn.addActionListener( new ActionListener()
 		{	@Override
 			public void actionPerformed(ActionEvent arg0) {
-			{ 				   
-				if (siteExists){
-					if (Desktop.isDesktopSupported()) {
-						try {
-							Desktop.getDesktop().open(site);
-						} catch (IOException ex) {
-						}
+
+			if (siteExists){
+				if (Desktop.isDesktopSupported()) {
+					try {
+						Desktop.getDesktop().open(site);
+					} catch (IOException ex) {
 					}
-				}			   
-			}
+				}
+			}			   
 		}
+
 		});
 
 		viewPhotoBtn.addActionListener( new ActionListener()
 		{	@Override
 			public void actionPerformed(ActionEvent arg0) {
-			{ 		
-				int ph = photosArr.length;
-				sp.showMessage("" + ph);
-				for (int i =0; i< ph; i++){
-					if (photosArr[i].exists())
-						if (Desktop.isDesktopSupported()) {
-							try {
-								Desktop.getDesktop().open(photosArr[i]);
-							} catch (IOException ex) {
-							}
+			int ph = photosArr.length;
+			sp.showMessage("" + ph);
+			for (int i =0; i< ph; i++){
+				if (photosArr[i].exists())
+					if (Desktop.isDesktopSupported()) {
+						try {
+							Desktop.getDesktop().open(photosArr[i]);
+						} catch (IOException ex) {
 						}
-				}			   
-			}
+					}
+			}			   
 		}
+
 		});
 
 		removeQutBtn.addActionListener( new ActionListener()
 		{	@Override
 			public void actionPerformed(ActionEvent arg0) {
-			{ 
-				int i = qutDZ.getSelectedIndex();	//getSelectedValue();//getSelectedItem();
-				if(i!=-1){
-					qutLM.remove(i);
-				}
-				else{
-					sp.showMessage("Please Select a File to Remove");
-				}
+
+			int i = qutDZ.getSelectedIndex();	//getSelectedValue();//getSelectedItem();
+			if(i!=-1){
+				qutLM.remove(i);
+			}
+			else{
+				sp.showMessage("Please Select a File to Remove");
 			}
 		}
+
 		});
 
 		removeSiteBtn.addActionListener( new ActionListener()
 		{	@Override
-			public void actionPerformed(ActionEvent arg0) {
-			{ 
-				int i = siteDZ.getSelectedIndex();	//getSelectedValue();//getSelectedItem();
-				if(i!=-1){
-					siteLM.remove(i);
-				}
-				else{
-					sp.showMessage("Please Select a File to Remove");
-				}
+			public void actionPerformed(ActionEvent arg0) { 
+			int i = siteDZ.getSelectedIndex();	//getSelectedValue();//getSelectedItem();
+			if(i!=-1){
+				siteLM.remove(i);
+			}
+			else{
+				sp.showMessage("Please Select a File to Remove");
 			}
 		}
 		});
@@ -385,25 +394,48 @@ class QuotePanel extends JPanel {
 		removePhotoBtn.addActionListener( new ActionListener()
 		{	@Override
 			public void actionPerformed(ActionEvent arg0) {
-			{ 
-				int i = photoDZ.getSelectedIndex();	//getSelectedValue();//getSelectedItem();
-				if(i!=-1){
-					photoLM.remove(i);
-				}
-				else{
-					sp.showMessage("Please Select a File to Remove");
-				}
+			int i = photoDZ.getSelectedIndex();	//getSelectedValue();//getSelectedItem();
+			if(i!=-1){
+				photoLM.remove(i);
+			}
+			else{
+				sp.showMessage("Please Select a File to Remove");
 			}
 		}
 		});
+
+		removBtn.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (rowSelected){
+					int dialogButton = JOptionPane.YES_NO_OPTION;
+					int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to remove this site check?\n"
+							+ "This sale will be moved back into Site checks.","Warning",dialogButton);
+					if(dialogResult == JOptionPane.YES_OPTION){
+						if (chBcRmvSC.isSelected()){
+							removeSiteCheck();
+							resetTable();
+						}else{
+							JOptionPane.showMessageDialog(null, "You have not selected to remove this sale\n"
+									+ "from the quoting stage.");
+						}
+					}
+				}
+				else{
+					JOptionPane.showMessageDialog(null, "You must first selected a sale. ");
+				}
+
+
+			}
+		});
+
 
 		cancelSaleReqBtn.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				{ 
-					resetTable();
-				}					
+				resetTable();					
 			}
 		});
 
@@ -413,7 +445,7 @@ class QuotePanel extends JPanel {
 			public void actionPerformed(ActionEvent arg0) {
 				{ 
 					if(rowSelected){
-						if(allowSave()){						   
+						if(validateData()){						   
 							saveDocuments();
 						}
 					}
@@ -435,9 +467,10 @@ class QuotePanel extends JPanel {
 
 					//			pp.setFormsLocked();
 					try{
-						quoteNum = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
+						saleID = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
+						custID= salesTbl.getValueAt(salesTbl.getSelectedRow(), 1).toString();
 
-						detailsTxtArea.setText(sp.DisplayClientDetails(quoteNum));
+						detailsTxtArea.setText(sp.DisplayClientDetails(custID));
 						//displayClientDetails(quoteNum);
 						checkForFiles();
 
@@ -450,20 +483,23 @@ class QuotePanel extends JPanel {
 		resetTable();
 	}
 
-	protected void updateSalesDocs(String quote) {
+	protected void updateQuote(String saleID, int custID) {
 
 		CallableStatement pm = null;
 		try {
 
+			System.out.println(custID + "-------" + saleID);
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
 
-			pm = conn.prepareCall(updateDocs);
+			pm = conn.prepareCall(updateQuote);
 
-			pm.setString(1, quote);
-			pm.setString(2, getQutLoaded());
-			pm.setString(3,	getSaleID());
-			pm.setString(4, getSiteLoaded());
-			pm.setString(5, getPhotoLoaded());
+			pm.setInt(1, custID);
+			pm.setString(2, getReesCode());
+			pm.setString(3, getQuoteNum());
+			pm.setString(4, getQutLoaded());
+			pm.setString(5,	saleID);
+			pm.setString(6, getSiteLoaded());
+			pm.setString(7, getPhotoLoaded());
 
 			pm.executeUpdate();
 		}
@@ -532,7 +568,7 @@ class QuotePanel extends JPanel {
 				savePhoto(photoLM.getElementAt(i),i);
 			}
 		}
-		updateSalesDocs(quoteNum);
+		updateQuote(saleID, Integer.parseInt(custID));
 		resetTable();
 	}
 
@@ -543,7 +579,7 @@ class QuotePanel extends JPanel {
 		if(f instanceof File){
 			quote = (File)f;
 			File src = new File(quote.getAbsolutePath());
-			File target = new File(folder+qutPfx+quoteNum+".pdf");
+			File target = new File(folder+qutPfx+saleID+".pdf");
 
 			try {
 				Files.copy(src.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -594,11 +630,32 @@ class QuotePanel extends JPanel {
 	/*
 	 * Checks for any reason files should not be saved: too many or wrong type!
 	 */
-	protected Boolean allowSave() {
+	protected Boolean validateData() {
 
 		saveAllowed=true;
 		msg = "";
-		if (qutLM.getSize()>0 || siteLM.getSize()>0 || photoLM.getSize()>0 ){
+		if (!txtBxReesCode.getText().equals("") || !txtBxQuoteNum.getText().equals("") || qutLM.getSize()>0 || siteLM.getSize()>0 || photoLM.getSize()>0){
+
+			if (txtBxReesCode.getText().length() > 8){
+				msg = msg + "Rees Code can not be more than 8 characters\n";
+				saveAllowed=false;
+			}else if (!txtBxReesCode.getText().contains("-")){	
+				msg = msg + "Rees Code must contain a -\n";
+				saveAllowed=false;
+			}
+
+			try {
+				Integer.parseInt(txtBxQuoteNum.getText());
+				if(txtBxQuoteNum.getText().length() > 9){
+					msg = msg + "Quote can not be more than 9 numbers\n";
+					saveAllowed=false;
+				}
+			}
+			catch (NumberFormatException e) {
+				//Display number error message 
+				msg = msg + "Quote can only contain numbers\n";
+				saveAllowed=false;
+			}
 
 			if (qutLM.getSize()>1){
 				msg = msg +"Only one Quote can be saved\n";
@@ -634,7 +691,7 @@ class QuotePanel extends JPanel {
 				}
 			}
 		}else{
-			msg = msg +"No Files to Save";
+			msg = msg +"Nothing to Save";
 			saveAllowed=false;
 		}
 		if (!saveAllowed)	{
@@ -650,7 +707,7 @@ class QuotePanel extends JPanel {
 	 */
 	protected void checkForFiles() {
 		//Check for stored Quote
-		quote = new File(folder+qutPfx+quoteNum+".pdf");//Uses InstallID/Quote number
+		quote = new File(folder+qutPfx+saleID+".pdf");//Uses InstallID/Quote number
 		if (quote.exists()){
 			viewQutBtn.setVisible(true);
 			qutExists = true;
@@ -686,21 +743,6 @@ class QuotePanel extends JPanel {
 
 	}
 
-//	private void displayClientDetails(String parameter) {
-//
-//		rs = sp.getDetails(getSaleID, quoteNum);
-//
-//		try {
-//			while(rs.next()){
-//
-//				saleID 		= rs.getString("SID");						 						
-//
-//			}
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		}
-//
-//	}	
 
 	public void spaceHeader(TableColumnModel colM, int[] colW) {
 		int i;
@@ -724,7 +766,9 @@ class QuotePanel extends JPanel {
 		spaceHeader(columnModel, columnWidth);
 
 		rowSelected=false;
-		quoteNum = "";
+		custID = "";
+		txtBxReesCode.setText("");
+		txtBxQuoteNum.setText("");
 		detailsTxtArea.setText("");
 		clearDrops();
 		viewQutBtn.setVisible(false);
@@ -812,8 +856,38 @@ class QuotePanel extends JPanel {
 	public JTable getSalesTbl(){
 		return salesTbl;
 	}
-	public Boolean doesQuoteExist(){
 
+	public String getReesCode(){
+		return txtBxReesCode.getText();
+	}
+
+	public String getQuoteNum(){
+		return txtBxQuoteNum.getText();
+	}
+
+	public void removeSiteCheck(){
+		CallableStatement pm = null;
+		try {
+
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+
+			pm = conn.prepareCall(rmvSiteCheck);
+
+			pm.setString(1,	saleID);
+
+			pm.executeUpdate();
+		}
+		catch (SQLServerException sqex)
+		{
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}			
+	}
+
+	public Boolean doesQuoteExist(){
 		return qutExists;
 	}
 	public Boolean doesSiteExist(){
@@ -835,214 +909,3 @@ class QuotePanel extends JPanel {
 		return pht;
 	}
 }
-
-/*
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.sql.ResultSet;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumnModel;
-
-import DB_Comms.CreateConnection;
-import Main.ConnDetails;
-import net.proteanit.sql.DbUtils;
-
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
-class QuotePanel extends JPanel {
-	//private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
-	//private String result3 = "EXEC AWS_WCH_DB.dbo.[p_PermitFire] ";
-	private String param = "";  
-	private ResultSet rs;
-
-	private JTableHeader header;
-	private TableColumnModel columnModel;
-	private Color LtGray = Color.decode("#eeeeee");
-	private JPanel tablePanel;
-	private JPanel infoPanel;
-	private JTable salesTbl;
-	private DefaultTableModel model1;
-
-	private SalesPane sp;
-	private ConnDetails conDeets;
-	private CreateConnection connecting;
-
-	private JTextField txtBxReesCode;
-	private JTextField txtBxQuoteNum;
-
-	private JScrollPane scrollPane = new JScrollPane(salesTbl);
-	private JTextArea txtBxSCheck;
-	private JTextArea txtBxQuote;
-	private JTextArea txtBxPhoto;
-	private JTextArea txtAreaCustInfo;
-	private JLabel lblSiteCheck;
-	private JLabel lblQuote;
-	private JLabel lblPhoto;
-	private JLabel lblReeseCode;
-	private JLabel lblQuoteNum;
-	private JButton btnCancel;
-	private JButton btnSave;
-
-	public QuotePanel(ConnDetails ConDeets, SalesPane sp) {
-		this.sp = sp;
-		this.conDeets = ConDeets;
-
-
-		connecting = new CreateConnection();
-
-		model1 = new DefaultTableModel();  
-		model1.setRowCount(0);
-		salesTbl = new JTable(model1);
-		salesTbl.setAutoCreateRowSorter(true);
-
-		JScrollPane scrollPane = new JScrollPane(salesTbl);
-
-		header= salesTbl.getTableHeader();
-		columnModel = header.getColumnModel();
-		add(header); 
-
-		//Panel for the table
-		tablePanel = new JPanel();
-				tablePanel.setBounds(20, 20, 1025, 260);  //setPreferredSize(new Dimension(0, 300));      
-				tablePanel.setLayout(new BorderLayout());
-
-				//Content panel
-				infoPanel = new JPanel();
-				infoPanel.setBounds(0, 280, 1077, 289);  //setPreferredSize(new Dimension(0, 300));
-				infoPanel.setLayout(null);
-
-				txtAreaCustInfo = new JTextArea("");
-				txtAreaCustInfo.setBounds(20, 20, 250, 260);
-				txtAreaCustInfo.setBorder(BorderFactory.createEtchedBorder());
-				txtAreaCustInfo.setBackground(LtGray);
-				txtAreaCustInfo.setLineWrap(true);
-				txtAreaCustInfo.setEditable(false);
-			        infoPanel.add(txtAreaCustInfo);
-
-
-				lblReeseCode = new JLabel("Reese Code");
-				lblReeseCode.setBounds(583, 54, 74, 14);
-				infoPanel.add(lblReeseCode);
-
-				lblQuoteNum = new JLabel("Quote Number");
-				lblQuoteNum.setBounds(820, 54, 91, 14);
-				infoPanel.add(lblQuoteNum);
-
-				txtBxReesCode = new JTextField();
-				txtBxReesCode.setBounds(670, 51, 140, 20);
-				infoPanel.add(txtBxReesCode);
-				txtBxReesCode.setColumns(10);
-
-				txtBxQuoteNum = new JTextField();
-				txtBxQuoteNum.setBounds(920, 51, 113, 20);
-				infoPanel.add(txtBxQuoteNum);
-				txtBxQuoteNum.setColumns(10);
-
-				txtBxSCheck = new JTextArea();
-				txtBxSCheck.setBounds(583, 124, 97, 94);
-				infoPanel.add(txtBxSCheck);
-
-				txtBxQuote = new JTextArea();
-				txtBxQuote.setBounds(757, 124, 97, 94);
-				infoPanel.add(txtBxQuote);
-
-				txtBxPhoto = new JTextArea();
-				txtBxPhoto.setBounds(936, 124, 97, 94);
-				infoPanel.add(txtBxPhoto);
-
-				lblSiteCheck = new JLabel("Site Check");
-				lblSiteCheck.setBounds(593, 104, 72, 14);
-				infoPanel.add(lblSiteCheck);
-
-				lblQuote = new JLabel("Quote");
-				lblQuote.setBounds(787, 104, 46, 14);
-				infoPanel.add(lblQuote);
-
-				lblPhoto = new JLabel("Photo");
-				lblPhoto.setBounds(956, 104, 46, 14);
-				infoPanel.add(lblPhoto);
-
-				btnCancel = new JButton("Cancel");
-				btnCancel.setBounds(593, 227, 148, 23);
-				infoPanel.add(btnCancel);
-				btnCancel.addActionListener( new ActionListener()
-				{
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						{ 
-							resetTable();
-							//resetting the other textboxes
-							txtBxReesCode.setText(null);
-							txtBxQuoteNum.setText(null);
-							txtBxSCheck.setText(null);
-							txtBxQuote.setText(null);
-							txtBxPhoto.setText(null);
-						}					
-					}
-				});
-
-				btnSave = new JButton("Save Quote Details");
-				btnSave.setBounds(885, 227, 148, 23);
-				infoPanel.add(btnSave);
-
-				this.setLayout(null);
-				this.add(tablePanel); 
-				this.add(infoPanel);
-
-				tablePanel.add(scrollPane, BorderLayout.CENTER);
-				tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
-
-				salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-					@Override
-					public void valueChanged(ListSelectionEvent arg0) {
-						if (!arg0.getValueIsAdjusting()){
-							//rowSelected=true;
-							try{
-								param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
-								//displayClientDetails(param);
-								txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
-							} catch (IndexOutOfBoundsException e){
-							}
-						}
-					}
-				});
-	}
-
-	protected void resetTable() {
-		//Fix this little null error 
-		ResultSet rs = sp.getResults(3);
-		salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
-		//spaceHeader(columnModel, columnWidth);
-		//sentChk.setSelected(false);
-		//rowSelected=false;
-		param = "";
-		txtAreaCustInfo.setText("");
-
-	}	
-
-	public JTable getSalesTbl(){
-		return salesTbl;
-	}
-}
-
-//}
-
-
-	}
-}
-
- */
