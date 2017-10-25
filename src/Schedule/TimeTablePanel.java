@@ -31,6 +31,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -183,10 +184,10 @@ class TimeTablePanel extends JPanel {
 				        updateWeek();
 				      }
 				    });		
-			  	timeTbl.addMouseListener(new java.awt.event.MouseAdapter() {
+/*			  	timeTbl.addMouseListener(new java.awt.event.MouseAdapter() {
 			  		@Override
 			  		 public void mouseClicked(java.awt.event.MouseEvent evt) {
-/*			  		    row = timeTbl.rowAtPoint(evt.getPoint());
+			  		    row = timeTbl.rowAtPoint(evt.getPoint());
 			  		    col = timeTbl.columnAtPoint(evt.getPoint());
 			  		    if (col >= 2) {		
 
@@ -205,8 +206,8 @@ class TimeTablePanel extends JPanel {
 									JOptionPane.showMessageDialog(null, timeTbl.getValueAt(row, col).toString());
 								}
 							}
-*/			  		 	}
-			  		});
+			  		 	}
+			  		});		*/
 		    
 				// Calendar for today
 				cal.getInstance();   
@@ -298,17 +299,17 @@ class TimeTablePanel extends JPanel {
 			param = "";  
 			timeTbl.clearSelection();
 			rowSelected=false;
-			this.updateWeek();
+			updateWeek();
 		}
 				
 			
-			private void displayClientDetails(String parameter) {
+	/*		private void displayClientDetails(String parameter) {
 				
 				rs2 = sp.getDetails(qry, param);
 				
 		        	 try {
 						while(rs2.next()){
-									    					
+	*/								    					
 	/*			        	String invoice 			= rs2.getString("Invoice");
 				        	String rees				= rs2.getString("Rees");
 							 String customerName 	= rs2.getString("CustomerName");
@@ -320,7 +321,7 @@ class TimeTablePanel extends JPanel {
 							 String customerEmail 	= rs2.getString("CustomerEmail");
 							 String streetAddress 	= rs2.getString("StreetAddress");
 							 String suburb 			= rs2.getString("Suburb");
-	*/						 String status 			= rs2.getString("PermitStatus");
+	*/	/*					 String status 			= rs2.getString("PermitStatus");
 							 String consent 		= rs2.getString("Consent");						 						
 							 String lot 			= rs2.getString("Lot");
 							 String dP 				= rs2.getString("DP"); 
@@ -341,7 +342,7 @@ class TimeTablePanel extends JPanel {
 					}
 //		       	 updateFireDetails(fireIDTxtBx.getText());
 			}        	 
-		        
+	*/	        
 			
 			  
 		    public void spaceHeader() {
@@ -380,10 +381,10 @@ class TimeTablePanel extends JPanel {
 		          cell.setFont(cell.getFont().deriveFont(12, Font.BOLD));	
 		    	  return cell;
 		      }else {
-		    	  JLabel l = (JLabel)cell;
+//		    	  JLabel l = (JLabel)cell;
 		    	  
 		    	  String contents = (String)value;
-		    	  l.setToolTipText(contents);		    	  		    	  
+		    	  ((JComponent) cell).setToolTipText(contents);		    	  		    	  
 		    	  cell.setBackground( instColors[(row/2)%4]);
 
 		    	  return cell;

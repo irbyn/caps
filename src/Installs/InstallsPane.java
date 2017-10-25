@@ -61,8 +61,26 @@ public class InstallsPane extends JPanel
 		private String stock = "";
 
 		private Boolean lockForm;
-		private String custDetails = "EXEC AWS_WCH_DB.dbo.p_CustomerDetails";	
+		private String custDetails = "EXEC AWS_WCH_DB.dbo.p_CustomerDetails";
+		private String custBookings = "EXEC AWS_WCH_DB.dbo.i_CustomerBooking";
 		private String stockDetails = "EXEC AWS_WCH_DB.dbo.i_StockDetails";	
+		
+		private String invoice="";			
+		private String rees="";
+		private String customerName="";
+		private String customerAddress="";
+		private String customerSuburb="";
+		private String customerPostCode="";
+		private String customerPhone="";
+		private String customerMobile="";
+		private String customerEmail="";
+		private String streetAddress="";
+		private String suburb="";
+		private String bookedDate="";
+		private String bookedTime=""; 		
+		private String bookedInstaller="";
+		
+		
 
 // Stored procedures to fill tables (Triggered by tab selection)
 private String[] procedure = new String[]{	"EXEC AWS_WCH_DB.dbo.i_InstallsToLoad", 	// procedure[0]
@@ -75,7 +93,7 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
 										 {30, 100, 120, 80, 40, 40, 40, 40},	 		// procedure[1]
 										 {20, 100, 120, 20, 80, 400}, 					// procedure[2]
 										 {20, 100, 100, 40, 20, 80, 300, 50}, 			// procedure[3]
-										 {30, 100, 120, 80, 40, 40, 40, 40, 40}};		// procedure[4]
+										 {30, 100, 100, 80, 50, 50, 50, 40}};		// procedure[4]
 		
 
 	public InstallsPane(ConnDetails conDeets, Homescreen hs)
@@ -95,7 +113,7 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
 		checkOrderPnl = new CheckForOrdersPanel(lockForm, conDeets, this);
 		placeOrderPnl = new PlaceOrdPanel(lockForm, conDeets, this);
 		recvOrderPnl = new RecvOrderPanel(lockForm, conDeets, this);
-		bookingPnl = new BookingsPanel(lockForm, conDeets, this);
+		bookingPnl = new BookingsPanel(lockForm, conDeets, this, hs.getSchedule());
 		
 		JTable[] tablez = new JTable[]{loadDocPnl.getInstallTbl(), 
 										checkOrderPnl.getInstallTbl(), 
@@ -215,19 +233,19 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
         	else{
 				while(qryResults.next()){
 					
-					String invoice 			= qryResults.getString("Invoice");
-		        	String rees				= qryResults.getString("Rees");
-	 	     		String customerName 	= qryResults.getString("CustomerName");
-					String customerAddress  = qryResults.getString("CustomerAddress");
-					String customerSuburb 	= qryResults.getString("CustomerSuburb");
-					String customerPostCode = qryResults.getString("CustomerPostCode");
-					String customerPhone 	= qryResults.getString("CustomerPhone");
-					String customerMobile 	= qryResults.getString("CustomerMobile");
-					String customerEmail 	= qryResults.getString("CustomerEmail");
-					String streetAddress 	= qryResults.getString("StreetAddress");
-					String suburb 			= qryResults.getString("Suburb");
+					invoice 			= qryResults.getString("Invoice");
+		        	rees				= qryResults.getString("Rees");
+	 	     		customerName 	= qryResults.getString("CustomerName");
+					customerAddress  = qryResults.getString("CustomerAddress");
+					customerSuburb 	= qryResults.getString("CustomerSuburb");
+					customerPostCode = qryResults.getString("CustomerPostCode");
+					customerPhone 	= qryResults.getString("CustomerPhone");
+					customerMobile 	= qryResults.getString("CustomerMobile");
+					customerEmail 	= qryResults.getString("CustomerEmail");
+					streetAddress 	= qryResults.getString("StreetAddress");
+					suburb 			= qryResults.getString("Suburb");
 										
-			        String str = 	" INVOICE:\t" + instNumber + "\n" +
+			        str = 	" INVOICE:\t" + instNumber + "\n" +
 			        				" REES CODE:\t" + rees +"\n" +
 			        				" CLIENT:\t" + customerName + "\n\n" + 
 			        				" SITE:\t" + streetAddress + "\n" +
@@ -237,6 +255,47 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
 			        				"\t" + customerPostCode + "\n\n" +
 			        				" PHONE:\t" + customerPhone + "\n" + 
 			        				" MOBILE:\t" + customerMobile + "\n\n" +
+			        				" EMAIL:\t" + customerEmail;	        		
+        		return str;
+				}
+        	}
+        }
+        catch(Exception ex)
+        { 
+        JOptionPane.showMessageDialog(null, ex.toString());
+        }      		            
+		return "";
+    }
+    
+    public String DisplayClientShortDetails(String instNumber){
+    	
+        try
+        {
+        	Connection conn = connecting.CreateConnection(conDeets);
+        	PreparedStatement st2 =conn.prepareStatement(custBookings + ' ' +  instNumber);	    	
+        	qryResults = st2.executeQuery();
+        	if (qryResults==null){
+
+    			  JOptionPane.showMessageDialog(null, "null query");
+        	}
+        	else{
+				while(qryResults.next()){
+					
+					invoice 			= qryResults.getString("Invoice");
+		        	rees				= qryResults.getString("Rees");
+	 	     		customerName 		= qryResults.getString("CustomerName");
+					customerPhone 		= qryResults.getString("CustomerPhone");
+					customerMobile 		= qryResults.getString("CustomerMobile");
+					customerEmail 		= qryResults.getString("CustomerEmail");
+					bookedTime 			= qryResults.getString("Booking");
+					bookedInstaller		= qryResults.getString("bookedInstaller");
+
+										
+			        str = 	" INVOICE:\t" + instNumber + "\n" +
+			        				" REES CODE:\t" + rees +"\n" +
+			        				" CLIENT:\t" + customerName + "\n\n" + 
+			        				" PHONE:\t" + customerPhone + "\n" + 
+			        				" MOBILE:\t" + customerMobile + "\n" +
 			        				" EMAIL:\t" + customerEmail;	        		
         		return str;
 				}
@@ -400,5 +459,12 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
 		return sb;
     }
 
-	
+	public String getInstTime(){
+		return bookedTime;
+	}
+	public String getInstaller(){
+		return bookedInstaller;
+	}
+    
+    
 }

@@ -1,6 +1,7 @@
 package Main;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 
@@ -9,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.Timer;
 
 import DB_Comms.CreateConnection;
@@ -22,6 +24,7 @@ import Admin.AdminLogin;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 public class Homescreen extends JFrame {
 
@@ -44,7 +47,7 @@ public class Homescreen extends JFrame {
 	private static String user;
 	private static String pass;
 
-	public Color Mycolour;
+	public Color selected= Color.decode("#70a6ff");
 
 	public Homescreen(String User, String Pass) {
 
@@ -53,8 +56,6 @@ public class Homescreen extends JFrame {
 
 		//PASS THE LOGIN DETAILS TO Class connectionDetails
 		ConnDetails conDeets = new ConnDetails(user, pass);
-
-		Mycolour = Color.decode("#eeeeee");
 
 		// setting up JFrame
 		getContentPane().setLayout(null);
@@ -65,7 +66,6 @@ public class Homescreen extends JFrame {
 		// creating main button JPanel (blue)
 		btnPanel = new JPanel();
 		btnPanel.setLayout(null);
-		//btnPanel.setBackground(Mycolour);
 		btnPanel.setBounds(0, 0, 1100, 40);
 		btnPanel.setPreferredSize(new Dimension(1100, 40));
 		getContentPane().add(btnPanel);
@@ -112,6 +112,8 @@ public class Homescreen extends JFrame {
 				contentPanel.add(schedulePanel);        		
 				pack();
 				contentPanel.repaint();
+				clearButton(btnPanel);
+				highlightButton(scheduleBtn);
 			}
 		});
 
@@ -123,6 +125,8 @@ public class Homescreen extends JFrame {
 				contentPanel.add(salesPanel);        		
 				pack();
 				contentPanel.repaint();
+				clearButton(btnPanel);
+				highlightButton(salesBtn);
 			}
 		});
 
@@ -134,6 +138,8 @@ public class Homescreen extends JFrame {
 				contentPanel.add(installPanel);        		
 				pack();
 				contentPanel.repaint();
+				clearButton(btnPanel);
+				highlightButton(installBtn);
 			}
 		});
 
@@ -145,6 +151,8 @@ public class Homescreen extends JFrame {
 				contentPanel.add(permitPanel);        		
 				pack();
 				contentPanel.repaint();
+				clearButton(btnPanel);
+				highlightButton(permitBtn);
 			}
 		});
 		
@@ -182,7 +190,25 @@ public class Homescreen extends JFrame {
 		//Making the schedule the first view the user sees.  
 		contentPanel.add(schedulePanel);        		        
 		//Load the frame
+		highlightButton(scheduleBtn);
 		pack();
+	}
+
+	protected void highlightButton(JButton btn) {
+		btn.setBackground(selected);
+		btn.setForeground(Color.WHITE);
+	}
+//returns all buttons to default color scheme
+	protected void clearButton(JPanel infPanel) {
+		for(Component control : infPanel.getComponents())
+      	{	
+      	    if(control instanceof JButton)
+      	    {
+      	    	JButton ctrl = (JButton) control;
+      	    	ctrl.setBackground(null);
+      	    	ctrl.setForeground(Color.BLACK);
+      	    }
+      	}
 	}
 
 	public void showMsg(String st){
@@ -202,5 +228,8 @@ public class Homescreen extends JFrame {
 		        timer.setRepeats(false);
 		        timer.start();
 		        msgDialog.setVisible(true);
+	}
+	public SchedulePane getSchedule(){
+		return schedulePanel;
 	}
 }
