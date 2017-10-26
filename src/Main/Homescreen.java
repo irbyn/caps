@@ -44,6 +44,7 @@ public class Homescreen extends JFrame {
 	private InstallsPane installPanel;
 	private PermitPane permitPanel; 
 	private AdminLogin adminLogin;
+	private Homescreen hs;
 	private static String user;
 	private static String pass;
 
@@ -159,9 +160,8 @@ public class Homescreen extends JFrame {
 		//Log into the Admin Panel
 		adminLoginBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {	
-				adminLogin = new AdminLogin();
+				adminLogin = new AdminLogin(hs);
 				adminLogin.setVisible(true);
-				System.out.println("+++++++++++++++");
 				setVisible(false); //Make the screen invisible
 				dispose();//Close the login window
 			}

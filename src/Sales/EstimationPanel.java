@@ -637,4 +637,9 @@ class EstimationPanel extends JPanel {
 		return emailBody;
 
 	}
+	
+	public JPanel getInfoPanel(){
+		return infoPanel;
+	}
+
 }

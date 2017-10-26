@@ -235,49 +235,10 @@ class FollowUpPanel extends JPanel {
   	return salesTbl;
   }
   
+  public JPanel getInfoPanel(){
+		return infoPanel;
+	}
 	
-	/*private void updatePermitDetails(String parameter) {
-      try
-      {
-      	Connection conn = connecting.CreateConnection(conDets);
-      	PreparedStatement st2 =conn.prepareStatement(result2 + parameter);
-      	ResultSet rs2 = st2.executeQuery();
-  
-              //Retrieve by column name
-      	 while(rs2.next()){
-      		 
-      		 txtAreaCustInfo.setText("\n INVOICE:\t" + param + "\n");
-      		 txtAreaCustInfo.append( " CLIENT:\t" + rs2.getString("CustomerName") + "\n\n");
-      		 txtAreaCustInfo.append( " SITE:\t" + rs2.getString("StreetAddress") + "\n");
-      		 txtAreaCustInfo.append( "\t" + rs2.getString("Suburb") + "\n\n");
-      		 txtAreaCustInfo.append( " POSTAL:\t" + rs2.getString("CustomerAddress") + "\n");               
-      	 }
-      	 
-      	 
-	        	PreparedStatement st3 =conn.prepareStatement(result3 + parameter);
-	        	
-	        	ResultSet rs3 = null;
-	        	rs3 = st3.executeQuery();
-	    
-	        	 while(rs3.next()){
-	        		 
-	        	if (!rs3.getString("FireID").equals(parameter)){
-	                //Retrieve by column name
-
-	    	        nelsonTxtBx.setText("");
-
-	    	        nelsonTxtBx.setText(rs3.getString("Nelson"));
-	        	 }
-	        } 
-	        
-      	conn.close();	
-      }
-      catch(Exception ex)
-      { 
-      JOptionPane.showMessageDialog(null, ex.toString());
-      }	  	
-	}	*/
+	
 }
-
-	//}
 

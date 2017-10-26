@@ -908,4 +908,9 @@ class QuotePanel extends JPanel {
 	private String getPhotoLoaded() {
 		return pht;
 	}
+	
+	public JPanel getInfoPanel(){
+		return infoPanel;
+	}
+
 }

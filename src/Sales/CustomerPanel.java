@@ -940,4 +940,9 @@ class CustomerPanel extends JPanel {
 	public String getSSuburb(){
 		return sSuburbTxtBx.getText();
 	}
+	public JPanel getInfoPanel(){
+		return infoPanel;
+	}
+
+
 }

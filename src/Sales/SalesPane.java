@@ -1,15 +1,20 @@
 package Sales;
 
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.TableColumnModel;
@@ -85,6 +90,13 @@ public class SalesPane extends JPanel
 				siteCheck.getSalesTbl(), 
 				quote.getSalesTbl(), 
 				followUp.getSalesTbl()};
+		
+		JPanel[] fieldz = new JPanel[]{	customer.getInfoPanel(), 
+				estimation.getInfoPanel(), 
+				siteCheck.getInfoPanel(),  
+				quote.getInfoPanel(), 
+				followUp.getInfoPanel()};
+
 
 		//Adding tabs to the content panel 
 		salesP.addTab("Customer", customer);
@@ -101,7 +113,7 @@ public class SalesPane extends JPanel
 			public void stateChanged(ChangeEvent e) {
 				if (e.getSource() instanceof JTabbedPane) {
 					//  	if(!lockForm){
-					
+					ClearFields(fieldz[tabIndex]);
 					JTabbedPane pane = (JTabbedPane) e.getSource();
 					tabIndex = pane.getSelectedIndex();
 
@@ -251,6 +263,36 @@ public class SalesPane extends JPanel
 		return qryResults;       		            
 	}	
 
+	/*
+	 * Clears Contents of InfoPanel on each tab when another tab is selected
+	 */
+    protected void ClearFields(JPanel infPanel) {
+      	for(Component control : infPanel.getComponents())
+      	{	//Set TextFields to ""
+      	    if(control instanceof JTextField)
+      	    {
+      	        JTextField ctrl = (JTextField) control;
+      	        ctrl.setText("");
+      	    }
+      	    else if (control instanceof JTextArea)
+      	    {	//Set JTextArea to ""
+      	    	JTextArea ctrl = (JTextArea) control;
+      	        ctrl.setText("");
+      	    }
+      	    else if (control instanceof JComboBox)
+      	    {	//Set JTextArea to ""
+      	    	JComboBox ctrl = (JComboBox) control;
+      	        ctrl.setSelectedIndex(0);
+      	    }
+      	    else if (control instanceof JCheckBox)
+      	    {	//Set JTextArea to ""
+      	    	JCheckBox ctrl = (JCheckBox) control;
+      	        ctrl.setSelected(false);
+      	    }   	}
+}
+
+	
+	
 	public void showMessage(String msg) {
 		hs.showMsg(msg);
 	}

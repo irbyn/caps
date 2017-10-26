@@ -55,8 +55,9 @@ public class AdminLogin extends JFrame{
 	private JPanel logPanel;
 
 
-	public AdminLogin() {
-
+	public AdminLogin(Homescreen homeScreen) {
+		//this.homescreen = new Homescreen(user, pass);
+		
 	// setting up JFrame
 	getContentPane().setLayout(null);
 	setPreferredSize(new Dimension(400, 250));
@@ -106,7 +107,7 @@ public class AdminLogin extends JFrame{
 		public void actionPerformed(ActionEvent e) { 
 			String user=txtBxUsername.getText();
     		String pwd = new String(txtBxPassword.getPassword());
-			adminPanel = new AdminPanel(user, pwd);
+			adminPanel = new AdminPanel(user, pwd, homescreen);
 			adminPanel.setVisible(true);				
 			setVisible(false); //Make the screen invisible
 			//dispose();//Close the login window
@@ -117,7 +118,7 @@ public class AdminLogin extends JFrame{
 		public void actionPerformed(ActionEvent e) {
 			homescreen.setVisible(true);
 			setVisible(false); //Make the screen invisible
-			//dispose();//Close the login window
+			dispose();//Close the login window
 		}
 	});      
 

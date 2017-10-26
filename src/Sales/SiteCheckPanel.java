@@ -411,11 +411,6 @@ class SiteCheckPanel extends JPanel {
 					else{
 						comBxSChkDoneBy.setSelectedItem(salesPerson);
 					}
-					
-					
-
-
-
 				}
 			}
 		}
@@ -518,4 +513,9 @@ class SiteCheckPanel extends JPanel {
 			return false;
 		}
 	}
+	
+	public JPanel getInfoPanel(){
+		return infoPanel;
+	}
+
 }
