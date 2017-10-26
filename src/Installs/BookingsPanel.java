@@ -3,10 +3,18 @@ package Installs;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -16,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 
@@ -36,6 +45,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SpinnerDateModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -44,6 +54,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
@@ -56,12 +68,15 @@ class BookingsPanel extends JPanel {
 
 	private String [] columns = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
 	private int [] colWidth = {80, 20, 50, 100, 100, 100, 100, 100, 50};
-	
 	private int [] columnWidth = {30, 100, 100, 80, 50, 50, 50, 40}; 	
-	private String upCCCClient = "{Call AWS_WCH_DB.dbo.[p_PermitUpdateCCCToClient] (?,?)}";
+
+	private String saveBooking = "{Call AWS_WCH_DB.dbo.[sc_SaveBooking] (?,?,?,?)}";
+	private String delBooking = "{Call AWS_WCH_DB.dbo.[sc_DeleteBooking] (?,?,?,?)}";
 	
 	private String weekOf ="'2017-10-22'";
+	private String[] week= new String[7]; 
 	private String weekInitial ="'2017-10-22'";
+	private Date dayOfWeek;
 	private int day;        
 	private String month; 
 	private int mnth;
@@ -83,16 +98,17 @@ class BookingsPanel extends JPanel {
 	private ImageIcon left;
 	private ImageIcon right;
 	private JButton backBtn;
+	private JLabel weekLbl;
 	private JButton forBtn;
 	
-	private String invoiceNum = "";  
+	private String invoiceNum = ""; 
+	private String inst;
+	private String tme;
+	private String dte;
 	private ResultSet rs;
-	
+	private Boolean lockSelection = false;
 	private Boolean rowSelected = false;
-	private Boolean showSchedule = false;
-	
-	private CreateConnection connecting;
-	
+		
 	private JTableHeader header;
 	private TableColumnModel columnModel;
 	private JPanel tablePanel;
@@ -110,17 +126,23 @@ class BookingsPanel extends JPanel {
 	
 	private JTextArea detailsTxtArea;
 	private JTextArea stockTxtArea;
+	private JTextArea noteToInstaller;
 	
 	private JLabel instLbl;
 	private JTextField instTxtBx;
 	private JLabel dateLbl;
 	private JTextField dateTxtBx;
     
+	private JButton installerNoteBtn;
+	private JButton closeInstallBtn;
 	private JButton cancelPermitReqBtn; 
-	private JButton editBookingBtn; 
+	private JButton editBookingBtn; 	
+	private JButton deleteBookingBtn;
+	private JButton saveBookingBtn;
 	
 	private CreateConnection conn;
-		
+	private CreateConnection connecting;
+	
 	private Boolean lockForm;
 	private ConnDetails conDeets;
 	private InstallsPane ip;
@@ -164,6 +186,10 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn, S
         backBtn.setVisible(false);
         this.add(backBtn);
 
+        weekLbl = new JLabel();
+        weekLbl.setBounds(300, 0, 200, 20);
+        this.add(weekLbl);
+        
         forBtn = new JButton(right);
         forBtn.setBounds(943, 0, 84, 20);
         forBtn.setVisible(false);
@@ -214,6 +240,16 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn, S
         dateTxtBx.setBounds(895, 50, 150, 20);
         dateTxtBx.setEditable(false);
         infoPanel.add(dateTxtBx);
+        
+        installerNoteBtn = new JButton("Add Note to Installer");
+        installerNoteBtn.setBounds(895, 80, 150, 25);
+        installerNoteBtn.setVisible(false);
+	    infoPanel.add(installerNoteBtn);
+	    
+	    closeInstallBtn = new JButton("Close Install");
+	    closeInstallBtn.setBounds(720, 80, 150, 25);
+	    closeInstallBtn.setVisible(false);
+	    infoPanel.add(closeInstallBtn);
  
 	    cancelPermitReqBtn = new JButton("Cancel");
 	    cancelPermitReqBtn.setBounds(720, 115, 150, 25);
@@ -222,14 +258,21 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn, S
 	    editBookingBtn = new JButton("Edit Booking");
 	    editBookingBtn.setBounds(895, 115, 150, 25);
 	    infoPanel.add(editBookingBtn);
-
-      
+	    
+	    deleteBookingBtn = new JButton("Delete Booking");
+	    deleteBookingBtn.setBounds(895, 115, 150, 25);
+	    deleteBookingBtn.setVisible(false);
+	    infoPanel.add(deleteBookingBtn);
+	    
+	    saveBookingBtn = new JButton("Save Booking");
+	    saveBookingBtn.setBounds(895, 115, 150, 25);
+	    saveBookingBtn.setVisible(false);
+	    infoPanel.add(saveBookingBtn);
       
 	    this.setLayout(null);
 	    this.add(tablePanel);
 	    this.add(schedulePanel);
-	    this.add(infoPanel);
-      
+	    this.add(infoPanel);     
 
 	    tablePanel.add(scrollPane, BorderLayout.CENTER);
 	  	tablePanel.add(installTbl.getTableHeader(), BorderLayout.NORTH); 
@@ -242,13 +285,37 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn, S
 		        updateWeek();
 		      }
 		    });
-		 
+
 	  	forBtn.addActionListener(new ActionListener() {
 		      public void actionPerformed(ActionEvent ae) {
 		        cal.add(Calendar.DATE, +7);
 		        updateWeek();
 		      }
 		    });
+	  	saveBookingBtn.addActionListener(new ActionListener() {
+		      public void actionPerformed(ActionEvent ae) {
+		    	  modifyBooking(saveBooking);	        		
+		    	  ip.showMessage("Saving Booking");
+		    	  resetTable();
+		      }
+		    });
+	  	deleteBookingBtn.addActionListener(new ActionListener() {
+		      public void actionPerformed(ActionEvent ae) {
+		    	  modifyBooking(delBooking);
+		    	  ip.showMessage("Deleting Booking");
+		    	  resetTable();	        		
+		      }
+		    });
+	  	installerNoteBtn.addActionListener(new ActionListener() {
+		      public void actionPerformed(ActionEvent ae) {
+		    	  addNoteToInstaller();
+		      }
+		 });
+	  	closeInstallBtn.addActionListener(new ActionListener() {
+		      public void actionPerformed(ActionEvent ae) {
+		    	  closeInstall();
+		      }
+		 });
 		cancelPermitReqBtn.addActionListener( new ActionListener()
 		{
 			@Override
@@ -272,8 +339,7 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn, S
 					   ResultSet rs = schP.getResults(0, weekOf );
 					   timeTbl.setModel(DbUtils.resultSetToTableModel(rs));
 					   updateWeek();
-					 //  renderTable();
-				 
+					 //  renderTable();				 
 				   }
 			   }
 			}
@@ -288,79 +354,92 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn, S
 					try{
 						invoiceNum = installTbl.getValueAt(installTbl.getSelectedRow(), 0).toString();
 
-					stockTxtArea.setText(ip.DisplayStockOnOrder(invoiceNum));
-					detailsTxtArea.setText(ip.DisplayClientShortDetails(invoiceNum));
+						stockTxtArea.setText(ip.DisplayStockOnOrder(invoiceNum));
+						detailsTxtArea.setText(ip.DisplayClientShortDetails(invoiceNum));
 					
-					instTxtBx.setText(ip.getInstaller());        
-					dateTxtBx.setText(ip.getInstTime());
-					
-					
+						instTxtBx.setText(ip.getInstaller());        
+						dateTxtBx.setText(ip.getInstTime());
+						String note = ip.getNoteFromInstaller();
+						installerNoteBtn.setVisible(true); 
+						closeInstallBtn.setVisible(true); 
+						if( note.equals("NULL")){ 
+							//	ip.showMessage("NULL");
+						} else if (note.equals("")){
+						
+						}
+						else{
+							stockTxtArea.setText("NOTE FROM INSTALLER:\n" + note);
+						}					
 					} catch (IndexOutOfBoundsException e){
 						//Ignoring IndexOutOfBoundsExceptions!
 					}
-					}
 				}
-		  	});
+			}
+		});
 	  	timeTbl.addMouseListener(new java.awt.event.MouseAdapter() {
 	  		@Override
 	  		 public void mouseClicked(java.awt.event.MouseEvent evt) {
-			  		    row = timeTbl.rowAtPoint(evt.getPoint());
+	  			if (!lockSelection){
+			  	row = timeTbl.rowAtPoint(evt.getPoint());
 	  		    col = timeTbl.columnAtPoint(evt.getPoint());
 	  		    if (col >= 2) {		
 
-						if (timeTbl.getValueAt(row, col) == null || timeTbl.getValueAt(row, col).equals("")) {
-							String inst = timeTbl.getValueAt(row,0).toString();
-							String tme = timeTbl.getValueAt(row,1).toString();	
-							String dte;
-							Date instDate;
-							
-							DateFormat df = new SimpleDateFormat("MM/dd/yyyy"); 
-							Date weekDate;
-							try {
-							    weekDate = df.parse(weekOf);
+					inst = timeTbl.getValueAt(row,0).toString();
+					tme = timeTbl.getValueAt(row,1).toString();	
+					dte = week[col-2];
 					
-								GregorianCalendar cl = new GregorianCalendar();
-								cl.setTime(weekDate);
-								
-				//				instDate = cl.add(Calendar.DATE, (col-2));
-								
-				//				instDate = addDays(weekDate, (col-2));
-							    
-				//				dte = df.format(instDate);
-							    
-							    
-							    
-					//		    System.out.println(newDateString);
-							} catch (ParseException e) {
-							//    e.printStackTrace();
-							}
-							
-						try {
-				        	int input = JOptionPane.showConfirmDialog(null,"Make Booking for Install " + invoiceNum + "?\n "
-				        			+ tme + " BY: " + inst,  "Place Booking?", JOptionPane.YES_NO_OPTION);
-				        	if (input == 0){
-				        		
+						if (timeTbl.getValueAt(row, col) == null || timeTbl.getValueAt(row, col).equals("")) {
 
-							resetTable();	        		
-							ip.showMessage("Updating Booking");
-				        	} else{
-								
-				        	}
-							/*
-								DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-								LocalDate date = LocalDate.parse("2017-10-22", formatter);
-								date = date.plusDays(col-2);
-								ip.showMessage("SLOT: " + inst + ", " + tme + " ON: " + date.toString());	
-								*/
+							try {
+								dayOfWeek = new SimpleDateFormat("yyyy-MM-dd").parse(dte);
+							} catch (ParseException e) {
 							}
-							catch (DateTimeParseException exc) {
-							}								
+
+							StringBuilder sbuf = new StringBuilder();
+							Formatter fmt = new Formatter(sbuf);
+							fmt.format("%tA %td %tb %tY", dayOfWeek, dayOfWeek, dayOfWeek, dayOfWeek);
+							
+							
+				        	int input = JOptionPane.showConfirmDialog(null,"Make Booking for Install " + invoiceNum + "?" +
+				        			"\nON: " + sbuf +  
+				        			"\nIN: " + tme + 
+				        			"\nBY: " + inst,  "Place Booking?", JOptionPane.YES_NO_OPTION);
+				        	if (input == 0){
+				        		lockSelection = true;
+				        		saveBookingBtn.setVisible(true);
+
+				        	} else{
+				        		
+				        	}					
 						}else {
-							JOptionPane.showMessageDialog(null, timeTbl.getValueAt(row, col).toString());
+							String str = timeTbl.getValueAt(row, col).toString();
+							 
+							int start = str.indexOf("[");
+							int end = str.indexOf("]");
+							String st = str.substring(start+1, end);
+							
+							if (st.equals(invoiceNum)){
+								int input = JOptionPane.showConfirmDialog(null,"Do you wish to delete booking for " + 
+											invoiceNum + "?",  "Delete Booking?", JOptionPane.YES_NO_OPTION);
+					        	if (input == 0){
+					        		lockSelection = true;
+					        		deleteBookingBtn.setVisible(true);	
+					        		JOptionPane.showMessageDialog(null, "inst " + inst
+					        											+"\ndate " + dte
+					        											+"\ntime " + tme
+					        											+"\ninvoice " + invoiceNum);
+					        	} else{
+					        		deleteBookingBtn.setVisible(false);
+					        	}
+							} else {
+								JOptionPane.showMessageDialog(null, "Delete this Existing Install before making this Booking");
+							}						
 						}
 					}
-			  		 	}
-	  		});
+	  			}
+			}
+	  	});
+	  	
 		// Calendar for today
 		cal.getInstance();   
 	    day = cal.get(Calendar.DAY_OF_MONTH);           
@@ -369,7 +448,48 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn, S
 	    year = cal.get(Calendar.YEAR);
 	    
 	    weekInitial = "'"+ year +  "-" +  month + "-" +  day + "'";
-	    resetSchedule();
+	//    resetSchedule();		//not required at this point - 
+}
+
+protected void closeInstall() {
+	int input = JOptionPane.showConfirmDialog(null,"Close Install?\n "
+			+ "This Action is final, Install will no longer be tracked!",  "Close Install?", JOptionPane.YES_NO_OPTION);
+	if (input == 0){
+		
+	ip.showMessage("Closing Permit");
+	} else{
+		ip.showMessage("dont close");
+	}
+				
+}
+	
+
+
+protected void modifyBooking(String modify) {
+	CallableStatement pm = null;
+
+	try {
+			
+	    Connection conn = connecting.CreateConnection(conDeets);	        	   	
+	
+	    pm = conn.prepareCall(modify);
+		
+	    pm.setString(1, invoiceNum);
+	    pm.setString(2, dte);
+	    pm.setString(3, tme);
+	    pm.setString(4, inst);
+	    
+	    pm.executeUpdate();
+	    }
+        catch (SQLServerException sqex)
+        {
+           	JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+        }
+        catch(Exception ex)
+        { 
+           JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+        }	
+	
 }
 
 protected void resetSchedule() {
@@ -392,25 +512,41 @@ protected void updateWeek() {
 
 	String month = cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
 	int year = cal.get(Calendar.YEAR);
-//	label.setText("WEEK OF: " + day + "-" +month + "-" + year);
+	weekLbl.setText("WEEK OF: " + day + "-" +month + "-" + year);
     	    	  
 	int numberOfDays = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 
 	weekOf = "'" + year + "-" +  mnth + "-" +   day + "'";
+
 	
 	ResultSet rs = schP.getResults(0, weekOf );
 	timeTbl.setModel(DbUtils.resultSetToTableModel(rs)); 
 	
 	JTableHeader header= timeTbl.getTableHeader();
 	TableColumnModel colMod = header.getColumnModel();
+	
 	int i;
-    	    
+	
+    boolean newMonth = false; 
+    int mth = mnth;
+    int yr = year;
+    
+    //iterate thru the days of the week
 	for (i=0; i<7; i++){
 		TableColumn tabCol = colMod.getColumn(i+2);
 		int thisDay = (day + i);
+			//reset day, month & year if week passes thru the end of the month
 			if(thisDay > numberOfDays){
-				thisDay = thisDay - numberOfDays;
+				thisDay = thisDay - numberOfDays;				
+				mth = mnth+1;
+					if(mth > 12){
+						mth = 1;
+						yr = year + 1;
+					}
     	        }
+			//fill array of this weeks dates
+			week[i] = yr + "-" +  mth + "-" +   thisDay;
+			//add day number to day of week in header
     	    tabCol.setHeaderValue(columns[i] + " "+ thisDay);
     	    header.setFont(new Font("SansSerif", Font.BOLD, 14));
     	}
@@ -503,18 +639,7 @@ protected void clearStock() {
 	stockTxtArea.setText("");
 	tmod2.setRowCount(0);
 }
-/*protected void resetTimeTable() {
-	
-	ResultSet rs = s.getResults(0, weekOf );
-	timeTbl.setModel(DbUtils.resultSetToTableModel(rs)); 
-	  				
-	spaceHeader();			  	
-//	param = "";  
-	timeTbl.clearSelection();
-	rowSelected=false;
-	this.updateWeek();
-}
-*/
+
 public void spaceHeader(TableColumnModel colM, int[] colW) {
     int i;
    	TableColumn tabCol = colM.getColumn(0);
@@ -525,8 +650,7 @@ public void spaceHeader(TableColumnModel colM, int[] colW) {
   	header.repaint();
   }   
 
-protected void resetTable() {
-	
+protected void resetTable() {	
 	ResultSet rs = ip.getResults(4,  conDeets);
 	installTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
   	spaceHeader(columnModel, columnWidth);  	
@@ -540,8 +664,30 @@ protected void resetTable() {
     backBtn.setVisible(false);
     forBtn.setVisible(false);
     editBookingBtn.setVisible(true);
+    saveBookingBtn.setVisible(false);
+    deleteBookingBtn.setVisible(false);
+    installerNoteBtn.setVisible(false);
+	closeInstallBtn.setVisible(false); 
+    lockSelection = false;
 }	
 
+protected void addNoteToInstaller() {
+	
+    noteToInstaller = new JTextArea();
+    noteToInstaller.setColumns(32);
+    noteToInstaller.setRows(5); 
+    noteToInstaller.setLineWrap(true);
+    noteToInstaller.setWrapStyleWord(true);
+
+	int option = JOptionPane.showOptionDialog(null, noteToInstaller, "Enter Note To Installer", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+	if (option == JOptionPane.CANCEL_OPTION)
+	{
+	    // user hit cancel
+	} else if (option == JOptionPane.OK_OPTION)
+	{
+		 JOptionPane.showMessageDialog(null, "Validate & Save Note to Installer: \n" + noteToInstaller.getText());
+		}		
+	}
 public JTable getInstallTbl(){
 	return installTbl;
 }

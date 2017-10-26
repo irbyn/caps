@@ -79,6 +79,7 @@ public class InstallsPane extends JPanel
 		private String bookedDate="";
 		private String bookedTime=""; 		
 		private String bookedInstaller="";
+		private String fromInstaller="";
 		
 		
 
@@ -289,7 +290,7 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
 					customerEmail 		= qryResults.getString("CustomerEmail");
 					bookedTime 			= qryResults.getString("Booking");
 					bookedInstaller		= qryResults.getString("bookedInstaller");
-
+					fromInstaller		= qryResults.getString("fromInstaller");
 										
 			        str = 	" INVOICE:\t" + instNumber + "\n" +
 			        				" REES CODE:\t" + rees +"\n" +
@@ -464,6 +465,9 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
 	}
 	public String getInstaller(){
 		return bookedInstaller;
+	}
+	public String getNoteFromInstaller(){
+		return fromInstaller;
 	}
     
     
