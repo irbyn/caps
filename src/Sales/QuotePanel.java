@@ -487,8 +487,6 @@ class QuotePanel extends JPanel {
 
 		CallableStatement pm = null;
 		try {
-
-			System.out.println(custID + "-------" + saleID);
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
 
 			pm = conn.prepareCall(updateQuote);

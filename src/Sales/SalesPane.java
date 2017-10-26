@@ -64,7 +64,7 @@ public class SalesPane extends JPanel
 		{50, 50, 70, 150, 100, 100, 100, 50, 50, 50},// procedure[1]
 		{50, 50, 100, 70, 100, 100, 60, 50, 50},// procedure[2]
 		 {50, 50, 100, 70, 100, 100, 60, 50, 50, 50},// procedure[3]
-		 {30, 100, 120, 80, 40, 40, 40, 40, 40}};// procedure[4]
+		 {30, 30, 80, 100, 100, 100, 40, 40, 40, 50, 50}};// procedure[4]
 
 	public SalesPane(ConnDetails conDeets, Homescreen hs)
 	{
