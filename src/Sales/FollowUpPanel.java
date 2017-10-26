@@ -2,9 +2,13 @@ package Sales;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -14,6 +18,7 @@ import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -65,12 +70,30 @@ class FollowUpPanel extends JPanel {
 	private JRadioButton rdBtnSoldEls;
 	private JButton btnCancel;
 	private JButton btnSave;
-	private JButton btnViewSC;
-	private JButton btnViewQuote;
-	private JButton btnViewPhoto;
+	//private JButton btnViewSC;
+	//private JButton btnViewQuote;
+	//private JButton btnViewPhoto;
+	private JButton viewSiteBtn;
+	private JButton viewQutBtn;
+	private JButton viewPhotoBtn;
 	private Boolean rowSelected;
 	private Date date;
 	public ButtonGroup group;
+	
+	private File quote;
+	private File site;
+	private File photo;
+	private Boolean qutExists = false;
+	private Boolean siteExists = false;
+	private Boolean photoExists = false;
+	private ImageIcon fll;
+	private ImageIcon pic;
+	private File[] photosArr;
+	
+	private String folder = "//C:/pdfs/Invoice/";
+	private String qutPfx = "QUT_";
+	private String sitePfx = "SC_";
+	private String photoPfx = "PH_";
 
 	private JTextField txtBxInvNumb;
 
@@ -79,6 +102,8 @@ class FollowUpPanel extends JPanel {
 		this.sp = sp;
 		this.conDeets = ConDeets;
 		connecting = new CreateConnection();
+		fll = new ImageIcon(getClass().getResource("pdf.png"));
+		pic = new ImageIcon(getClass().getResource("pictures.png"));
 
 		model1 = new DefaultTableModel();  
 		model1.setRowCount(0);
@@ -134,7 +159,7 @@ class FollowUpPanel extends JPanel {
 				infoPanel.add(rdBtnInvoice);
 
 				rdBtnSoldEls = new JRadioButton("Sold Elsewhere");
-				rdBtnSoldEls.setBounds(563, 83, 151, 23);
+				rdBtnSoldEls.setBounds(563, 85, 151, 23);
 				infoPanel.add(rdBtnSoldEls);
 
 				group = new ButtonGroup();
@@ -148,14 +173,14 @@ class FollowUpPanel extends JPanel {
 				txtBxInvNumb.setColumns(10);
 
 				btnCancel = new JButton("Cancel");
-				btnCancel.setBounds(563, 204, 148, 23);
+				btnCancel.setBounds(563, 240, 164, 23);
 				infoPanel.add(btnCancel);
 
 				btnSave = new JButton("Save Details");
-				btnSave.setBounds(855, 204, 148, 23);
+				btnSave.setBounds(797, 240, 164, 23);
 				infoPanel.add(btnSave);
 
-				btnViewSC = new JButton("Visit Site Check");
+				/*btnViewSC = new JButton("Visit Site Check");
 				btnViewSC.setBounds(569, 117, 125, 23);
 				infoPanel.add(btnViewSC);
 
@@ -166,14 +191,13 @@ class FollowUpPanel extends JPanel {
 				btnViewPhoto = new JButton("View Photo");
 				btnViewPhoto.setBounds(912, 117, 125, 23);
 				infoPanel.add(btnViewPhoto);
-
+*/
 				this.setLayout(null);
 				this.add(tablePanel); 
 				this.add(infoPanel);
 
 				tablePanel.add(scrollPane, BorderLayout.CENTER);
 				tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
-
 
 				salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 					@Override
@@ -185,6 +209,8 @@ class FollowUpPanel extends JPanel {
 								paramSID = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
 								//displayClientDetails(param);
 								txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
+								
+								checkForFiles();
 							} catch (IndexOutOfBoundsException e){
 
 							}
@@ -236,7 +262,68 @@ class FollowUpPanel extends JPanel {
 					}
 				});
 	
-	
+				//-------------------------------------------------------
+				
+				viewSiteBtn = new JButton("View Site Check PDF");
+				viewSiteBtn.setBounds(563, 126, 164, 23);
+				infoPanel.add(viewSiteBtn);
+				
+				viewQutBtn = new JButton("View Quote PDF");
+				viewQutBtn.setBounds(563, 165, 164, 23);
+				infoPanel.add(viewQutBtn);
+				
+				viewPhotoBtn = new JButton("View Photo(s)");
+				viewPhotoBtn.setBounds(797, 126, 164, 23);
+				infoPanel.add(viewPhotoBtn);
+
+				viewSiteBtn.addActionListener( new ActionListener()
+				{	@Override
+					public void actionPerformed(ActionEvent arg0) {
+
+					if (siteExists){
+						if (Desktop.isDesktopSupported()) {
+							try {
+								Desktop.getDesktop().open(site);
+							} catch (IOException ex) {
+							}
+						}
+					}			   
+				}
+				});
+				
+				viewQutBtn.addActionListener( new ActionListener(){
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+
+					if (qutExists){
+						if (Desktop.isDesktopSupported()) {
+							try {
+								Desktop.getDesktop().open(quote);
+							} catch (IOException ex) {
+							}
+						}
+					}			   
+				}
+
+				});
+				
+				viewPhotoBtn.addActionListener( new ActionListener()
+				{	@Override
+					public void actionPerformed(ActionEvent arg0) {
+					int ph = photosArr.length;
+					sp.showMessage("" + ph);
+					for (int i =0; i< ph; i++){
+						if (photosArr[i].exists())
+							if (Desktop.isDesktopSupported()) {
+								try {
+									Desktop.getDesktop().open(photosArr[i]);
+								} catch (IOException ex) {
+								}
+							}
+					}			   
+				}
+
+				});
 	}
 
 	protected void resetTable() {
@@ -371,6 +458,44 @@ class FollowUpPanel extends JPanel {
 	
 	public int getInvNum(){
 		return Integer.parseInt(txtBxInvNumb.getText());
+	}
+	
+	protected void checkForFiles() {
+		//Check for stored Quote
+		quote = new File(folder+qutPfx+paramSID+".pdf");//Uses InstallID/Quote number
+		if (quote.exists()){
+			viewQutBtn.setVisible(true);
+			qutExists = true;
+		}else{
+			viewQutBtn.setVisible(false);
+			qutExists = false;
+		}	
+		//Check for stored SiteCheck Forms	
+		site = new File(folder+sitePfx+paramSID+".pdf");//Uses SaleID number
+		if (site.exists()){
+			viewSiteBtn.setVisible(true);
+			siteExists = true;
+		}else{
+			viewSiteBtn.setVisible(false);
+			siteExists = false;
+		}
+		//Check for stored Photo(s)	
+		//Create array of photos
+		File f = new File(folder);					
+		photosArr = f.listFiles(new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				return name.startsWith(photoPfx+paramSID+"_");	//Uses SaleID number
+			}
+		});
+
+		if (photosArr.length>0){
+			viewPhotoBtn.setVisible(true);
+			photoExists = true;
+		}else{
+			viewPhotoBtn.setVisible(false);
+			photoExists = false;
+		}
+
 	}
 
 }
