@@ -80,7 +80,7 @@ public class PrintSiteCheck {
         { 
         JOptionPane.showMessageDialog(null, ex.toString());
         }      		            
-        JOptionPane.showMessageDialog(null, scPath);
+
         try (PDDocument pdfDocument = PDDocument.load(new File(scPath)))
         {
             // get the document catalog
@@ -117,8 +117,8 @@ public class PrintSiteCheck {
 	    	    try {
 	    	        File myFile = new File(file+"_"+saleID+".pdf");
 	    	        Desktop.getDesktop().open(myFile);
-	    	    } catch (FileNotFoundException f){
-	    	    	
+	    	    } catch (java.io.FileNotFoundException f){
+
 	    	    } catch (IOException ex) {
 	    	        // no application registered for PDF		    	    	
 	    	    }

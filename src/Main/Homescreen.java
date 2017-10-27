@@ -128,6 +128,9 @@ public class Homescreen extends JFrame {
 
 		salesBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				if(salesPanel==null){					
+					salesPanel = new SalesPane(conDeets, hs);
+				}	
 				if (schedulePanel.isDisplayable() || installPanel.isDisplayable() || permitPanel.isDisplayable()) {
 					contentPanel.removeAll();
 				}  		
@@ -141,6 +144,10 @@ public class Homescreen extends JFrame {
 
 		installBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
+				if(installPanel==null){
+					installPanel = new InstallsPane(conDeets, hs);
+				}				
 				if (salesBtn.isDisplayable()|| schedulePanel.isDisplayable() || permitPanel.isDisplayable()) {
 					contentPanel.removeAll();
 				} 		
@@ -154,6 +161,9 @@ public class Homescreen extends JFrame {
 
 		permitBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				if(permitPanel==null){				
+				permitPanel = new PermitPane(conDeets, hs);
+				}
 				if (salesBtn.isDisplayable()|| schedulePanel.isDisplayable() || installPanel.isDisplayable()) {
 					contentPanel.removeAll();
 				} 	
@@ -189,9 +199,9 @@ public class Homescreen extends JFrame {
 
 		// creating new panel objects from the panel classes containing their content
 		schedulePanel = new SchedulePane(conDeets, this); 
-		salesPanel = new SalesPane(conDeets, this);  
-		installPanel = new InstallsPane(conDeets, this);
-		permitPanel = new PermitPane(conDeets, this);
+		salesPanel = null;		//new SalesPane(conDeets, this);  
+		installPanel = null;	//new InstallsPane(conDeets, this);
+		permitPanel = null;		//new PermitPane(conDeets, this);
 		
 
 		//Making the schedule the first view the user sees.  

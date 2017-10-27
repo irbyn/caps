@@ -54,12 +54,15 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.DocumentFilter;
 
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Main.GetJobs;
+import Main.bookingColumnRenderer;
 import Permit.PermitPane;
 import Schedule.SchedulePane;
 import net.proteanit.sql.DbUtils;
@@ -84,15 +87,16 @@ class BookingsPanel extends JPanel {
 	private int row;
 	private int col;
 	
-	private Color LtBlue = Color.decode("#e8e8ff");	
+/*	private Color LtBlue = Color.decode("#e8e8ff");	
 	private Color DkBlue = Color.decode("#174082");
 	private Color LtGray = Color.decode("#eeeeee");	
 	private Color inst1 = Color.decode("#eeffd6");
 	private Color inst2 = Color.decode("#fff1e2");
 	private Color inst3 = Color.decode("#e2fff5");
 	private Color inst4 = Color.decode("#ffe2f8");
-	private Color[] instColors = {inst1, inst2, inst3, inst4};
-	
+	private Color[] instColors = {inst1, inst2, inst3, inst4};*/
+
+	private Color LtGray = Color.decode("#eeeeee");	
 	private Calendar cal = new GregorianCalendar();
 	
 	private ImageIcon left;
@@ -102,6 +106,7 @@ class BookingsPanel extends JPanel {
 	private JButton forBtn;
 	
 	private String invoiceNum = ""; 
+	private int invRow=-1;
 	private String inst;
 	private String tme;
 	private String dte;
@@ -137,8 +142,6 @@ class BookingsPanel extends JPanel {
 	private JButton closeInstallBtn;
 	private JButton cancelPermitReqBtn; 
 	private JButton editBookingBtn; 	
-	private JButton deleteBookingBtn;
-	private JButton saveBookingBtn;
 	
 	private CreateConnection conn;
 	private CreateConnection connecting;
@@ -258,17 +261,7 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn, S
 	    editBookingBtn = new JButton("Edit Booking");
 	    editBookingBtn.setBounds(895, 115, 150, 25);
 	    infoPanel.add(editBookingBtn);
-	    
-	    deleteBookingBtn = new JButton("Delete Booking");
-	    deleteBookingBtn.setBounds(895, 115, 150, 25);
-	    deleteBookingBtn.setVisible(false);
-	    infoPanel.add(deleteBookingBtn);
-	    
-	    saveBookingBtn = new JButton("Save Booking");
-	    saveBookingBtn.setBounds(895, 115, 150, 25);
-	    saveBookingBtn.setVisible(false);
-	    infoPanel.add(saveBookingBtn);
-      
+   
 	    this.setLayout(null);
 	    this.add(tablePanel);
 	    this.add(schedulePanel);
@@ -290,20 +283,6 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn, S
 		      public void actionPerformed(ActionEvent ae) {
 		        cal.add(Calendar.DATE, +7);
 		        updateWeek();
-		      }
-		    });
-	  	saveBookingBtn.addActionListener(new ActionListener() {
-		      public void actionPerformed(ActionEvent ae) {
-		    	  modifyBooking(saveBooking);	        		
-		    	  ip.showMessage("Saving Booking");
-		    	  resetTable();
-		      }
-		    });
-	  	deleteBookingBtn.addActionListener(new ActionListener() {
-		      public void actionPerformed(ActionEvent ae) {
-		    	  modifyBooking(delBooking);
-		    	  ip.showMessage("Deleting Booking");
-		    	  resetTable();	        		
 		      }
 		    });
 	  	installerNoteBtn.addActionListener(new ActionListener() {
@@ -406,8 +385,11 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn, S
 				        			"\nBY: " + inst,  "Place Booking?", JOptionPane.YES_NO_OPTION);
 				        	if (input == 0){
 				        		lockSelection = true;
-				        		saveBookingBtn.setVisible(true);
-
+				        		String inv = invoiceNum;
+						    	  modifyBooking(saveBooking);	        		
+						    	  ip.showMessage("Saving Booking");
+						    	  resetTable();
+						    	  reselectRow(inv);
 				        	} else{
 				        		
 				        	}					
@@ -423,13 +405,13 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn, S
 											invoiceNum + "?",  "Delete Booking?", JOptionPane.YES_NO_OPTION);
 					        	if (input == 0){
 					        		lockSelection = true;
-					        		deleteBookingBtn.setVisible(true);	
-					        		JOptionPane.showMessageDialog(null, "inst " + inst
-					        											+"\ndate " + dte
-					        											+"\ntime " + tme
-					        											+"\ninvoice " + invoiceNum);
+					        		String inv = invoiceNum;
+							    	  modifyBooking(delBooking);
+							    	  ip.showMessage("Deleting Booking for "+ invoiceNum);
+							    	  resetTable();	
+							    	  reselectRow(inv);
 					        	} else{
-					        		deleteBookingBtn.setVisible(false);
+
 					        	}
 							} else {
 								JOptionPane.showMessageDialog(null, "Delete this Existing Install before making this Booking");
@@ -451,6 +433,14 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn, S
 	//    resetSchedule();		//not required at this point - 
 }
 
+protected void reselectRow(String inv) {
+	for (int i = 0; i < installTbl.getRowCount(); i++){
+		if (inv.equals(installTbl.getModel().getValueAt(i, 0).toString())){
+			installTbl.setRowSelectionInterval(i, i);
+		}
+	}
+}
+
 protected void closeInstall() {
 	int input = JOptionPane.showConfirmDialog(null,"Close Install?\n "
 			+ "This Action is final, Install will no longer be tracked!",  "Close Install?", JOptionPane.YES_NO_OPTION);
@@ -460,7 +450,6 @@ protected void closeInstall() {
 	} else{
 		ip.showMessage("dont close");
 	}
-				
 }
 	
 
@@ -561,23 +550,23 @@ protected void updateWeek() {
 		JTableHeader th = timeTbl.getTableHeader();		
 
 		TableColumn tc = timeTbl.getColumnModel().getColumn(0);			    
-		tc.setCellRenderer(new installerColumnRenderer());
+		tc.setCellRenderer(new bookingColumnRenderer());
 		tc = timeTbl.getColumnModel().getColumn(1);			    
-		tc.setCellRenderer(new installerColumnRenderer());
+		tc.setCellRenderer(new bookingColumnRenderer());
 		tc = timeTbl.getColumnModel().getColumn(2);			    
-		tc.setCellRenderer(new installerColumnRenderer());
+		tc.setCellRenderer(new bookingColumnRenderer());
 		tc = timeTbl.getColumnModel().getColumn(3);			    
-		tc.setCellRenderer(new installerColumnRenderer());
+		tc.setCellRenderer(new bookingColumnRenderer());
 		tc = timeTbl.getColumnModel().getColumn(4);			    
-		tc.setCellRenderer(new installerColumnRenderer());
+		tc.setCellRenderer(new bookingColumnRenderer());
 		tc = timeTbl.getColumnModel().getColumn(5);			    
-		tc.setCellRenderer(new installerColumnRenderer());
+		tc.setCellRenderer(new bookingColumnRenderer());
 		tc = timeTbl.getColumnModel().getColumn(6);			    
-		tc.setCellRenderer(new installerColumnRenderer());
+		tc.setCellRenderer(new bookingColumnRenderer());
 		tc = timeTbl.getColumnModel().getColumn(7);			    
-		tc.setCellRenderer(new installerColumnRenderer());
+		tc.setCellRenderer(new bookingColumnRenderer());
 		tc = timeTbl.getColumnModel().getColumn(8);			    
-		tc.setCellRenderer(new installerColumnRenderer());		
+		tc.setCellRenderer(new bookingColumnRenderer());		
 }
 	
     public void spaceHeader() {
@@ -599,41 +588,7 @@ protected void updateWeek() {
         header.repaint();
   }
     
-    class installerColumnRenderer extends DefaultTableCellRenderer
-    {		         
-       public installerColumnRenderer() {
-          super();
-       }
-
-       public Component getTableCellRendererComponent
-            (JTable table, Object value, boolean isSelected,
-             boolean hasFocus, int row, int column)
-       {
-          Component cell = super.getTableCellRendererComponent
-             (table, value, isSelected, hasFocus, row, column);
-      if (column == 0 || column == 1 ){	
-    	  cell.setBackground( instColors[(row/2)%4]);  
-          cell.setForeground( DkBlue );		          
-          cell.setFont(cell.getFont().deriveFont(Font.BOLD));	
-          setHorizontalAlignment(SwingConstants.CENTER);
-          return cell;
-      }else if (column == 2 || column == 8 ){
-          cell.setBackground( LtGray);  
-          cell.setForeground( DkBlue );
-          cell.setFont(cell.getFont().deriveFont(12, Font.BOLD));	
-    	  return cell;
-      }else {
-//    	  JLabel l = (JLabel)cell;
-    	  
-    	  String contents = (String)value;
-    	  ((JComponent) cell).setToolTipText(contents);		    	  		    	  
-    	  cell.setBackground( instColors[(row/2)%4]);
-
-    	  return cell;
-      }
-
-       }
-    }
+ 
 protected void clearStock() {
 	detailsTxtArea.setText("");
 	stockTxtArea.setText("");
@@ -664,8 +619,6 @@ protected void resetTable() {
     backBtn.setVisible(false);
     forBtn.setVisible(false);
     editBookingBtn.setVisible(true);
-    saveBookingBtn.setVisible(false);
-    deleteBookingBtn.setVisible(false);
     installerNoteBtn.setVisible(false);
 	closeInstallBtn.setVisible(false); 
     lockSelection = false;
@@ -688,6 +641,7 @@ protected void addNoteToInstaller() {
 		 JOptionPane.showMessageDialog(null, "Validate & Save Note to Installer: \n" + noteToInstaller.getText());
 		}		
 	}
+
 public JTable getInstallTbl(){
 	return installTbl;
 }

@@ -119,15 +119,7 @@ class ViewSiteChecksPanel extends JPanel {
 		infoPanel = new JPanel();
 		infoPanel.setBounds(0, 280, 1100, 300);  
 		infoPanel.setLayout(null);
-/*      
-		detailsTxtArea = new JTextArea("");
-		detailsTxtArea.setBounds(20, 20, 250, 260);
-        detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
-        detailsTxtArea.setBackground(LtGray);
-		detailsTxtArea.setLineWrap(true);
-		detailsTxtArea.setEditable(false);
-		infoPanel.add(detailsTxtArea);
-*/		
+		
 	      poPanel = new JPanel();
 	      poPanel.setBounds(20, 20, 1025, 170);		  
 	      poPanel.setLayout(new BorderLayout());
@@ -149,10 +141,6 @@ class ViewSiteChecksPanel extends JPanel {
 		cancelGoodsRcvdBtn.setBounds(720, 260, 150, 25);
 		infoPanel.add(cancelGoodsRcvdBtn);
       
-/*		saveGoodsRcvdBtn = new JButton("Save Received");
-		saveGoodsRcvdBtn.setBounds(895, 260, 150, 25);
-		infoPanel.add(saveGoodsRcvdBtn);
-*/
 		this.setLayout(null);
 		this.add(tablePanel); 
 		infoPanel.add(poPanel);
@@ -237,7 +225,7 @@ class ViewSiteChecksPanel extends JPanel {
 }
 
 
-
+/*
 protected void showReceivedItems() {
 	
     SimpleDateFormat repModel = new SimpleDateFormat("dd.MMM.yyyy");
@@ -278,7 +266,7 @@ protected void showReceivedItems() {
 			}
 		}		
 	}
-
+*/
 private void moveRow(int row, JTable fromTbl, JTable toTbl){
 	String date;
 	if (fromTbl.getValueAt(row, 4)!=null){

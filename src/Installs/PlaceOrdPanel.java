@@ -139,7 +139,7 @@ public PlaceOrdPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
       cancelPONumBtn.setBounds(720, 260, 150, 25);
       infoPanel.add(cancelPONumBtn);
       
-      savePONumBtn = new JButton("Save Permit Details");
+      savePONumBtn = new JButton("Save Order Number");
       savePONumBtn.setBounds(895, 260, 150, 25);
       infoPanel.add(savePONumBtn);
 
@@ -217,7 +217,6 @@ public PlaceOrdPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 	  	         }		  	      
 	  	    }
 	  	});	
-	  	resetTable();
 }
 
 
