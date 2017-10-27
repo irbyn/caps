@@ -7,11 +7,11 @@ package Main;
  */
 public class ConnDetails {
 	static final String dbURL = "jdbc:sqlserver://wchdb.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:1433";
-	private String user = "default";
-	private String pass = "default";
+	private String user = "Khgv92367hdkfug9";
+	private String pass = "Locei02h84b5KJUVaW";
 	
 	public ConnDetails(){
-		
+
 	}
 
 	public ConnDetails(String usr, String pwd){

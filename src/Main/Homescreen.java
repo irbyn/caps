@@ -22,6 +22,8 @@ import Permit.PermitPane;
 import Admin.AdminLogin;
 
 import java.awt.event.ActionListener;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -45,6 +47,8 @@ public class Homescreen extends JFrame {
 	private PermitPane permitPanel; 
 	private AdminLogin adminLogin;
 	private Homescreen hs;
+	
+
 	private static String user;
 	private static String pass;
 
@@ -54,10 +58,14 @@ public class Homescreen extends JFrame {
 
 		user = User;
 		pass = Pass;
-
+		hs = this;
+		
 		//PASS THE LOGIN DETAILS TO Class connectionDetails
-		ConnDetails conDeets = new ConnDetails(user, pass);
-
+		//ConnDetails conDeets = new ConnDetails(user, pass);
+		ConnDetails conDeets = new ConnDetails();
+		
+		
+		
 		// setting up JFrame
 		getContentPane().setLayout(null);
 		setPreferredSize(new Dimension(1100, 700));
@@ -159,11 +167,10 @@ public class Homescreen extends JFrame {
 		
 		//Log into the Admin Panel
 		adminLoginBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {	
+			public void actionPerformed(ActionEvent e) {
 				adminLogin = new AdminLogin(hs);
 				adminLogin.setVisible(true);
 				setVisible(false); //Make the screen invisible
-				dispose();//Close the login window
 			}
 		});
 		
@@ -194,6 +201,10 @@ public class Homescreen extends JFrame {
 		pack();
 	}
 
+	
+
+	
+	
 	protected void highlightButton(JButton btn) {
 		btn.setBackground(selected);
 		btn.setForeground(Color.WHITE);

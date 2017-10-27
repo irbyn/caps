@@ -7,6 +7,8 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -44,12 +46,14 @@ import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 
 public class AdminPanel extends JFrame {
-	private int[] columnWidth = new int[]{50, 70, 150, 100, 100, 100};
-	private String qryList = new String("EXEC AWS_WCH_DB.dbo.[a_UserList]");
+	private int[] columnWidth = new int[]{50, 70, 150, 100, 100, 100, 100};
+	private String qryList = new String("EXEC AWS_WCH_DB.dbo.[a_userList]");
 	private String qryDetails = new String("EXEC AWS_WCH_DB.dbo.[a_UserDetails]");
 	private String qryCreateUser = "call AWS_WCH_DB.dbo.a_createNewUser";
+	private String upUserPass = "call AWS_WCH_DB.dbo.a_UpdateUserPass";
 	private String upUser = "call AWS_WCH_DB.dbo.a_UpdateUser";
-	private String param = "";  
+	private String param = "";
+	private String paramAID = "";
 	private Homescreen hs;
 
 	//private String dbURL = "";
@@ -109,6 +113,7 @@ public class AdminPanel extends JFrame {
 	private JLabel roleTypelbl;
 
 	private ConnDetails conDeets;
+	public String md5Hash = "";
 
 	private ResultSet results;
 	private ResultSet qryResults;
@@ -124,18 +129,15 @@ public class AdminPanel extends JFrame {
 	private JTextField rankTxtBx;
 	private Homescreen homescreen;
 
-	public AdminPanel(String User, String Pass, Homescreen hs){
+	public AdminPanel(Homescreen hs){
 		rowSelected = false;
-		user = User;
-		pass = Pass;
+		//user = User;
+		//pass = Pass;
 
-		homescreen = new Homescreen(user, pass);
-
+		this.homescreen =hs;// new Homescreen(user, pass);		
 		//PASS THE LOGIN DETAILS TO Class connectionDetails
-		conDeets = new ConnDetails(user, pass);
-
-
-
+		conDeets = new ConnDetails();
+		
 		getContentPane().setLayout(null);
 		setPreferredSize(new Dimension(1100, 700));
 		setResizable(false);
@@ -388,7 +390,15 @@ public class AdminPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0){
 				//showMessage("Updating Consent Received");
-				updateUser();
+				
+				String pwd = new String(passtxtBx.getPassword());
+				if (!pwd.equals("")){
+					updateUserAndPass();
+				}
+				else{
+					updateUser();
+				}
+				
 				disableFields();
 				clearFields();
 				updateBtn.setEnabled(false);
@@ -462,6 +472,7 @@ public class AdminPanel extends JFrame {
 					try{
 						//Get the customer ID as a paramater to feed into the SQL procedure 
 						param = adminTbl.getValueAt(adminTbl.getSelectedRow(), 0).toString();
+						paramAID = adminTbl.getValueAt(adminTbl.getSelectedRow(), 1).toString();
 						displayUserDetails(param);
 						rowSelected = true;
 						modifyUserBtn.setEnabled(true);
@@ -472,9 +483,7 @@ public class AdminPanel extends JFrame {
 				}
 			}
 		});
-
 		disableFields();
-
 		getContentPane().setLayout(null);
 		getContentPane().add(tablePanel); 
 		getContentPane().add(infoPanel);
@@ -550,10 +559,6 @@ public class AdminPanel extends JFrame {
 				}else{
 					chckbxSCheck.setSelected(false);
 				}
-
-
-
-
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -635,9 +640,7 @@ public class AdminPanel extends JFrame {
 		}			
 	}
 
-
 	protected void updateUser() {
-
 		CallableStatement stm = null;
 		try {
 
@@ -665,7 +668,55 @@ public class AdminPanel extends JFrame {
 			stm.setInt(17, getRanked());
 			stm.setString(18, getRoleType());
 			stm.setBoolean(19, getAccStatus());
+			
+			stm.executeUpdate();
+		}
+		catch (SQLServerException sqex)
+		{
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}			
+	}
 
+	
+	
+	protected void updateUserAndPass() {
+		CallableStatement stm = null;
+		try {
+
+			String update = "{" + upUserPass +"(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+
+			stm = conn.prepareCall(update);
+
+			stm.setString(1, param);
+			stm.setString(2, getFName());
+			stm.setString(3, getLName());
+			stm.setString(4, getPhone());
+			stm.setString(5, getMobile());
+			stm.setString(6, getEmail());
+			stm.setString(7, getPAddr());
+			stm.setString(8, getPSuburb());
+			stm.setString(9, getPAreaCode());
+			stm.setString(10, getNZHHANum());
+			stm.setString(11, getUsername());
+			stm.setString(12, getCouncNum());
+			stm.setInt(13, getReeseNum());
+			stm.setBoolean(14, getSiteCheck());
+			stm.setBoolean(15, getInstall());
+			stm.setBoolean(16, getSell());
+			stm.setInt(17, getRanked());
+			stm.setString(18, getRoleType());
+			stm.setBoolean(19, getAccStatus());
+			stm.setInt(20, Integer.parseInt(paramAID));
+			
+			getHash();
+			
+			stm.setString(21, md5Hash);
+			
 			stm.executeUpdate();
 		}
 		catch (SQLServerException sqex)
@@ -701,7 +752,12 @@ public class AdminPanel extends JFrame {
 	}
 
 	private void validateData(){
-
+		String pwd = new String(passtxtBx.getPassword());
+		String reConPwd = new String(reConnPasstxtBx.getPassword());
+		if (!pwd.equals(""))
+			if (!pwd.equals(reConPwd)){
+				JOptionPane.showMessageDialog(null, "Ensure both passwords are the same");
+			}
 	}
 
 	private void disableFields(){
@@ -859,6 +915,40 @@ public class AdminPanel extends JFrame {
 	public void showMessage(String msg) {
 		hs.showMsg(msg);
 	}
+	
+	public void getHash(){
+		String username = usertxtBx.getText();
+		String pwd = new String(passtxtBx.getPassword());
+		computeMD5Hash(pwd+username);
+	}
+	
+	public void computeMD5Hash(String userPass)
+	{
+		try {
+			// Create MD5 Hash
+			MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+			digest.update(userPass.getBytes());
+			byte messageDigest[] = digest.digest();
+
+			StringBuffer MD5Hash = new StringBuffer();
+			for (int i = 0; i < messageDigest.length; i++)
+			{
+				String h = Integer.toHexString(0xFF & messageDigest[i]);
+				while (h.length() < 2)
+					h = "0" + h;
+				MD5Hash.append(h);
+			}
+			md5Hash = MD5Hash.toString();
+			System.out.println(md5Hash);
+
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+
 }
 
 

@@ -16,6 +16,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.TableColumnModel;
 
+import com.microsoft.sqlserver.jdbc.SQLServerException;
+
 import Main.ConnDetails;
 import Main.Homescreen;
 
@@ -36,12 +38,17 @@ import javax.swing.JTable;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import java.awt.event.ActionListener;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.awt.event.ActionEvent;
 
 public class AdminLogin extends JFrame{
+	private String getuserPass = "call AWS_WCH_DB.dbo.a_DeskAdminLoginDetails";
 	private ConnDetails conDeets;
 	private Homescreen homescreen;
 	private AdminPanel adminPanel;
@@ -53,11 +60,13 @@ public class AdminLogin extends JFrame{
 	private JButton loginBtn;
 	private JButton cancelBtn;
 	private JPanel logPanel;
+	private String md5Hash;
+	private ResultSet rs; 
 
 
-	public AdminLogin(Homescreen homeScreen) {
-		//this.homescreen = new Homescreen(user, pass);
-		
+	public AdminLogin(Homescreen hs) {
+	this.homescreen = hs;
+	
 	// setting up JFrame
 	getContentPane().setLayout(null);
 	setPreferredSize(new Dimension(400, 250));
@@ -85,12 +94,12 @@ public class AdminLogin extends JFrame{
 	lblPassword.setBounds(98, 113, 86, 14);
 	logPanel.add(lblPassword);
 
-	txtBxUsername = new JTextField("Khgv92367hdkfug9");
+	txtBxUsername = new JTextField("KurtVs");
 	txtBxUsername.setBounds(194, 61, 123, 20);
 	txtBxUsername.setColumns(10);
 	logPanel.add(txtBxUsername);
 
-	txtBxPassword = new JPasswordField("Locei02h84b5KJUVaW");
+	txtBxPassword = new JPasswordField("AdminPassword");
 	txtBxPassword.setBounds(194, 110, 123, 20);
 	logPanel.add(txtBxPassword);
 
@@ -105,12 +114,18 @@ public class AdminLogin extends JFrame{
 	//Action listeners for each button
 	loginBtn.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) { 
+			
 			String user=txtBxUsername.getText();
-    		String pwd = new String(txtBxPassword.getPassword());
-			adminPanel = new AdminPanel(user, pwd, homescreen);
-			adminPanel.setVisible(true);				
-			setVisible(false); //Make the screen invisible
-			//dispose();//Close the login window
+			String pwd = new String(txtBxPassword.getPassword());
+			computeMD5Hash(pwd+user);
+			if (checkLoginDets()){
+				//if connect continue
+				adminPanel = new AdminPanel(homescreen);
+				adminPanel.setVisible(true);				
+				setVisible(false); //Make the screen invisible
+			}else{
+				JOptionPane.showMessageDialog(null, "Failed to log in");
+			}		
 		}
 	});
 
@@ -123,5 +138,64 @@ public class AdminLogin extends JFrame{
 	});      
 
 	pack();
+	}
+	
+	public void computeMD5Hash(String userPass)
+	{
+		try {
+			// Create MD5 Hash
+			MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+			digest.update(userPass.getBytes());
+			byte messageDigest[] = digest.digest();
+
+			StringBuffer MD5Hash = new StringBuffer();
+			for (int i = 0; i < messageDigest.length; i++)
+			{
+				String h = Integer.toHexString(0xFF & messageDigest[i]);
+				while (h.length() < 2)
+					h = "0" + h;
+				MD5Hash.append(h);
+			}
+			md5Hash = MD5Hash.toString();
+
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public Boolean checkLoginDets(){
+		Boolean login = false;
+		
+		CallableStatement sm = null;
+		try {
+
+			String update = "{" + getuserPass +"(?,?)}";
+			
+			String dbURL = "jdbc:sqlserver://wchdb.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:1433";
+			String user = "Khgv92367hdkfug9";
+			String pass = "Locei02h84b5KJUVaW";
+			Connection conn = DriverManager.getConnection(dbURL, user, pass);
+			
+			sm = conn.prepareCall(update);
+			sm.setString(1, md5Hash);
+			sm.setString(2, txtBxUsername.getText());
+
+			rs = sm.executeQuery();	 
+
+			if (rs.next()){
+				login = true;
+			}
+		}
+		catch (SQLServerException sqex)
+		{
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}
+		return login;
 	}
 }

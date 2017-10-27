@@ -383,8 +383,8 @@ class CustomerPanel extends JPanel {
 		});
 
 		//Display the initial table
-		rs = sp.getResults(0);		
-		salesTbl.setModel(DbUtils.resultSetToTableModel(rs));  
+		//rs = sp.getResults(0);		
+		//salesTbl.setModel(DbUtils.resultSetToTableModel(rs));  
 
 		//When check box is selected
 		pAddChbx.addItemListener(new ItemListener() {

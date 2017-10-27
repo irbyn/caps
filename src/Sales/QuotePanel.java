@@ -63,7 +63,8 @@ import net.proteanit.sql.DbUtils;
 class QuotePanel extends JPanel {
 
 	private int [] columnWidth = {50, 50, 100, 70, 100, 100, 60, 50, 50, 50}; 	
-	private String getSaleID = "EXEC AWS_WCH_DB.dbo.[i_InstallsGetSaleID] ";
+	//private String getSaleID = "EXEC AWS_WCH_DB.dbo.[i_InstallsGetSaleID] ";
+	private String getSCDetails = "{Call AWS_WCH_DB.dbo.[s_SalesSCDetails] (?)}";
 	private String updateQuote = "{Call AWS_WCH_DB.dbo.[s_SalesUpdateQuote] (?,?,?,?,?,?,?)}";
 	private String rmvSiteCheck = "{Call AWS_WCH_DB.dbo.[s_SalesRmvSiteCheck] (?)}";
 
