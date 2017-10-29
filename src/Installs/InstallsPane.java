@@ -290,7 +290,7 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
 					customerPhone 		= qryResults.getString("CustomerPhone");
 					customerMobile 		= qryResults.getString("CustomerMobile");
 					customerEmail 		= qryResults.getString("CustomerEmail");
-					bookedTime 			= qryResults.getString("Booking");
+					bookedTime 			= qryResults.getString("bookedTime");
 					bookedInstaller		= qryResults.getString("bookedInstaller");
 					fromInstaller		= qryResults.getString("fromInstaller");
 										
