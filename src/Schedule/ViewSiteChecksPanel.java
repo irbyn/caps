@@ -42,7 +42,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 import DB_Comms.CreateConnection;
 import Installs.InstallsPane;
 import Main.ConnDetails;
-import Main.PrintSiteCheck;
+import documents.PrintSiteCheck;
 import net.proteanit.sql.DbUtils;
 
 
@@ -280,6 +280,12 @@ private void moveRow(int row, JTable fromTbl, JTable toTbl){
 	} else {
 		time = "";
 	}
+	String by;
+	if (fromTbl.getValueAt(row, 6)!=null){
+		by = fromTbl.getValueAt(row, 6).toString();
+	} else {
+		by = "";
+	}
 
 String[] rowData = new String[]{	fromTbl.getValueAt(row, 0).toString(),
 									fromTbl.getValueAt(row, 1).toString(),
@@ -287,8 +293,7 @@ String[] rowData = new String[]{	fromTbl.getValueAt(row, 0).toString(),
 									fromTbl.getValueAt(row, 3).toString(),
 									date,
 									time,
-									fromTbl.getValueAt(row, 6).toString()//,instDate
-								};
+									by	};
 			((DefaultTableModel)toTbl.getModel()).addRow(rowData);
 
 }

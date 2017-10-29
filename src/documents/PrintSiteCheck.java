@@ -1,4 +1,4 @@
-package Main;
+package documents;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -19,6 +19,7 @@ import org.apache.pdfbox.pdmodel.interactive.form.PDTextField;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import DB_Comms.CreateConnection;
+import Main.ConnDetails;
 
 public class PrintSiteCheck {
 	private String getSCDetails = "EXEC AWS_WCH_DB.dbo.sc_PrintSiteChecks";

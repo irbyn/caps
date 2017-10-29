@@ -64,6 +64,7 @@ public class InstallsPane extends JPanel
 		private String custDetails = "EXEC AWS_WCH_DB.dbo.p_CustomerDetails";
 		private String custBookings = "EXEC AWS_WCH_DB.dbo.i_CustomerBooking";
 		private String stockDetails = "EXEC AWS_WCH_DB.dbo.i_StockDetails";	
+		private String instNote = "EXEC AWS_WCH_DB.dbo.i_getInstallerNote";	
 		
 		private String invoice="";			
 		private String rees="";
@@ -80,6 +81,7 @@ public class InstallsPane extends JPanel
 		private String bookedTime=""; 		
 		private String bookedInstaller="";
 		private String fromInstaller="";
+		private String toInstaller="";
 		
 		
 
@@ -308,6 +310,39 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
         }      		            
 		return "";
     }
+    
+    public String DisplayNoteToInstaller(String instNumber){
+    	
+        try
+        {
+        	Connection conn = connecting.CreateConnection(conDeets);
+        	PreparedStatement st2 =conn.prepareStatement(instNote + ' ' +  instNumber);	    	
+        	qryResults = st2.executeQuery();
+        	if (qryResults==null){
+
+    			  JOptionPane.showMessageDialog(null, "null query");
+        	}
+        	else{
+				while(qryResults.next()){
+					
+					toInstaller		= qryResults.getString("toInstaller");
+										
+			        str = 	" INVOICE:\t" + instNumber + "\n" +
+			        				" REES CODE:\t" + rees +"\n" +
+			        				" CLIENT:\t" + customerName + "\n\n" + 
+			        				" PHONE:\t" + customerPhone + "\n" + 
+			        				" MOBILE:\t" + customerMobile + "\n" +
+			        				" EMAIL:\t" + customerEmail;	        		
+        		return toInstaller;
+				}
+        	}
+        }
+        catch(Exception ex)
+        { 
+        JOptionPane.showMessageDialog(null, ex.toString());
+        }      		            
+		return "";
+    }
     	
     public String DisplayStockOnOrder(String instNumber){
     	    		
@@ -317,23 +352,19 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
         	PreparedStatement st2 =conn.prepareStatement(stockDetails + ' ' +  instNumber);	    	
         	qryResults = st2.executeQuery();
         	if (qryResults==null){
-
     			  JOptionPane.showMessageDialog(null, "null query");
         	}
-        	else{
-        		            		
+        	else{        		            		
         		stock = " PO:\tStock Item\t\n";
-		        
+	        	String po 	= "";
+ 	     		String desc = "";
 				while(qryResults.next()){
-					
-		        	String po 			= qryResults.getString("POrd");
-	 	     		String desc 		= qryResults.getString("Stock");
-
-										
+		        	po 			= qryResults.getString("POrd");
+	 	     		desc 		= qryResults.getString("Stock");
 			        stock = stock + po + "\t" + desc + "\n";
-				}	        		
-        		return stock;
-				
+				}	     
+				stock = "NOTE TO INSTALLER: \n" + DisplayNoteToInstaller(instNumber) + "\n\n" + stock;
+        		return stock;				
         	}
         	
         }
