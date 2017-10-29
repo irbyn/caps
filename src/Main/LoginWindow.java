@@ -147,7 +147,6 @@ public class LoginWindow extends JFrame{
 
 			//result.setText("MD5 hash generated is: " + " " + MD5Hash);
 			md5Hash = MD5Hash.toString();
-			System.out.println("Login hash on " + md5Hash);
 
 		}
 		catch (NoSuchAlgorithmException e)

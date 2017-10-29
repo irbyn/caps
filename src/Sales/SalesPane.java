@@ -6,11 +6,14 @@ import java.awt.Dimension;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Calendar;
+import java.util.Date;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
@@ -47,6 +50,7 @@ public class SalesPane extends JPanel
 	private SiteCheckPanel siteCheck;
 	private String custEmail;
 	private String custName;
+	private Date date;
 
 	private Boolean lockForm;
 	//private String custDetails = "EXEC AWS_WCH_DB.dbo.p_CustomerDetails";
@@ -288,7 +292,15 @@ public class SalesPane extends JPanel
       	    {	//Set JTextArea to ""
       	    	JCheckBox ctrl = (JCheckBox) control;
       	        ctrl.setSelected(false);
-      	    }   	}
+      	    }   
+      	    else if (control instanceof JSpinner)
+    	    {	//Set JTextArea to ""
+      	    	JSpinner ctrl = (JSpinner) control;
+      	    	date = new java.sql.Date(Calendar.getInstance().getTime().getTime());
+    	        ctrl.setValue(date);
+    	    }  
+      	    
+      	}
 }
 
 	

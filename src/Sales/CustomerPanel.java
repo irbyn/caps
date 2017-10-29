@@ -98,7 +98,10 @@ class CustomerPanel extends JPanel {
 
 	private SalesPane sp;
 	private ConnDetails conDeets;
+	private JButton createSaleBtn;
 	private JButton clearSchBtn;
+	private JButton hideCustBtn;
+	private JButton viewCustBtn;
 	private JTextField reesTxtBx;
 
 
@@ -123,11 +126,12 @@ class CustomerPanel extends JPanel {
 		searchPanel = new JPanel();
 		searchPanel.setBounds(0, 0, 611, 77);
 		searchPanel.setLayout(null);
+		searchPanel.setVisible(false);
 
 		//Search Panel contents
 		searchLbl = new JLabel("Search");
 		searchLbl.setFont(new Font("Arial", Font.BOLD, 20));
-		searchLbl.setBounds(20, 11, 122, 20);
+		searchLbl.setBounds(10, 11, 78, 20);
 		searchPanel.add(searchLbl);
 
 		sFNameLbl = new JLabel("First Name:");
@@ -162,11 +166,13 @@ class CustomerPanel extends JPanel {
 		tablePanel.setLayout(new BorderLayout());
 		tablePanel.add(scrollPane, BorderLayout.CENTER);
 		tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
+		tablePanel.setVisible(false);
 
 		//Content panel
 		infoPanel = new JPanel();
-		infoPanel.setBounds(621, 0, 424, 585);
+		infoPanel.setBounds(289, 11, 424, 585);
 		infoPanel.setLayout(null);
+		
 
 		contactLbl = new JLabel("Contact Information");
 		contactLbl.setFont(new Font("Arial", Font.BOLD, 20));
@@ -284,7 +290,6 @@ class CustomerPanel extends JPanel {
 		cancelBtn.setBounds(22, 533, 120, 25);
 		infoPanel.add(cancelBtn);
 
-
 		updateBtn = new JButton("Update");
 		updateBtn.setBounds(161, 533, 120, 25);
 		updateBtn.setEnabled(false);
@@ -295,8 +300,7 @@ class CustomerPanel extends JPanel {
 		infoPanel.add(createCustBtn);
 
 		this.setLayout(null);
-		this.add(searchPanel);
-
+		
 		JLabel reesLbl = new JLabel("Reese #:");
 		reesLbl.setBounds(425, 42, 62, 14);
 		searchPanel.add(reesLbl);
@@ -305,12 +309,46 @@ class CustomerPanel extends JPanel {
 		reesTxtBx.setColumns(10);
 		reesTxtBx.setBounds(482, 39, 120, 20);
 		searchPanel.add(reesTxtBx);
-		this.add(tablePanel); 
+		//this.add(tablePanel); 
 		this.add(infoPanel);
 
-		JButton createSaleBtn = new JButton("Create Sale");
+		createSaleBtn = new JButton("Create Sale");
 		createSaleBtn.setBounds(291, 533, 120, 25);
 		infoPanel.add(createSaleBtn);	
+		
+		hideCustBtn = new JButton("Hide All Customers");
+		hideCustBtn.setBounds(87, 6, 163, 23);
+		searchPanel.add(hideCustBtn);
+		
+		viewCustBtn = new JButton("View All Customers");
+		viewCustBtn.setBounds(0, 0, 178, 23);
+		add(viewCustBtn);
+		
+		viewCustBtn.addActionListener( new ActionListener(){
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			viewCustBtn.setVisible(false);
+			add(tablePanel);
+			resetTable();
+			tablePanel.setVisible(true);
+			add(searchPanel);
+			searchPanel.setVisible(true);
+			infoPanel.setBounds(621, 0, 424, 585);
+		}
+		});
+		
+		hideCustBtn.addActionListener( new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				viewCustBtn.setVisible(true);
+				remove(tablePanel);
+				tablePanel.setVisible(true);
+				remove(searchPanel);
+				searchPanel.setVisible(true);
+				infoPanel.setBounds(289, 11, 424, 585);
+			}
+		});
+		
 		createSaleBtn.addActionListener( new ActionListener()
 		{
 			@Override
@@ -404,8 +442,7 @@ class CustomerPanel extends JPanel {
 			}
 		});
 
-		updateBtn.addActionListener( new ActionListener()
-		{
+		updateBtn.addActionListener( new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				{ 
@@ -478,6 +515,13 @@ class CustomerPanel extends JPanel {
 						clearFields();
 						createCustBtn.setEnabled(true);
 						updateBtn.setEnabled(false);
+						
+						viewCustBtn.setVisible(true);
+						remove(tablePanel);
+						tablePanel.setVisible(true);
+						remove(searchPanel);
+						searchPanel.setVisible(true);
+						infoPanel.setBounds(289, 11, 424, 585);
 					}
 				}
 			}
@@ -943,6 +987,4 @@ class CustomerPanel extends JPanel {
 	public JPanel getInfoPanel(){
 		return infoPanel;
 	}
-
-
 }
