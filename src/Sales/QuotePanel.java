@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -63,8 +64,7 @@ import net.proteanit.sql.DbUtils;
 class QuotePanel extends JPanel {
 
 	private int [] columnWidth = {50, 50, 100, 70, 100, 100, 60, 50, 50, 50}; 	
-	//private String getSaleID = "EXEC AWS_WCH_DB.dbo.[i_InstallsGetSaleID] ";
-	private String getSCDetails = "{Call AWS_WCH_DB.dbo.[s_SalesSCDetails] (?)}";
+	private String getQuoteDetails = "{Call AWS_WCH_DB.dbo.[s_SalesQuoteDetails](?,?)}";
 	private String updateQuote = "{Call AWS_WCH_DB.dbo.[s_SalesUpdateQuote] (?,?,?,?,?,?,?)}";
 	private String rmvSiteCheck = "{Call AWS_WCH_DB.dbo.[s_SalesRmvSiteCheck] (?)}";
 
@@ -130,7 +130,7 @@ class QuotePanel extends JPanel {
 	private JList photoDZ;
 	private JScrollPane photoSP;
 
-	private JLabel lblReeseCode; 
+	private JLabel lblReesCode; 
 	private JLabel lblQuoteNum; 
 	private JTextField txtBxReesCode;
 	private JTextField txtBxQuoteNum;
@@ -198,9 +198,9 @@ class QuotePanel extends JPanel {
 		detailsTxtArea.setEditable(false);
 		infoPanel.add(detailsTxtArea);
 
-		lblReeseCode = new JLabel("Reese Code");
-		lblReeseCode.setBounds(386, 25, 74, 14);
-		infoPanel.add(lblReeseCode);
+		lblReesCode = new JLabel("Rees Code");
+		lblReesCode.setBounds(386, 25, 74, 14);
+		infoPanel.add(lblReesCode);
 
 		lblQuoteNum = new JLabel("Quote Number");
 		lblQuoteNum.setBounds(622, 25, 95, 14);
@@ -312,7 +312,6 @@ class QuotePanel extends JPanel {
 
 		tablePanel.add(scrollPane, BorderLayout.CENTER);
 		tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);        
-
 
 		viewQutBtn.addActionListener( new ActionListener()
 		{	@Override
@@ -431,7 +430,6 @@ class QuotePanel extends JPanel {
 			}
 		});
 
-
 		cancelSaleReqBtn.addActionListener( new ActionListener()
 		{
 			@Override
@@ -465,14 +463,12 @@ class QuotePanel extends JPanel {
 					qutLM.removeAllElements();
 					siteLM.removeAllElements();
 					photoLM.removeAllElements();						
-
-					//			pp.setFormsLocked();
 					try{
 						saleID = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
 						custID= salesTbl.getValueAt(salesTbl.getSelectedRow(), 1).toString();
 
 						detailsTxtArea.setText(sp.DisplayClientDetails(custID));
-						//displayClientDetails(quoteNum);
+						getNumbers();
 						checkForFiles();
 
 					} catch (IndexOutOfBoundsException e){
@@ -635,11 +631,8 @@ class QuotePanel extends JPanel {
 		msg = "";
 		if (!txtBxReesCode.getText().equals("") || !txtBxQuoteNum.getText().equals("") || qutLM.getSize()>0 || siteLM.getSize()>0 || photoLM.getSize()>0){
 
-			if (txtBxReesCode.getText().length() > 8){
+			if (txtBxReesCode.getText().length() > 11){
 				msg = msg + "Rees Code can not be more than 8 characters\n";
-				saveAllowed=false;
-			}else if (!txtBxReesCode.getText().contains("-")){	
-				msg = msg + "Rees Code must contain a -\n";
 				saveAllowed=false;
 			}
 
@@ -864,6 +857,50 @@ class QuotePanel extends JPanel {
 		return txtBxQuoteNum.getText();
 	}
 
+	public void getNumbers(){
+		CallableStatement sm = null;
+		try {
+
+			//String update = "{" + getQuoteDetails +"(?,?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+
+			sm = conn.prepareCall(getQuoteDetails);
+			sm.setInt(1, Integer.parseInt(saleID));
+			sm.setInt(2, Integer.parseInt(custID));
+
+			rs = sm.executeQuery();	 
+
+			if (rs==null){
+				JOptionPane.showMessageDialog(null, "null query");
+			}
+			else
+			{	
+				while (rs.next()){
+
+					String rees 	= rs.getString("ReesCode");
+					String quote 	= rs.getString("QuoteNumber");
+					
+					
+	/*				if (rees==null){
+						txtBxReesCode.setText("");
+					}else{*/
+						txtBxReesCode.setText(rees);
+					//}
+					/*if (quote == null ){
+						txtBxQuoteNum.setText("");
+					}else{*/
+						txtBxQuoteNum.setText(quote);
+					//}
+				
+				}
+			}
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, ex.toString());
+		}
+	}
+	
 	public void removeSiteCheck(){
 		CallableStatement pm = null;
 		try {

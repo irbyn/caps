@@ -129,19 +129,9 @@ class SiteCheckPanel extends JPanel {
 		lblSChkBooking = new JLabel("Site Check Booking:");
 		lblSChkBooking.setBounds(478, 68, 128, 14);
 		infoPanel.add(lblSChkBooking);
-
-		/*		SimpleDateFormat dt = new SimpleDateFormat("dd.MMM.yyyy");
-		spnTimeDate = new JSpinner(new SpinnerDateModel());
-		spnTimeDate.setEditor(new JSpinner.DateEditor(spnTimeDate, dt.toPattern()));
-		//spnTimeDate.setBounds(634, 65, 284, 20);
-		infoPanel.add(spnTimeDate);*/
-
-
+		
 		date = new java.sql.Date(Calendar.getInstance().getTime().getTime());
 
-		/*spnDate = new JSpinner( new SpinnerDateModel() );
-		JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(spnDate, "dd.MMM.yyyy");
-		spnDate.setEditor(dateEditor);*/
 		SimpleDateFormat dtModel = new SimpleDateFormat("dd.MMM.yyyy");
 		spnDate = new JSpinner(new SpinnerDateModel());
 		spnDate.setEditor(new JSpinner.DateEditor(spnDate, dtModel.toPattern()));
@@ -149,9 +139,6 @@ class SiteCheckPanel extends JPanel {
 		spnDate.setValue(date);
 		infoPanel.add(spnDate);
 
-		/*spnTime = new JSpinner( new SpinnerDateModel() );
-		JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(spnTime, "HH:mm");
-		spnTime.setEditor(timeEditor);*/
 		SimpleDateFormat tmModel = new SimpleDateFormat("HH:MM");
 		spnTime = new JSpinner(new SpinnerDateModel());
 		spnTime.setEditor(new JSpinner.DateEditor(spnTime, tmModel.toPattern()));

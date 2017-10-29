@@ -436,8 +436,6 @@ class FollowUpPanel extends JPanel {
 	
 	public void addComment(){
 		
-		//date dateStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-		
 		date = new java.sql.Date(Calendar.getInstance().getTime().getTime());
 		
 		CallableStatement pm = null;
@@ -463,7 +461,6 @@ class FollowUpPanel extends JPanel {
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}			
 	}
-	
 	
 	public void createInstall(){
 		CallableStatement pm = null;

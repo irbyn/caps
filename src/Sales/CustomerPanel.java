@@ -172,7 +172,6 @@ class CustomerPanel extends JPanel {
 		infoPanel = new JPanel();
 		infoPanel.setBounds(289, 11, 424, 585);
 		infoPanel.setLayout(null);
-		
 
 		contactLbl = new JLabel("Contact Information");
 		contactLbl.setFont(new Font("Arial", Font.BOLD, 20));
@@ -300,7 +299,7 @@ class CustomerPanel extends JPanel {
 		infoPanel.add(createCustBtn);
 
 		this.setLayout(null);
-		
+
 		JLabel reesLbl = new JLabel("Reese #:");
 		reesLbl.setBounds(425, 42, 62, 14);
 		searchPanel.add(reesLbl);
@@ -315,28 +314,28 @@ class CustomerPanel extends JPanel {
 		createSaleBtn = new JButton("Create Sale");
 		createSaleBtn.setBounds(291, 533, 120, 25);
 		infoPanel.add(createSaleBtn);	
-		
+
 		hideCustBtn = new JButton("Hide All Customers");
 		hideCustBtn.setBounds(87, 6, 163, 23);
 		searchPanel.add(hideCustBtn);
-		
+
 		viewCustBtn = new JButton("View All Customers");
 		viewCustBtn.setBounds(0, 0, 178, 23);
 		add(viewCustBtn);
-		
+
 		viewCustBtn.addActionListener( new ActionListener(){
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			viewCustBtn.setVisible(false);
-			add(tablePanel);
-			resetTable();
-			tablePanel.setVisible(true);
-			add(searchPanel);
-			searchPanel.setVisible(true);
-			infoPanel.setBounds(621, 0, 424, 585);
-		}
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				viewCustBtn.setVisible(false);
+				add(tablePanel);
+				resetTable();
+				tablePanel.setVisible(true);
+				add(searchPanel);
+				searchPanel.setVisible(true);
+				infoPanel.setBounds(621, 0, 424, 585);
+			}
 		});
-		
+
 		hideCustBtn.addActionListener( new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -346,57 +345,6 @@ class CustomerPanel extends JPanel {
 				remove(searchPanel);
 				searchPanel.setVisible(true);
 				infoPanel.setBounds(289, 11, 424, 585);
-			}
-		});
-		
-		createSaleBtn.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-
-				Boolean errorChk = false;
-				String error = " ";
-				//otherwise the email field should be valid
-				if (sAddrTxtBx.getText().equals("")){
-					errorChk = true;
-					error = error + "STREET ADDRESS: can not be empty\n";
-				}else if (pAddrTxtBx.getText().length() > 30 || sAddrTxtBx.getText().length() > 30){
-					errorChk = true;
-					error = error + "STREET ADDRESS: can not be longer than 30 letters\n";
-				}
-
-				if (sSuburbTxtBx.getText().equals("")){
-					errorChk = true;
-					error = error + "SUBURB: can not be empty\n";
-				} else if(sAddrTxtBx.getText().length() > 20){
-					errorChk = true;
-					error = error + "SUBURB: can not be longer than 30 letters\n";
-				}
-
-				//Check to see if any errors has occured
-				if (errorChk == true){
-					JOptionPane.showMessageDialog(null, error);
-				}else if (validatedata() == false){
-					//If the customer doesn't yet exist create a new customer and sale
-					if (rowSelected=false){
-						//getID();
-						createCustAndSale();
-						sp.showMessage("Creating New Customer and Sale");
-						resetTable();
-						clearFields();
-						createCustBtn.setEnabled(true);
-					}
-					//Otherwise just create a new sale
-					else{
-						createSale();
-						sp.showMessage("Creating new Sale");
-						resetTable();
-						clearFields();
-						createCustBtn.setEnabled(true);
-					}
-
-				}
-
 			}
 		});
 
@@ -420,9 +368,39 @@ class CustomerPanel extends JPanel {
 			}
 		});
 
-		//Display the initial table
-		//rs = sp.getResults(0);		
-		//salesTbl.setModel(DbUtils.resultSetToTableModel(rs));  
+		createCustBtn.addActionListener( new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				{ 
+					//If validate data is false then there is no error
+					if (validatedata() == false){
+						//Check to see if the user is sure about creating the customer
+						int dialogButton = JOptionPane.YES_NO_OPTION;
+						int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to create this customer","Warning",dialogButton);
+						if(dialogResult == JOptionPane.YES_OPTION){
+							//Check to see if customer already exists
+							try {
+								//if the statement doesn't return any customers then create a new customer
+								if (!checkDBForCust().isBeforeFirst()){
+									createNewCustomer();
+									sp.showMessage("Creating new customer");
+									//createCustomer();
+									resetTable();
+									clearFields();
+								}else{
+									JOptionPane.showMessageDialog(null, "This customer already exists! \nPlease search and edit them.");
+								}
+							} catch (SQLException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+						}
+
+					}
+				}					
+			}
+		});
 
 		//When check box is selected
 		pAddChbx.addItemListener(new ItemListener() {
@@ -466,40 +444,6 @@ class CustomerPanel extends JPanel {
 			}
 		});
 
-		createCustBtn.addActionListener( new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				{ 
-					//If validate data is false then there is no error
-					if (validatedata() == false){
-						//Check to see if the user is sure about creating the customer
-						int dialogButton = JOptionPane.YES_NO_OPTION;
-						int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to create this customer","Warning",dialogButton);
-						if(dialogResult == JOptionPane.YES_OPTION){
-							//Check to see if customer already exists
-							try {
-								//if the statement doesn't return any customers then create a new customer
-								if (!checkDBForCust().isBeforeFirst()){
-									createNewCustomer();
-									sp.showMessage("Creating new customer");
-									//createCustomer();
-									resetTable();
-									clearFields();
-								}else{
-									JOptionPane.showMessageDialog(null, "This customer already exists! \nPlease search and edit them.");
-								}
-							} catch (SQLException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-
-						}
-
-					}
-				}					
-			}
-		});
-
 		cancelBtn.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0){
@@ -515,7 +459,6 @@ class CustomerPanel extends JPanel {
 						clearFields();
 						createCustBtn.setEnabled(true);
 						updateBtn.setEnabled(false);
-						
 						viewCustBtn.setVisible(true);
 						remove(tablePanel);
 						tablePanel.setVisible(true);
@@ -524,6 +467,37 @@ class CustomerPanel extends JPanel {
 						infoPanel.setBounds(289, 11, 424, 585);
 					}
 				}
+			}
+		});
+
+		createSaleBtn.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (validatedata() == false){
+					
+					System.out.println(rowSelected);
+					
+					//If the customer doesn't yet exist create a new customer and sale
+					if (rowSelected=false){
+						//getID();
+						createCustAndSale();
+						sp.showMessage("Creating New Customer and Sale");
+						resetTable();
+						clearFields();
+						createCustBtn.setEnabled(true);
+					}
+					//Otherwise just create a new sale
+					else{
+						createSale();
+						sp.showMessage("Creating new Sale");
+						resetTable();
+						clearFields();
+						createCustBtn.setEnabled(true);
+					}
+
+				}
+
 			}
 		});
 
@@ -651,33 +625,47 @@ class CustomerPanel extends JPanel {
 			errorChk = true;
 			error = error + "NUMBERS: either home number or mobile number can not be empty\n";
 		}
-		//Convert Phone numbers to Numbers
-		try {
 
-			Integer.parseInt(homeNumTxtBx.getText());
-			if(homeNumTxtBx.getText().length() > 15){
-				errorChk = true;
-				error = error + "HOME NUMBER: can not be more than 15 numbers\n";
+
+		if (homeNumTxtBx.getText().equals("") && mobileNumTxtBx.getText().equals("")){
+			errorChk = true;
+			error = error + "PHONE NUMBER: You must either enter a home or mobile number\n";
+		}else{
+			//Convert Phone numbers to Numbers
+			if (!homeNumTxtBx.getText().equals("")){
+				try {
+
+					Integer.parseInt(homeNumTxtBx.getText());
+					if(homeNumTxtBx.getText().length() > 12){
+						errorChk = true;
+						error = error + "HOME NUMBER: can not be more than 12 numbers\n";
+					}
+				}
+				catch (NumberFormatException e) {
+					//Display number error message 
+					errorChk = true;
+					error = error + "HOME NUMBER: can only contain numbers\n";
+				}
+			}else if (!mobileNumTxtBx.getText().equals("")){
+				//Convert Mobile Numbers
+				try {
+					Integer.parseInt(mobileNumTxtBx.getText());
+					if(homeNumTxtBx.getText().length() > 12){
+						errorChk = true;
+						error = error + "MOBILE NUMBER: can not be more than 12 numbers\n";
+					}
+				}
+				catch (NumberFormatException e) {
+					//Display number error message 
+					errorChk = true;
+					error = error + "MOBILE NUMBER: can only contain numbers\n";
+				}
 			}
 		}
-		catch (NumberFormatException e) {
-			//Display number error message 
-			errorChk = true;
-			error = error + "HOME NUMBER: can only contain numbers\n";
-		}
-		//Convert Mobile Numbers
-		try {
-			Integer.parseInt(mobileNumTxtBx.getText());
-			if(homeNumTxtBx.getText().length() > 15){
-				errorChk = true;
-				error = error + "MOBILE NUMBER: can not be more than 15 numbers\n";
-			}
-		}
-		catch (NumberFormatException e) {
-			//Display number error message 
-			errorChk = true;
-			error = error + "MOBILE NUMBER: can only contain numbers\n";
-		}
+
+
+
+
 		//Make sure the email contails 
 		if (emailTxtBx.getText().equals("")){
 			errorChk = true;
@@ -728,6 +716,35 @@ class CustomerPanel extends JPanel {
 		}
 		return errorChk;
 	}
+
+	public Boolean validSiteCheck(){
+		Boolean errorChk = false;
+		String error = " ";
+		//otherwise the email field should be valid
+		if (sAddrTxtBx.getText().equals("")){
+			errorChk = true;
+			error = error + "STREET ADDRESS: can not be empty\n";
+		}else if (pAddrTxtBx.getText().length() > 30 || sAddrTxtBx.getText().length() > 30){
+			errorChk = true;
+			error = error + "STREET ADDRESS: can not be longer than 30 letters\n";
+		}
+
+		if (sSuburbTxtBx.getText().equals("")){
+			errorChk = true;
+			error = error + "SUBURB: can not be empty\n";
+		} else if(sAddrTxtBx.getText().length() > 20){
+			errorChk = true;
+			error = error + "SUBURB: can not be longer than 30 letters\n";
+		}
+
+		//Check to see if any errors has occured
+		if (errorChk == true){
+			JOptionPane.showMessageDialog(null, error);
+		}
+
+		return errorChk;
+	}
+
 
 	public void clearFields(){
 		//Set all the text boxes to blank
