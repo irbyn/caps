@@ -164,8 +164,10 @@ public class LoginWindow extends JFrame{
 			String update = "{" + getuserPass +"(?,?)}";
 			
 			String dbURL = "jdbc:sqlserver://wchdb.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:1433";
-			String user = "Khgv92367hdkfug9";
-			String pass = "Locei02h84b5KJUVaW";
+
+			String user = "nhfnKGF519hinsd897665465jbsdsf";
+			String pass = "NJiugi7btdjyFbe99n9n09UU";
+
 			Connection conn = DriverManager.getConnection(dbURL, user, pass);
 			
 			sm = conn.prepareCall(update);

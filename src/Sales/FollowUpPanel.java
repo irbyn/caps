@@ -259,7 +259,11 @@ class FollowUpPanel extends JPanel {
 
 				btnSave.addActionListener( new ActionListener(){
 					@Override
-					public void actionPerformed(ActionEvent arg0) {
+					public void actionPerformed(ActionEvent arg0) {		
+						if (validateData()){
+							
+						
+						
 						//if invoice is sleceted create a new install
 						if (rdBtnInvoice.isSelected()){
 							createInstall();
@@ -272,22 +276,18 @@ class FollowUpPanel extends JPanel {
 						}
 						resetTable();
 						clearFields();
+						}
+						else{
+							JOptionPane.showMessageDialog(null, "You must first select a row.");
+						}
 					}
 				});
 				
-				btnCancel.addActionListener( new ActionListener()
-				{
+				btnCancel.addActionListener( new ActionListener(){
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
-						{ 
-							
-							int dialogButton = JOptionPane.YES_NO_OPTION;
-							int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to cancel?","Warning",dialogButton);
-							if(dialogResult == JOptionPane.YES_OPTION){
 									resetTable();
-									clearFields();
-							}
-							}					
+									clearFields();				
 					}
 				});
 	
@@ -404,6 +404,16 @@ class FollowUpPanel extends JPanel {
 	public JPanel getInfoPanel(){
 		return infoPanel;
 	}
+	
+	public Boolean validateData(){
+		boolean valid = true;
+		if(group.getSelection() == null){
+			valid = false;
+		}
+		return valid;
+		
+	}
+
 	
 	public void updateFollowup(){
 		CallableStatement pm = null;

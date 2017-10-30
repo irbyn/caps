@@ -146,7 +146,6 @@ class SiteCheckPanel extends JPanel {
 		spnTime.setValue(date);
 		infoPanel.add(spnTime);
 
-
 		comBxSChkDoneBy = new JComboBox<String>();
 		comBxSChkDoneBy.setBackground(Color.WHITE);
 		comBxSChkDoneBy.setBounds(634, 115, 284, 20);

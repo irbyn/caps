@@ -599,12 +599,11 @@ public class AdminPanel extends JFrame {
 		return qryResults;       		            
 	}
 
-
 	private void createNewUser() {
 		CallableStatement stm = null;
 		try {
 
-			String update = "{" + qryCreateUser +"(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}";	
+			String update = "{" + qryCreateUser +"(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}";	
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
 
 			stm = conn.prepareCall(update);
@@ -627,6 +626,8 @@ public class AdminPanel extends JFrame {
 			stm.setInt(16, getRanked());
 			stm.setString(17, getRoleType());
 			stm.setBoolean(18, getAccStatus());
+			getHash();
+			stm.setString(19, md5Hash);
 
 			stm.executeUpdate();
 		}
@@ -680,8 +681,6 @@ public class AdminPanel extends JFrame {
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}			
 	}
-
-	
 	
 	protected void updateUserAndPass() {
 		CallableStatement stm = null;
@@ -939,7 +938,6 @@ public class AdminPanel extends JFrame {
 				MD5Hash.append(h);
 			}
 			md5Hash = MD5Hash.toString();
-			System.out.println(md5Hash);
 
 		}
 		catch (NoSuchAlgorithmException e)

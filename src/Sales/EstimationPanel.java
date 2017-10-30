@@ -336,14 +336,18 @@ class EstimationPanel extends JPanel {
 		btnSave.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0){
-				//If there isn't an error add the details
-				if (validateData() == false){
-					updateEstimation();
-					sp.showMessage("Adding the Estimation Details");
-					resetTable();
-					clearFields();
+				if (rowSelected){
+					//If there isn't an error add the details
+					if (validateData() == false){
+						updateEstimation();
+						sp.showMessage("Adding the Estimation Details");
+						resetTable();
+						clearFields();
+					}else{
+						JOptionPane.showMessageDialog(null, error);
+					}
 				}else{
-					JOptionPane.showMessageDialog(null, error);
+					JOptionPane.showMessageDialog(null, "You must first select a row!");
 				}
 			}
 		});
@@ -437,19 +441,19 @@ class EstimationPanel extends JPanel {
 			sm.setInt(1, Integer.parseInt(parameter));
 
 			rs = sm.executeQuery();	 
-			
+
 			if (rs==null){
 				JOptionPane.showMessageDialog(null, "null query");
 			}
 			else
 			{	
 				while (rs.next()){
-				
+
 					String fire 			= rs.getString("Fire");
 					String price 			= rs.getString("Estimate Price");
 					String instType 		= rs.getString("Install Type");
 					String salesPerson 		= rs.getString("Salesperson");
-					
+
 					txtBxFire.setText(fire);
 					txtBxPrice.setText(price);
 					comBxInstType.setSelectedItem(instType);
@@ -483,16 +487,27 @@ class EstimationPanel extends JPanel {
 			error = error + "FIRE: can not be more than 30 letters\n";
 		}
 		try {
-			Integer.parseInt(txtBxPrice.getText());
-			if(4 <= txtBxPrice.getText().length() && txtBxPrice.getText().length() >= 5){
+
+			if(!txtBxPrice.getText().equals("")){
+				Integer.parseInt(txtBxPrice.getText());
+				if(4 <= txtBxPrice.getText().length() && txtBxPrice.getText().length() >= 5){
+					isError = true;
+					error = error + "PRCIE: must be between 2000 - 99999\n";
+				}
+			}
+			else{
 				isError = true;
-				error = error + "PRCIE: must be between 2000 - 99999\n";
+				error = error + "PRCIE: cannot be empty\n";
 			}
 		}
 		catch (NumberFormatException e) {
 			//Display number error message 
 			isError = true;
 			error = error + "PRICE: can only contain numbers\n";
+		}
+		if (comBxSlsPerson.getSelectedItem() == null){
+			isError = true;
+			error = error + "SALESPERSON: must be selected\n";
 		}
 		return isError;
 	}
@@ -591,7 +606,7 @@ class EstimationPanel extends JPanel {
 		String slsPerson = (String) comBxSlsPerson.getSelectedItem();
 
 		if (getFire().equals("") || getPrice().equals("") || instType.equals("") || slsPerson.equals("")){
-			JOptionPane.showMessageDialog(null, "Cannot send email! \nEnsure all fields are complete");
+			JOptionPane.showMessageDialog(null, "Cannot send email! \nEnsure all fields are saved");
 			return false;
 		}else{
 			return true;
@@ -600,6 +615,7 @@ class EstimationPanel extends JPanel {
 
 	public String getEmailBody(){
 		String form = "";
+		int basePrice = 0;
 		String instType = (String) comBxInstType.getSelectedItem();
 		CallableStatement sm = null;
 		try {
@@ -613,6 +629,7 @@ class EstimationPanel extends JPanel {
 			ResultSet rs = sm.executeQuery();
 			while (rs.next()){
 				form = rs.getString("EmailFromLetter");
+				basePrice = rs.getInt("BasePrice");
 			}
 		}
 		catch (SQLServerException sqex)
@@ -626,18 +643,19 @@ class EstimationPanel extends JPanel {
 
 		String custName = sp.getCustName();
 		String comment = txtBxComment.getText();
+		int price = Integer.parseInt(txtBxPrice.getText()) + basePrice;
 		String email = "";
 		if (comment.equals("")){
-			email = "Hello " + custName + "\n\n--------------------------------------------\n\n" + form + "\n\n--------------------------------------------\n\n";
+			email = "Hello " + custName + "\n\n--------------------------------------------\n\n" + form + "\n\nESTIMATED PRICE: $" + price + "\n\n--------------------------------------------\n\n";
 		}else{
-			email = "Hello%20" + custName + "\n\n" + comment  + "\n\n--------------------------------------------\n\n" + form + "\n\n--------------------------------------------\n\n" ;
+			email = "Hello%20" + custName + "\n\n" + comment  + "\n\n--------------------------------------------\n\n" + form + "\n\nESTIMATED PRICE: $" + price + "\n\n--------------------------------------------\n\n" ;
 		}		
 		String emailBody = email.replaceAll(" ", "%20");
 		emailBody = emailBody.replaceAll("\n", "%0D");
 		return emailBody;
 
 	}
-	
+
 	public JPanel getInfoPanel(){
 		return infoPanel;
 	}

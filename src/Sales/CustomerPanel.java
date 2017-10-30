@@ -300,7 +300,7 @@ class CustomerPanel extends JPanel {
 
 		this.setLayout(null);
 
-		JLabel reesLbl = new JLabel("Reese #:");
+		JLabel reesLbl = new JLabel("Rees #:");
 		reesLbl.setBounds(425, 42, 62, 14);
 		searchPanel.add(reesLbl);
 
@@ -476,11 +476,8 @@ class CustomerPanel extends JPanel {
 			public void actionPerformed(ActionEvent arg0) {
 				if (validatedata() == false){
 					
-					System.out.println(rowSelected);
-					
 					//If the customer doesn't yet exist create a new customer and sale
-					if (rowSelected=false){
-						//getID();
+					if (!rowSelected){
 						createCustAndSale();
 						sp.showMessage("Creating New Customer and Sale");
 						resetTable();
@@ -847,15 +844,14 @@ class CustomerPanel extends JPanel {
 	}
 
 	protected void createCustAndSale() {
-
 		CallableStatement sm = null;
 		try {
-
 			String update = "{" + createCustANDSale +"(?,?,?,?,?,?,?,?,?,?)}";	
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
 
 			sm = conn.prepareCall(update);
 
+			
 			sm.setString(1, getFName());
 			sm.setString(2, getLName());
 			sm.setString(3, getPAddr());

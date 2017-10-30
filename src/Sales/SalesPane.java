@@ -128,25 +128,7 @@ public class SalesPane extends JPanel
 					tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));
 					TableColumnModel tcm = tablez[tabIndex].getColumnModel();					
 					spaceHeader(spacing[tabIndex], tcm);
-					int cols = tcm.getColumnCount();
-
-					if (cols == 5){
-						int[] colWidths = new int[]{20, 150, 150, 100, 100}; 
-						spaceHeader(colWidths, tcm);
-					}else if (cols == 6){
-						int[] colWidths = new int[]{50, 70, 150, 100, 100, 100};  
-						spaceHeader(colWidths, tcm);
-						}
-					 else if (cols == 7){
-						int[] colWidths = new int[]{20, 150, 150, 100, 100, 100, 100};   
-						spaceHeader(colWidths, tcm);                         
-					} else if (cols == 9){
-						int[] colWidths = new int[]{50, 50, 100, 70, 100, 100, 60, 50, 50};    
-						spaceHeader(colWidths, tcm);
-					}else if (cols == 10){
-						int[] colWidths = new int[]{50, 50, 70, 150, 100, 100, 100, 50, 50, 50};    
-						spaceHeader(colWidths, tcm);
-					}
+					
 				}
 			}
 		});   		
