@@ -314,7 +314,7 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 			public void actionPerformed(ActionEvent arg0) {
 			   { 		
 				   int ph = photosArr.length;
-				   ip.showMessage("" + ph);
+			//	   ip.showMessage("" + ph);
 					for (int i =0; i< ph; i++){
 						if (photosArr[i].exists())
 					      if (Desktop.isDesktopSupported()) {
@@ -408,10 +408,10 @@ public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 		//			pp.setFormsLocked();
 					try{
 						invoiceNum = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
-
-					detailsTxtArea.setText(ip.DisplayClientDetails(invoiceNum));
-					displayClientDetails(invoiceNum);
-					checkForFiles();
+	
+						detailsTxtArea.setText(ip.DisplayClientDetails(invoiceNum));
+						getClientSaleID(invoiceNum);
+						checkForFiles();
 										
 					} catch (IndexOutOfBoundsException e){
 						//Ignoring IndexOutOfBoundsExceptions!
@@ -608,7 +608,8 @@ protected Boolean allowSave() {
 	if (photos>0){
 		for(int i=0; i<photos;i++){
 			String file = photoLM.get(i).toString();
-			if(!file.endsWith(".png") && !file.endsWith(".jpg") && !file.endsWith(".jpeg")){
+			if(!file.endsWith(".png") && !file.endsWith(".jpg") && !file.endsWith(".jpeg") &&
+			   !file.endsWith(".PNG") && !file.endsWith(".JPG") && !file.endsWith(".JPEG")){
 				msg = msg +"Photo: " + (1+i) + ") Only .png, .jpg or .jpeg files are Allowed.\n";
 				saveAllowed=false;	
 			}
@@ -667,7 +668,7 @@ protected Boolean allowSave() {
 	
 }
 
-	private void displayClientDetails(String parameter) {
+	private void getClientSaleID(String parameter) {
 	
 	rs = ip.getDetails(getSaleID, invoiceNum);
 	

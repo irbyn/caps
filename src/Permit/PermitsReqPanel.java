@@ -69,7 +69,7 @@ class PermitsReqPanel extends JPanel {
 	
 //	private JTextField ctrl;
 	
-	private String[] doctype = {"NONE","[Rates Notice]","[Certificate of Title]", "[Lease Agreement]", "[Sale & Purchase]", "Other"};
+	private String[] doctype = {"NONE","Rates Notice","Certificate of Title", "Lease Agreement", "Sale & Purchase", "Other"};
 	private String[] firestyle = {"FS","IS", "IB","Other"};
 	private String[] fueltype = {"Wood","Pellet", "Oil","Other"};
 	

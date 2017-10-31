@@ -130,7 +130,7 @@ public class PermitPane extends JPanel
                         	 int[] colWidths = new int[]{20, 150, 150, 100, 100, 100}; 
                         	 spaceHeader(colWidths, tcm);
                          } else if (cols == 7){
-                        	 int[] colWidths = new int[]{20, 150, 150, 100, 100, 100, 100};   
+                        	 int[] colWidths = new int[]{20, 120, 160, 100, 100, 100, 100};   
                         	 spaceHeader(colWidths, tcm);                         
                          } else if (cols == 9){
                             	 int[] colWidths = new int[]{30, 100, 120, 80, 40, 40, 40, 40, 40};   

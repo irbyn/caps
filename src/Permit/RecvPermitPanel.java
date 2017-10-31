@@ -50,7 +50,7 @@ import Main.*;
 class RecvPermitPanel extends JPanel {
 
 	
-	private int [] columnWidth = {20, 150, 150, 100, 100, 100};
+	private int [] columnWidth = {20, 120, 160, 100, 100, 100};
 	private String qry = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
 
 	private String upNumber = "call AWS_WCH_DB.dbo.p_PermitUpdateNumber ";
@@ -184,6 +184,7 @@ class RecvPermitPanel extends JPanel {
 			        		} else {
 			        			pp.showMessage("Updating Consent number");
 			        			updateNumber() ;
+			        			resetTable();	
 			        		}
 			        	}else {	//	No Customer selected
 			        		pp.showMessage("No details to Save");			        		
@@ -247,7 +248,8 @@ class RecvPermitPanel extends JPanel {
 			consentTxtBx.setText("");
 			receivedChk.setSelected(false);
 			receivedDate.setVisible(false);
-			receivedDateLbl.setVisible(false); 		
+			receivedDateLbl.setVisible(false); 	
+
 	}
 
 

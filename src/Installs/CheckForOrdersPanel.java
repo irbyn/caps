@@ -452,19 +452,20 @@ protected void saveStockLines() {
 		   code = "";
 		   dsc = "";
 		   rows = omodel.getRowCount();
-//		   JOptionPane.showMessageDialog(null,  "ROW: " + rows);
+
 		   for (int i = 0 ; i< rows ; i++){
 
 			   rowNum = (Integer.parseInt(omodel.getValueAt(i, 0).toString())-1);
-//			   JOptionPane.showMessageDialog(null,  "ROW num: " + rowNum);
+
 			   qt = model2.getValueAt(rowNum, 0).toString(); 
 			   code = model2.getValueAt(rowNum, 1).toString(); 
 			   dsc = model2.getValueAt(rowNum, 2).toString();			   
 //			   JOptionPane.showMessageDialog(null,  "[" + qt + "] [" + code + "] [" + dsc + "]");
 			   updateStockItem();
 		   }	
-		   resetTable();
+	//	   resetTable();
 		   }
+		   resetTable();
 	   }	
 }
 

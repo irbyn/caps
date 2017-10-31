@@ -61,7 +61,7 @@ public class InstallsPane extends JPanel
 		private String stock = "";
 
 		private Boolean lockForm;
-		private String custDetails = "EXEC AWS_WCH_DB.dbo.p_CustomerDetails";
+		private String custDetails = "EXEC AWS_WCH_DB.dbo.i_CustomerDetails";
 		private String custBookings = "EXEC AWS_WCH_DB.dbo.i_CustomerBooking";
 		private String stockDetails = "EXEC AWS_WCH_DB.dbo.i_StockDetails";	
 		private String instNote = "EXEC AWS_WCH_DB.dbo.i_getInstallerNote";	
@@ -234,20 +234,21 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
     			  JOptionPane.showMessageDialog(null, "null query");
         	}
         	else{
+        		
 				while(qryResults.next()){
 					
 					invoice 			= qryResults.getString("Invoice");
 		        	rees				= qryResults.getString("Rees");
-	 	     		customerName 	= qryResults.getString("CustomerName");
-					customerAddress  = qryResults.getString("CustomerAddress");
-					customerSuburb 	= qryResults.getString("CustomerSuburb");
-					customerPostCode = qryResults.getString("CustomerPostCode");
-					customerPhone 	= qryResults.getString("CustomerPhone");
-					customerMobile 	= qryResults.getString("CustomerMobile");
-					customerEmail 	= qryResults.getString("CustomerEmail");
-					streetAddress 	= qryResults.getString("StreetAddress");
-					suburb 			= qryResults.getString("Suburb");
-										
+	 	     		customerName 		= qryResults.getString("CustomerName");
+					customerAddress  	= qryResults.getString("CustomerAddress");
+					customerSuburb 		= qryResults.getString("CustomerSuburb");
+					customerPostCode 	= qryResults.getString("CustomerPostCode");
+					customerPhone 		= qryResults.getString("CustomerPhone");
+					customerMobile 		= qryResults.getString("CustomerMobile");
+					customerEmail 		= qryResults.getString("CustomerEmail");
+					streetAddress 		= qryResults.getString("StreetAddress");
+					suburb 				= qryResults.getString("Suburb");
+
 			        str = 	" INVOICE:\t" + instNumber + "\n" +
 			        				" REES CODE:\t" + rees +"\n" +
 			        				" CLIENT:\t" + customerName + "\n\n" + 
@@ -258,7 +259,7 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
 			        				"\t" + customerPostCode + "\n\n" +
 			        				" PHONE:\t" + customerPhone + "\n" + 
 			        				" MOBILE:\t" + customerMobile + "\n\n" +
-			        				" EMAIL:\t" + customerEmail;	        		
+			        				" EMAIL:\t" + customerEmail;
         		return str;
 				}
         	}
