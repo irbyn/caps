@@ -13,6 +13,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.Timer;
 
+import com.microsoft.sqlserver.jdbc.SQLServerException;
+
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Schedule.SchedulePane;
@@ -24,6 +26,9 @@ import Admin.AdminLogin;
 import java.awt.event.ActionListener;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -47,8 +52,10 @@ public class Homescreen extends JFrame {
 	private PermitPane permitPanel; 
 	private AdminLogin adminLogin;
 	private Homescreen hs;
+	private String loggedInUser = "call AWS_WCH_DB.dbo.h_loggedInUser";
+	private ResultSet rs;
 	
-
+	private ConnDetails conDeets;
 	private static String user;
 	private static String pass;
 
@@ -61,16 +68,14 @@ public class Homescreen extends JFrame {
 		hs = this;
 		
 		//PASS THE LOGIN DETAILS TO Class connectionDetails
-		//ConnDetails conDeets = new ConnDetails(user, pass);
-		ConnDetails conDeets = new ConnDetails();
-		
-		
+		conDeets = new ConnDetails();
 		
 		// setting up JFrame
 		getContentPane().setLayout(null);
 		setPreferredSize(new Dimension(1100, 700));
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setTitle("WorkFlow Solutions");
 
 		// creating main button JPanel (blue)
 		btnPanel = new JPanel();
@@ -81,19 +86,19 @@ public class Homescreen extends JFrame {
 
 		// creating JButtons in the main button JPanel (blue)
 		scheduleBtn = new JButton("SCHEDULE");
-		scheduleBtn.setBounds(160, 10, 128, 24);
+		scheduleBtn.setBounds(188, 12, 128, 24);
 
 		salesBtn = new JButton("SALES"); 
-		salesBtn.setBounds(308, 10, 128, 24);
+		salesBtn.setBounds(336, 12, 128, 24);
 
 		installBtn = new JButton("INSTALLS");
-		installBtn.setBounds(456, 10, 128, 24);
+		installBtn.setBounds(484, 12, 128, 24);
 
 		permitBtn = new JButton("PERMIT");
-		permitBtn.setBounds(604, 10, 128, 24);
+		permitBtn.setBounds(632, 12, 128, 24);
 
-		lblUser = new JLabel("Logged in as: ...");
-		lblUser.setBounds(10, 16, 100, 14);
+		lblUser = new JLabel("Logged in as: ");
+		lblUser.setBounds(10, 16, 168, 14);
 		btnPanel.add(lblUser);
 
 		logOutBtn = new JButton("Log Out ");
@@ -203,7 +208,8 @@ public class Homescreen extends JFrame {
 		installPanel = null;	//new InstallsPane(conDeets, this);
 		permitPanel = null;		//new PermitPane(conDeets, this);
 		
-
+		getuser();
+		
 		//Making the schedule the first view the user sees.  
 		contentPanel.add(schedulePanel);        		        
 		//Load the frame
@@ -252,5 +258,35 @@ public class Homescreen extends JFrame {
 	}
 	public SchedulePane getSchedule(){
 		return schedulePanel;
+	}
+	
+	protected void getuser(){
+		CallableStatement sm = null;
+		try {
+
+			String update = "{" + loggedInUser +"(?)}";	
+			CreateConnection connecting = new CreateConnection();
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+
+			sm = conn.prepareCall(update);
+
+			sm.setString(1, user);
+			
+			ResultSet qryResults = sm.executeQuery();
+			rs = qryResults;
+
+			while(qryResults.next()){
+				lblUser.setText("Logged in as: " + rs.getString("Name"));
+			}
+			
+		}
+		catch (SQLServerException sqex)
+		{
+			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
+		}	
 	}
 }

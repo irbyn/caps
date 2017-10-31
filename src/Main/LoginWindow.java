@@ -47,15 +47,13 @@ public class LoginWindow extends JFrame{
 
 	public LoginWindow() {
 
-		//conDeets = new ConnDetails("Khgv92367hdkfug9", "Locei02h84b5KJUVaW");
-
-
 		// setting up JFrame
 		getContentPane().setLayout(null);
 		setPreferredSize(new Dimension(400, 250));
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+		this.setTitle("WorkFlow Solutions");
+		
 		// creating main button JPanel (blue)
 		logPanel = new JPanel();
 		logPanel.setBounds(0, 0, 392, 221);
