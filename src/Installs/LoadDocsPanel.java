@@ -527,6 +527,9 @@ protected void saveInv(Object f){
 		File target = new File(folder+invPfx+invoiceNum+".pdf");
 
 		try {
+			if (target.exists()){
+				target.delete();
+			}
 			Files.copy(src.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			
 		} catch (IOException e) {
@@ -545,6 +548,9 @@ protected void saveSite(Object f){
 		File target = new File(folder+sitePfx+saleID+".pdf");
 
 		try {
+			if (target.exists()){
+				target.delete();
+			}
 			Files.copy(src.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			
 		} catch (IOException e) {
