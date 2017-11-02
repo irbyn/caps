@@ -51,14 +51,15 @@ import Installs.LoadDocsPanel.FileCellRenderer;
 import Installs.LoadDocsPanel.ListTransferHandler;
 import Main.ConnDetails;
 import Permit.PermitPane;
+import documents.ReadInvoice;
 import net.proteanit.sql.DbUtils;
 
 class CheckForOrdersPanel extends JPanel {
 	
 	private int [] columnWidth = {20, 150, 150, 100, 100, 100, 100, 100}; 	
 	private String getSaleID = "EXEC AWS_WCH_DB.dbo.[i_InstallsGetSaleID] ";
-	private String upStkList = "{Call AWS_WCH_DB.dbo.[i_InstallsUpdateFire] (?,?,?,?)}";
-	private String upStkItem = "{Call AWS_WCH_DB.dbo.[i_InstallsUpdateItems] (?,?,?,?)}";
+	private String upStkList = "{Call AWS_WCH_DB.dbo.[i_InstallsUpdateFire] (?,?,?,?,?)}";
+	private String upStkItem = "{Call AWS_WCH_DB.dbo.[i_InstallsUpdateItems] (?,?,?,?,?)}";
 	private String folder = "//C:/pdfs/Invoice/";	
 	private String invPfx = "INV_";
 	private String sitePfx = "SC_";
@@ -94,12 +95,14 @@ class CheckForOrdersPanel extends JPanel {
 	private JTableHeader hd;
 	private TableColumnModel cm;
 	private DefaultTableModel model2;
+	private JScrollPane scrollPane;
 	private JPanel stockPanel;
 	
 	private JTable orderTbl;
 	private JTableHeader ohd;
 	private TableColumnModel ocm;
 	private DefaultTableModel omodel;
+	private JScrollPane sp;
 	private JPanel orderPanel;
 	
 	private JTextArea detailsTxtArea;	
@@ -121,11 +124,12 @@ class CheckForOrdersPanel extends JPanel {
 	boolean siteExists;
 	boolean photoExists;
 	
-	File inv;
-	File site;
-	File[] photosArr;
+	private File inv;
+	private File site;
+	private File[] photosArr;
 	private String text;
 	private CreateConnection conn;
+	private ReadInvoice rInv;
 	
 	private Boolean lockForm;
 	private ConnDetails conDeets;
@@ -139,15 +143,14 @@ public CheckForOrdersPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane 
 	 	this.ip = ipn;
 
 	 	connecting = new CreateConnection();
+	 	rInv = new ReadInvoice();
 		  	
 	 	model1 = new DefaultTableModel();  
 	 	model1.setRowCount(0);
 	 	installTbl = new JTable(model1);
 	 	installTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	 	installTbl.setAutoCreateRowSorter(true);
-      
-	 	JScrollPane scrollPane = new JScrollPane(installTbl);
-	  
+	    scrollPane = new JScrollPane(installTbl);	  
 	 	header= installTbl.getTableHeader();
 	 	columnModel = header.getColumnModel();
 	 	add(header); 
@@ -178,7 +181,7 @@ public CheckForOrdersPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane 
       
 	    model2 = new DefaultTableModel(colNames,0);
 	    stockTbl = new JTable(model2);       
-        JScrollPane sp = new JScrollPane(stockTbl);
+        sp = new JScrollPane(stockTbl);
         hd= stockTbl.getTableHeader();        
         cm = hd.getColumnModel();
 	  	spaceHeader(cm, colWidth);
@@ -329,7 +332,13 @@ public CheckForOrdersPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 			   { 
-				   saveStockLines();
+				   int input = JOptionPane.showConfirmDialog(null,"Do you want to Mark this Order as Checked?",
+			    			  "Mark Order as Checked?", JOptionPane.YES_NO_OPTION);
+			    	if (input == 0){
+			    		saveStockLines(1);
+			    	} else {
+			    		saveStockLines(0);
+			    	}
 			   }
 			}
 		});
@@ -341,11 +350,10 @@ public CheckForOrdersPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane 
 					clearStock();
 		//			pp.setFormsLocked();
 					try{
-						invoiceNum = installTbl.getValueAt(installTbl.getSelectedRow(), 0).toString();
-					
+						invoiceNum = installTbl.getValueAt(installTbl.getSelectedRow(), 0).toString();					
 						detailsTxtArea.setText(ip.DisplayClientDetails(invoiceNum));
-						getExtraClientDetails(invoiceNum);
-						readInvoice();
+						getExtraClientDetails(invoiceNum);						
+						rInv.readInvoice(invoiceNum, model2);
 						checkForFiles();					
 					} catch (IndexOutOfBoundsException e){
 						//Ignoring IndexOutOfBoundsExceptions!
@@ -371,7 +379,7 @@ public CheckForOrdersPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane 
 	  	});
 }
 
-protected void updateStockList() {
+protected void updateStockList(int checked) {
 	
 	CallableStatement pm = null;
 
@@ -385,6 +393,8 @@ protected void updateStockList() {
 	    pm.setString(2, getFireCode());
 	    pm.setString(3,	getStockList());
 	    pm.setInt(4, omodel.getRowCount());
+	    pm.setInt(5,  checked);
+	    
 	    pm.executeUpdate();
 	    }
         catch (SQLServerException sqex)
@@ -397,7 +407,7 @@ protected void updateStockList() {
         }			
 }
 
-protected void updateStockItem() {
+protected void updateStockItem(int checked) {
 	
 	CallableStatement pm = null;
 
@@ -411,7 +421,7 @@ protected void updateStockItem() {
 	    pm.setString(2, qt);
 	    pm.setString(3,	code);
 	    pm.setString(4,	dsc);
-	    
+	    pm.setInt(5,  checked);
 	    
 	    pm.executeUpdate();
 	    }
@@ -425,7 +435,7 @@ protected void updateStockItem() {
         }			
 }
 
-protected void saveStockLines() {
+protected void saveStockLines(int checked) {
 	   if(rowSelected)
 	   {
 		   if(getFireCode().equals("") || getFireCode().equals(null) ){
@@ -446,7 +456,7 @@ protected void saveStockLines() {
 			   stkItems = stkItems + qt + " x " + dsc + "\n" ;
 		   }
 //		   JOptionPane.showMessageDialog(null, stkItems);
-		   updateStockList();
+		   updateStockList(checked);
 		   
 		   qt = ""; 
 		   code = "";
@@ -461,9 +471,8 @@ protected void saveStockLines() {
 			   code = model2.getValueAt(rowNum, 1).toString(); 
 			   dsc = model2.getValueAt(rowNum, 2).toString();			   
 //			   JOptionPane.showMessageDialog(null,  "[" + qt + "] [" + code + "] [" + dsc + "]");
-			   updateStockItem();
+			   updateStockItem(checked);
 		   }	
-	//	   resetTable();
 		   }
 		   resetTable();
 	   }	
@@ -488,73 +497,7 @@ protected void orderStock(int row) {
 	omodel.addRow(rowData);
 }
 
-/*
- * Reads selected file, strips away unwanted info
- */
-protected void readInvoice() {
 
-	   String src = folder + invPfx + invoiceNum + ".pdf";
-	      //Loading an existing document
-	      File file = new File(src);
-	      if (file.exists()){
-	          		      
-	      PDDocument document;
-		try {
-			document = PDDocument.load(file);
-		      //Instantiate PDFTextStripper class
-		      PDFTextStripper pdfStripper = new PDFTextStripper();
-
-		      //Retrieving text from PDF document
-		      text = pdfStripper.getText(document); 
-		      document.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-   
-		//Find split point on invoice
-	      String patternString = "=========================================================="
-	      		+ "========================================================================";
-	        Pattern pattern = Pattern.compile(patternString);	        
-	        String[] split = pattern.split(text);	        
-	        String inv = split[3];
-	        
-	        //	Initialise variables to search each line for text
-	        String foundPermit = "";
-	        String stockCode = "";
-	        String stockDesc = "";
-	        String stockQty = "";
-	        int chars = inv.length();				//total number of characters
-	        int maxRows = 25;						// 25 rows
-	//        String[] stkLine = new String[maxRows];
-	        String newLine = "";
-	        int i=0;
-	        int lineLength = 130;
-	        int start = 0;
-	        int end = lineLength + start;
-	        //For each line of text
-	        for (i=0;i<maxRows;i++){        	
-	        	newLine = inv.substring(start, end);		//split off 130 chars as a line
-	        	foundPermit = newLine.substring(2,6);
-	        	if (i == 0){
-	        		
-	        	}
-	        	if (foundPermit.equals("INST") || foundPermit.equals("PERM")){	
-	        		//Stop if either term is found as the first 4 characters (stock code)
-	        	}
-	        	else {
-	        		// create a row for table
-			    stockCode = newLine.substring(2,20);
-			    stockDesc = newLine.substring(23,82);
-			    stockQty = newLine.substring(96,99);			    
-			    model2.addRow(new Object[]{stockQty, stockCode, stockDesc});
-			    
-			    	//	next newLine starting points
-	        	start = start + lineLength;
-	        	end = end + lineLength;
-	        	}	
-	        }	
-	      }
-	}
 
 /*
  * Checks if this install (and sale), have files in the file system

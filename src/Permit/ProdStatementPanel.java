@@ -60,6 +60,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
+import documents.ProducerStatement;
 import net.proteanit.sql.DbUtils;
 
 class ProdStatementPanel extends JPanel {
@@ -68,12 +69,9 @@ class ProdStatementPanel extends JPanel {
 	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsCCC] ";
 	private String upPS3 = "{call AWS_WCH_DB.dbo.p_PermitUpdatePS3 (?,?)}";
 	private Color LtGray = Color.decode("#eeeeee");
-	private String param = "";  
+	private String invoiceNum = "";  
 	private ResultSet rs;
 	private Boolean rowSelected = false;
-	
-	private String ps3 = "//C:/pdfs/Invoice/ps3.pdf"; 
-	private String file = "//C:/pdfs/Invoice/ps3"; 
 	
 	private CreateConnection connecting;
 	
@@ -87,32 +85,20 @@ class ProdStatementPanel extends JPanel {
 	private DefaultTableModel model;
 	private DefaultTableModel model1;
 	
-	private JTextArea detailsTxtArea;
-	private JTextArea tmpTxt;
-	
+	private JTextArea detailsTxtArea;	
 	private JTextPane warningLbl;
-
 	private JLabel pSLbl;
 	private JSpinner pSDate;
 	
 	private JButton prntConsentBtn; 
 	private JButton cancelPermitReqBtn; 
-//	private JButton savePermitReqBtn; 
-	
-	private String inst = "";
-	private String auth = "";
-	private String consnt = "";
-	private String site = "";
-	private String legal = "";
-	private String owner = "";
-	private String fire = "";
-	private String dateinst = "";
 	
 	private Boolean lockForm;
 	private ConnDetails conDeets;
 	private PermitPane pp;
 
 	private CreateConnection conn;
+	private ProducerStatement ps;
 
 	  public ProdStatementPanel(Boolean lockForm, ConnDetails conDetts, PermitPane ppn) {
 		  			
@@ -121,6 +107,7 @@ class ProdStatementPanel extends JPanel {
 		  this.pp = ppn;
 	  		
 			connecting = new CreateConnection();
+			ps = new ProducerStatement();
 		  	 		  	
 			model = new DefaultTableModel();  
 			model.setRowCount(0);
@@ -175,10 +162,6 @@ class ProdStatementPanel extends JPanel {
 		    cancelPermitReqBtn = new JButton("Cancel");
 		    cancelPermitReqBtn.setBounds(720, 260, 150, 25);
 		    infoPanel.add(cancelPermitReqBtn);
-		        
-//		    savePermitReqBtn = new JButton("Save Permit Details");
-//		    savePermitReqBtn.setBounds(895, 260, 150, 25);
-//		    infoPanel.add(savePermitReqBtn);
 
 		    this.setLayout(null);
 		    this.add(tablePanel); 
@@ -192,12 +175,11 @@ class ProdStatementPanel extends JPanel {
 				public void valueChanged(ListSelectionEvent arg0) {
 					if (!arg0.getValueIsAdjusting()){
 						rowSelected=true;
-			//			pp.setFormsLocked();
 						try{
-						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
+							invoiceNum = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
 						
-						displayClientDetails(param);
-						detailsTxtArea.setText(pp.DisplayClientDetails(param));
+							checkInstallDate(invoiceNum);
+							detailsTxtArea.setText(pp.DisplayClientDetails(invoiceNum));
 						
 						} catch (IndexOutOfBoundsException e){
 							//Ignoring IndexOutOfBoundsExceptions!
@@ -227,12 +209,12 @@ class ProdStatementPanel extends JPanel {
 			        			+ "This Customer will no longer display on this page!",  "Mark Consent Sent?", JOptionPane.YES_NO_OPTION);
 			        	if (input == 0){
 			        		
-						fillPS3();
+			        	ps.fillPS3(invoiceNum, getPSDate(), conDeets);
 						updatePS3();
 						resetTable();	        		
 						pp.showMessage("Updating Permit");
 			        	} else{
-							fillPS3();
+			        	ps.fillPS3(invoiceNum, getPSDate(), conDeets);
 			        	}
 		        	}else {	//	No Customer selected
 		        		pp.showMessage("No details to Print");			        				      
@@ -240,59 +222,6 @@ class ProdStatementPanel extends JPanel {
 				}
 			});
 	  	}
-
-	  
-	  protected void fillPS3()   { 
-	        
-	        try (PDDocument pdfDocument = PDDocument.load(new File(ps3)))
-	        {
-	            // get the document catalog
-	            PDAcroForm acroForm = pdfDocument.getDocumentCatalog().getAcroForm();
-	            
-	            // as there might not be an AcroForm entry a null check is necessary
-	            if (acroForm != null)
-	            {
-	                // Retrieve an individual field and set its value.
-	                PDTextField field = (PDTextField) acroForm.getField( "installer" );
-	                field.setValue(inst);
-	                field = (PDTextField) acroForm.getField( "author" );
-	                field.setValue(auth);
-	                field = (PDTextField) acroForm.getField( "consent" );
-	                field.setValue(consnt);
-	                field = (PDTextField) acroForm.getField( "site" );
-	                field.setValue(site);
-	                field = (PDTextField) acroForm.getField( "lot" );
-	                field.setValue(legal);
-	                field = (PDTextField) acroForm.getField( "owner" );
-	                field.setValue(owner);
-	                field = (PDTextField) acroForm.getField( "fire" );
-	                field.setValue(fire);
-	                field = (PDTextField) acroForm.getField( "date" );
-	                field.setValue(getPSDate());
-	            }	            
-	            // Save and close the filled out form.
-	            pdfDocument.save(file+"_"+param+".pdf");
-	            
-		      if (Desktop.isDesktopSupported()) {
-		    	    try {
-		    	        File myFile = new File(file+"_"+param+".pdf");
-		    	        Desktop.getDesktop().open(myFile);
-		    	    } catch (FileNotFoundException f){
-		    	    	
-		    	    } catch (IOException ex) {
-		    	        // no application registered for PDF		    	    	
-		    	    }
-		      }
-	    } catch (java.lang.NoClassDefFoundError s){
-	    	JOptionPane.showMessageDialog(null, s.toString());
-	    } catch (InvalidPasswordException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-}
 
 	  
 		protected void updatePS3() {
@@ -306,7 +235,7 @@ class ProdStatementPanel extends JPanel {
 			
 			    pm = conn.prepareCall(update);
 				
-			    pm.setString(1, param);
+			    pm.setString(1, invoiceNum);
 			    pm.setString(2, getPSDate());
 				
 			    pm.executeUpdate();
@@ -338,12 +267,13 @@ class ProdStatementPanel extends JPanel {
 	  	spaceHeader();
 	  	
 		rowSelected=false;
-		param = "";
+		invoiceNum = "";
 		detailsTxtArea.setText("");
 		warningLbl.setVisible(false);
 }		    
 			
-	private void displayClientDetails(String parameter) {
+	private void checkInstallDate(String parameter) {
+		
 		try
 		    {
 		        Connection conn = connecting.CreateConnection(conDeets);
@@ -352,38 +282,10 @@ class ProdStatementPanel extends JPanel {
 		    
 		        //Retrieve by column name
 		        while(rs2.next()){
-				                        
-				String invoice 		= rs2.getString("Invoice");
-				String customerName 	= rs2.getString("CustomerName");					
-//				String customerAddress = rs2.getString("CustomerAddress");					
-//				String customerSuburb 	= rs2.getString("CustomerSuburb");					
-//				String customerPostCode= rs2.getString("CustomerPostCode");				
-//				String customerPhone 	= rs2.getString("CustomerPhone");					
-//				String customerMobile 	= rs2.getString("CustomerMobile");					
-//				String customerEmail 	= rs2.getString("CustomerEmail");					
-				String streetAddress 	= rs2.getString("StreetAddress");					
-				String suburb 			= rs2.getString("Suburb");							
-				String consent 			= rs2.getString("Consent");									
+							
 				Date consentDate		= rs2.getDate("ConsentDate");
-				String lot 				= rs2.getString("Lot");
-				String dP				= rs2.getString("DP"); 
-				String installerID 		= rs2.getString("Installer_ID"); 
 				Date installDate		= rs2.getDate("InstallDate");
-				String instName 		= rs2.getString("InstName"); 
-				String instMobile 		= rs2.getString("InstMobile"); 
-				String instAuth 		= rs2.getString("InstAuth"); 
-				String instNZHHA 		= rs2.getString("InstNZHHA"); 
-				String make_model 		= rs2.getString("Fire"); 
-				
-				inst = instName;
-				auth = instAuth;
-				consnt = consent;
-				site = streetAddress + ", " + suburb;
-				legal = "LOT: " + lot + ",  DP: " + dP;
-				owner = customerName;
-				fire = make_model;
-				dateinst = getPSDate();
-									
+							
 		       	SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
 				String cnst = sdf.format(consentDate);
 				String inst = sdf.format(installDate);
@@ -406,7 +308,8 @@ class ProdStatementPanel extends JPanel {
 		        { 
 		        JOptionPane.showMessageDialog(null, ex.toString());
 		        }	  	
-	 	}	
+
+		}	
 		
 	
     public String getPSDate(){  	

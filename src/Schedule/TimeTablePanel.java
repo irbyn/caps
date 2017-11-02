@@ -56,8 +56,8 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
-import Main.validator;
 import Permit.PermitPane;
+import Permit.validator;
 import net.proteanit.sql.DbUtils;
 
 

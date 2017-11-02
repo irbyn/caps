@@ -342,6 +342,8 @@ class SiteCheckPanel extends JPanel {
 		System.out.println("after: " +aft.getTime());
 		System.out.println("TimeValue: " +timeVal);
 
+		
+		
 		Date afte = aft.getTime();
 
 		if (dateVal.before(yesterday.getTime())){

@@ -136,8 +136,6 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
 		installP.addTab("Receive Orders", recvOrderPnl);
 		installP.addTab("Bookings", bookingPnl);
 		add(installP); 
-//		 JPanel[] tbs = new JPanel[]{ loadDocPnl, checkOrderPnl, placeOrderPnl, recvOrderPnl, bookingPnl};
-//		getResults(0);  
 		
 		installP.addChangeListener(new ChangeListener() {
             @Override
@@ -193,7 +191,6 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
           	      	    	JTable tbl = (JTable) v[k];
           	      	    	TableModel tm = tbl.getModel();
           	      	    	((DefaultTableModel) tm).setRowCount(0);
-          	     // 	    System.out.println("found inner JTABLE");
           	      	    }
          	        }
  	      	    }
@@ -328,12 +325,12 @@ private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// pr
 					
 					toInstaller		= qryResults.getString("toInstaller");
 										
-			        str = 	" INVOICE:\t" + instNumber + "\n" +
+		/*	        str = 	" INVOICE:\t" + instNumber + "\n" +
 			        				" REES CODE:\t" + rees +"\n" +
 			        				" CLIENT:\t" + customerName + "\n\n" + 
 			        				" PHONE:\t" + customerPhone + "\n" + 
 			        				" MOBILE:\t" + customerMobile + "\n" +
-			        				" EMAIL:\t" + customerEmail;	        		
+			        				" EMAIL:\t" + customerEmail;	        	*/	
         		return toInstaller;
 				}
         	}
