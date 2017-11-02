@@ -360,58 +360,7 @@ public BookingsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn, S
 	  		@Override
 	  		 public void mouseClicked(java.awt.event.MouseEvent evt) {
 	  			if (!lockSelection){
-			  	row = timeTbl.rowAtPoint(evt.getPoint());
-	  		    col = timeTbl.columnAtPoint(evt.getPoint());
-	  		    if (col >= 2) {		
-					inst = timeTbl.getValueAt(row,0).toString();
-					tme = timeTbl.getValueAt(row,1).toString();	
-					dte = week[col-2];
-					
-						if (timeTbl.getValueAt(row, col) == null || timeTbl.getValueAt(row, col).equals("")) {
-
-							try {
-								dayOfWeek = new SimpleDateFormat("yyyy-MM-dd").parse(dte);
-							} catch (ParseException e) {
-							}
-							StringBuilder sbuf = new StringBuilder();
-							Formatter fmt = new Formatter(sbuf);
-							fmt.format("%tA %td %tb %tY", dayOfWeek, dayOfWeek, dayOfWeek, dayOfWeek);
-													
-				        	int input = JOptionPane.showConfirmDialog(null,"Make Booking for Install " + invoiceNum + "?" +
-				        			"\nON: " + sbuf +  
-				        			"\nIN: " + tme + 
-				        			"\nBY: " + inst,  "Place Booking?", JOptionPane.YES_NO_OPTION);
-				        	if (input == 0){
-				        		lockSelection = true;
-				        		String inv = invoiceNum;
-						    	  modifyBooking(saveBooking);	        		
-						    	  ip.showMessage("Saving Booking");
-						    	  resetTable();
-						    	  reselectRow(inv);        		
-				        	}					
-						}else {
-							String str = timeTbl.getValueAt(row, col).toString();
-							 
-							int start = str.indexOf("[");
-							int end = str.indexOf("]");
-							String st = str.substring(start+1, end);
-							
-							if (st.equals(invoiceNum)){
-								int input = JOptionPane.showConfirmDialog(null,"Do you wish to delete booking for " + 
-											invoiceNum + "?",  "Delete Booking?", JOptionPane.YES_NO_OPTION);
-					        	if (input == 0){
-					        		lockSelection = true;
-					        		String inv = invoiceNum;
-							    	  modifyBooking(delBooking);
-							    	  ip.showMessage("Deleting Booking for "+ invoiceNum);
-							    	  resetTable();	
-							    	  reselectRow(inv);
-					        	}
-							} else {
-								JOptionPane.showMessageDialog(null, "Delete this Existing Install before making this Booking");
-							}						
-						}
-					}
+	  				checkClick(evt);
 	  			}
 			}
 	  	});
@@ -431,6 +380,61 @@ protected void reselectRow(String inv) {
 			installTbl.setRowSelectionInterval(i, i);
 		}
 	}
+}
+
+protected void checkClick(java.awt.event.MouseEvent evt){
+  	row = timeTbl.rowAtPoint(evt.getPoint());
+	    col = timeTbl.columnAtPoint(evt.getPoint());
+	    if (col >= 2) {		
+		inst = timeTbl.getValueAt(row,0).toString();
+		tme = timeTbl.getValueAt(row,1).toString();	
+		dte = week[col-2];
+		
+			if (timeTbl.getValueAt(row, col) == null || timeTbl.getValueAt(row, col).equals("")) {
+
+				try {
+					dayOfWeek = new SimpleDateFormat("yyyy-MM-dd").parse(dte);
+				} catch (ParseException e) {
+				}
+				StringBuilder sbuf = new StringBuilder();
+				Formatter fmt = new Formatter(sbuf);
+				fmt.format("%tA %td %tb %tY", dayOfWeek, dayOfWeek, dayOfWeek, dayOfWeek);
+										
+	        	int input = JOptionPane.showConfirmDialog(null,"Make Booking for Install " + invoiceNum + "?" +
+	        			"\nON: " + sbuf +  
+	        			"\nIN: " + tme + 
+	        			"\nBY: " + inst,  "Place Booking?", JOptionPane.YES_NO_OPTION);
+	        	if (input == 0){
+	        		lockSelection = true;
+	        		String inv = invoiceNum;
+			    	  modifyBooking(saveBooking);	        		
+			    	  ip.showMessage("Saving Booking");
+			    	  resetTable();
+			    	  reselectRow(inv);        		
+	        	}					
+			}else {
+				String str = timeTbl.getValueAt(row, col).toString();
+				 
+				int start = str.indexOf("[");
+				int end = str.indexOf("]");
+				String st = str.substring(start+1, end);
+				
+				if (st.equals(invoiceNum)){
+					int input = JOptionPane.showConfirmDialog(null,"Do you wish to delete booking for " + 
+								invoiceNum + "?",  "Delete Booking?", JOptionPane.YES_NO_OPTION);
+		        	if (input == 0){
+		        		lockSelection = true;
+		        		String inv = invoiceNum;
+				    	  modifyBooking(delBooking);
+				    	  ip.showMessage("Deleting Booking for "+ invoiceNum);
+				    	  resetTable();	
+				    	  reselectRow(inv);
+		        	}
+				} else {
+					JOptionPane.showMessageDialog(null, "Delete this Existing Install before making this Booking");
+				}						
+			}
+		}
 }
 
 protected void closeInstall() {
@@ -632,16 +636,13 @@ protected void resetTable() {
 
 protected void addNoteToInstaller() {
 	
-    noteToInstaller = new JTextArea();
-    noteToInstaller.setColumns(32);
-    noteToInstaller.setRows(5); 
+    noteToInstaller = new JTextArea(5, 32);
     noteToInstaller.setLineWrap(true);
     noteToInstaller.setWrapStyleWord(true);
-    
     noteToInstaller.setText(ip.DisplayNoteToInstaller(invoiceNum));
+    JScrollPane scr = new JScrollPane(noteToInstaller);
 
-
-	int option = JOptionPane.showOptionDialog(null, noteToInstaller, "Enter Note To Installer of Inv "+invoiceNum, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+	int option = JOptionPane.showOptionDialog(null, scr, "Enter Note To Installer of Inv "+invoiceNum, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
 	if (option == JOptionPane.CANCEL_OPTION)
 		{
 	    // user hit cancel
@@ -649,12 +650,12 @@ protected void addNoteToInstaller() {
 		{
 			String note = noteToInstaller.getText();
 			int noteSize = note.length();
-			if (noteSize < 250){
+			if (noteSize > 250){
+				ip.showMessage("Note Shortened, Max of 250 Characters reached");
+				note = note.substring(0, 250);
 				updateNote(note);
 				
 			} else {
-				ip.showMessage("Note Shortened, Max of 250 Characters reached");
-				note = note.substring(0, 250);
 				updateNote(note);
 			}
 		}	

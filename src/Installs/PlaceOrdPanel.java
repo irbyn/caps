@@ -224,7 +224,6 @@ protected void saveStock() {
 	   if (poTxtBx.getText().isEmpty()){
 		   ip.showMessage("Please Enter a PO Number");
 	   }else{
-
 		   int rows = tmod2.getRowCount();
 		   int i;
 		   inv = ""; 
@@ -240,7 +239,7 @@ protected void saveStock() {
 		   
 		   resetTable();
 	   }
-	
+	   
 }
 
 

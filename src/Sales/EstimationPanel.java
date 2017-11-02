@@ -14,7 +14,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Main.GetJobs;
-import Main.validator;
+import Permit.validator;
 import net.proteanit.sql.DbUtils;
 
 import java.awt.Font;

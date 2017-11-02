@@ -45,6 +45,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 import net.proteanit.sql.DbUtils;
 import DB_Comms.CreateConnection;
 import Main.*;
+import documents.AKLConsent;
 
 
 class PermitsReqPanel extends JPanel {
@@ -59,7 +60,7 @@ class PermitsReqPanel extends JPanel {
 	private Color LtGray = Color.decode("#e8e8ff");
 	private CreateConnection connecting;
 	
-	private String param = "";  
+	private String invoiceNum = "";  
 	private ResultSet rs;
 	private ResultSet rs2;
 	private ResultSet rs3;
@@ -133,351 +134,325 @@ class PermitsReqPanel extends JPanel {
 	private Boolean lockForm;
 	private ConnDetails conDeets;
 	private PermitPane pp;
+	private AKLConsent cnst;
 
-	  public PermitsReqPanel(Boolean lockForm, ConnDetails conDetts, PermitPane ppn)
-      {   
-		  this.lockForm = lockForm;
-		  this.conDeets = conDetts;
-		  this.pp = ppn;
+    public PermitsReqPanel(Boolean lockForm, ConnDetails conDetts, PermitPane ppn)
+    {   
+    	this.lockForm = lockForm;
+    	this.conDeets = conDetts;
+    	this.pp = ppn;
 
-  		  connecting = new CreateConnection();	//
-  		  
-		  infoFields = new JTextField[14];		// Array to hold user JTextField names 
-		  rowSelected = false;
+    	connecting = new CreateConnection();	//
+    	cnst = new AKLConsent();
+    	validator val = new validator(this);
+    	
+    	infoFields = new JTextField[14];		// Array to hold user JTextField names 
+    	rowSelected = false;
 		  
-		    model1 = new DefaultTableModel();  
-		    model1.setRowCount(0);
-	        permitsTbl = new JTable(model1);
-	        permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-	        permitsTbl.setAutoCreateRowSorter(true);
+    	model1 = new DefaultTableModel();  
+		model1.setRowCount(0);
+		permitsTbl = new JTable(model1);
+		permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		permitsTbl.setAutoCreateRowSorter(true);
 	        
-	        JScrollPane scrollPane = new JScrollPane(permitsTbl);
+		JScrollPane scrollPane = new JScrollPane(permitsTbl);
 		  
-	        header= permitsTbl.getTableHeader();
-	        columnModel = header.getColumnModel();
-	        add(header); 
+		header= permitsTbl.getTableHeader();
+		columnModel = header.getColumnModel();
+		add(header); 
 	                	        
-	        tablePanel = new JPanel();
-	        tablePanel.setBounds(20, 20, 1025, 260);  //setPreferredSize(new Dimension(0, 300));      
-	        tablePanel.setLayout(new BorderLayout());
+		tablePanel = new JPanel();
+		tablePanel.setBounds(20, 20, 1025, 260);  //setPreferredSize(new Dimension(0, 300));      
+		tablePanel.setLayout(new BorderLayout());
 	        
-	        infoPanel = new JPanel();
-	        infoPanel.setBounds(0, 280, 1100, 300);  //setPreferredSize(new Dimension(0, 300));
-	        infoPanel.setLayout(null);
+		infoPanel = new JPanel();
+		infoPanel.setBounds(0, 280, 1100, 300);  //setPreferredSize(new Dimension(0, 300));
+		infoPanel.setLayout(null);
 	        
-	        detailsTxtArea = new JTextArea("");
-	        detailsTxtArea.setBounds(20, 20, 250, 260);
-	        detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
-	        detailsTxtArea.setBackground(LtGray);
-	        detailsTxtArea.setLineWrap(true);
-	        detailsTxtArea.setEditable(false);
-	        infoPanel.add(detailsTxtArea);
+		detailsTxtArea = new JTextArea("");
+		detailsTxtArea.setBounds(20, 20, 250, 260);
+		detailsTxtArea.setBorder(BorderFactory.createEtchedBorder());
+		detailsTxtArea.setBackground(LtGray);
+		detailsTxtArea.setLineWrap(true);
+		detailsTxtArea.setEditable(false);
+		infoPanel.add(detailsTxtArea);
      	        
 // User entry fields
-	        lotLbl = new JLabel("Lot:");
-	        lotLbl.setBounds(305, 20, 70, 20);
-	        infoPanel.add(lotLbl);
-	        lotTxtBx = new JTextField(" ",10);
-	        lotTxtBx.setBounds(375, 20, 150, 20);
-	        infoPanel.add(lotTxtBx);
-	        infoFields[4] = lotTxtBx;
+	    lotLbl = new JLabel("Lot:");
+	    lotLbl.setBounds(305, 20, 70, 20);
+	    infoPanel.add(lotLbl);
+	    lotTxtBx = new JTextField(" ",10);
+	    lotTxtBx.setBounds(375, 20, 150, 20);
+	    infoPanel.add(lotTxtBx);
+	    infoFields[4] = lotTxtBx;
 	        
-	        dpLbl = new JLabel("DP:");
-	        dpLbl.setBounds(565, 20, 70, 20);
-	        infoPanel.add(dpLbl);
-	        dpTxtBx = new JTextField(10);
-	        dpTxtBx.setBounds(635, 20, 150, 20);
-	        infoPanel.add(dpTxtBx);
-	        infoFields[5] = dpTxtBx;
+	    dpLbl = new JLabel("DP:");
+	    dpLbl.setBounds(565, 20, 70, 20);
+	    infoPanel.add(dpLbl);
+	    dpTxtBx = new JTextField(10);
+	    dpTxtBx.setBounds(635, 20, 150, 20);
+	    infoPanel.add(dpTxtBx);
+	    infoFields[5] = dpTxtBx;
+	    
+	    consentLbl = new JLabel("Consent:");
+	    consentLbl.setBounds(825, 20, 70, 20);
+	    infoPanel.add(consentLbl);
+	    consentTxtBx = new JTextField(10);
+	    consentTxtBx.setBounds(895, 20, 150, 20);
+	    infoPanel.add(consentTxtBx);
+	    infoFields[2] = consentTxtBx;
 	        
-	        consentLbl = new JLabel("Consent:");
-	        consentLbl.setBounds(825, 20, 70, 20);
-	        infoPanel.add(consentLbl);
-	        consentTxtBx = new JTextField(10);
-	        consentTxtBx.setBounds(895, 20, 150, 20);
-	        infoPanel.add(consentTxtBx);
-	        infoFields[2] = consentTxtBx;
+	    buildingLbl = new JLabel("Building:");
+	    buildingLbl.setBounds(305, 50, 70, 20);
+	    infoPanel.add(buildingLbl);
+	    buildingTxtBx = new JTextField("Residence", 10);
+	    buildingTxtBx.setBounds(375, 50, 150, 20);
+	    infoPanel.add(buildingTxtBx);
+	    infoFields[6] = buildingTxtBx;
 	        
-	        buildingLbl = new JLabel("Building:");
-	        buildingLbl.setBounds(305, 50, 70, 20);
-	        infoPanel.add(buildingLbl);
-	        buildingTxtBx = new JTextField("Residence", 10);
-	        buildingTxtBx.setBounds(375, 50, 150, 20);
-	        infoPanel.add(buildingTxtBx);
-	        infoFields[6] = buildingTxtBx;
-	        
-	        levelLbl = new JLabel("Unit/Level:");	  
-	        levelLbl.setBounds(565, 50, 70, 20);	
-	        infoPanel.add(levelLbl);
-	        levelTxtBx = new JTextField(10);		
-	        levelTxtBx.setBounds(635, 50, 150, 20);	
-	        infoPanel.add(levelTxtBx);
-	        infoFields[3] = levelTxtBx;
-	        
-	        valueLbl = new JLabel("Value:");	      
-	        valueLbl.setBounds(825, 50, 70, 20);  
-	        infoPanel.add(valueLbl);
-	        valueTxtBx = new JTextField(10);	    
-	        valueTxtBx.setBounds(895, 50, 150, 20);	
-	        infoPanel.add(valueTxtBx);
-	        infoFields[0] = valueTxtBx;
-	        	        
-	        yearLbl = new JLabel("Year:");	           
-	        yearLbl.setBounds(305, 80, 70, 20);	
-	        infoPanel.add(yearLbl);
-	        yearTxtBx = new JTextField(10);	         
-	        yearTxtBx.setBounds(375, 80, 150, 20); 
-	        infoPanel.add(yearTxtBx);
-	        infoFields[1] = yearTxtBx;
-	        
-	        locationLbl = new JLabel("Location:");
-	        locationLbl.setBounds(565, 80, 70, 20);
-	        infoPanel.add(locationLbl);
-	        locationTxtBx = new JTextField(10);
-	        locationTxtBx.setBounds(635, 80, 150, 20);
-	        infoPanel.add(locationTxtBx);
-	        infoFields[7] = locationTxtBx;
+	    levelLbl = new JLabel("Unit/Level:");	  
+	    levelLbl.setBounds(565, 50, 70, 20);	
+	    infoPanel.add(levelLbl);
+	    levelTxtBx = new JTextField(10);		
+	    levelTxtBx.setBounds(635, 50, 150, 20);	
+	    infoPanel.add(levelTxtBx);
+	    infoFields[3] = levelTxtBx;
+	    
+	    valueLbl = new JLabel("Value:");	      
+	    valueLbl.setBounds(825, 50, 70, 20);  
+	    infoPanel.add(valueLbl);
+	    valueTxtBx = new JTextField(10);	    
+	    valueTxtBx.setBounds(895, 50, 150, 20);	
+	    infoPanel.add(valueTxtBx);
+	    infoFields[0] = valueTxtBx;
+	    
+	    yearLbl = new JLabel("Year:");	           
+	    yearLbl.setBounds(305, 80, 70, 20);	
+	    infoPanel.add(yearLbl);
+	    yearTxtBx = new JTextField(10);	         
+	    yearTxtBx.setBounds(375, 80, 150, 20); 
+	    infoPanel.add(yearTxtBx);
+	    infoFields[1] = yearTxtBx;
+	    
+	    locationLbl = new JLabel("Location:");
+	    locationLbl.setBounds(565, 80, 70, 20);
+	    infoPanel.add(locationLbl);
+	    locationTxtBx = new JTextField(10);
+	    locationTxtBx.setBounds(635, 80, 150, 20);
+	    infoPanel.add(locationTxtBx);
+	    infoFields[7] = locationTxtBx;
 	        	        	        
-	        ownerLbl = new JLabel("Proof:");
-	        ownerLbl.setBounds(825, 80, 70, 20);
-	        infoPanel.add(ownerLbl);
-	        ownerCmbo = new JComboBox(doctype);
-	        ownerCmbo.setSelectedIndex(0);
-	        ownerCmbo.setBackground(Color.WHITE);
-	        ownerCmbo.setBounds(895, 80, 150, 20);
-	        infoPanel.add(ownerCmbo);
+	    ownerLbl = new JLabel("Proof:");
+	    ownerLbl.setBounds(825, 80, 70, 20);
+	    infoPanel.add(ownerLbl);
+	    ownerCmbo = new JComboBox(doctype);
+	    ownerCmbo.setSelectedIndex(0);
+	    ownerCmbo.setBackground(Color.WHITE);
+	    ownerCmbo.setBounds(895, 80, 150, 20);
+	    infoPanel.add(ownerCmbo);
+	    
+	    wetLbl = new JLabel("Wetback:");
+	    wetLbl.setBounds(825, 110, 70, 20);
+	    infoPanel.add(wetLbl);
+	    wetChk = new JCheckBox("");
+	    wetChk.setSelected(false);
+	    wetChk.setBounds(895, 110, 150, 20);
+	    infoPanel.add(wetChk);
+	    
+	    fireIDLbl = new JLabel("Fire Code:");
+	    fireIDLbl.setBounds(305, 140, 70, 20);
+	    infoPanel.add(fireIDLbl);
+	    fireIDTxtBx = new JTextField(10);
+	    fireIDTxtBx.setBounds(375, 140, 150, 20);
+	    infoPanel.add(fireIDTxtBx);
+	    infoFields[8] = fireIDTxtBx;
+	    
+	    makeLbl = new JLabel("Make:");
+	    makeLbl.setBounds(565, 140, 70, 20);
+	    infoPanel.add(makeLbl);
+	    makeTxtBx = new JTextField(10);
+	    makeTxtBx.setBounds(635, 140, 150, 20);
+	    infoPanel.add(makeTxtBx);
+	    infoFields[9] = makeTxtBx;
 	        
-	        wetLbl = new JLabel("Wetback:");
-	        wetLbl.setBounds(825, 110, 70, 20);
-	        infoPanel.add(wetLbl);
-	        wetChk = new JCheckBox("");
-	        wetChk.setSelected(false);
-	        wetChk.setBounds(895, 110, 150, 20);
-	        infoPanel.add(wetChk);
-	        
-	        fireIDLbl = new JLabel("Fire Code:");
-	        fireIDLbl.setBounds(305, 140, 70, 20);
-	        infoPanel.add(fireIDLbl);
-	        fireIDTxtBx = new JTextField(10);
-	        fireIDTxtBx.setBounds(375, 140, 150, 20);
-	        infoPanel.add(fireIDTxtBx);
-	        infoFields[8] = fireIDTxtBx;
-	        
-	        makeLbl = new JLabel("Make:");
-	        makeLbl.setBounds(565, 140, 70, 20);
-	        infoPanel.add(makeLbl);
-	        makeTxtBx = new JTextField(10);
-	        makeTxtBx.setBounds(635, 140, 150, 20);
-	        infoPanel.add(makeTxtBx);
-	        infoFields[9] = makeTxtBx;
-	        
-	        modelLbl = new JLabel("Model:");
-	        modelLbl.setBounds(825, 140, 70, 20);
-	        infoPanel.add(modelLbl);
-	        modelTxtBx = new JTextField(10);
-	        modelTxtBx.setBounds(895, 140, 150, 20);
-	        infoPanel.add(modelTxtBx);
-	        infoFields[10] = modelTxtBx;
-	        
-	        lifeLbl = new JLabel("Life Time:");
-	        lifeLbl.setBounds(305, 170, 70, 20);
-	        infoPanel.add(lifeLbl);
-	        lifeTxtBx = new JTextField(10);
-	        lifeTxtBx.setBounds(375, 170, 150, 20);
-	        infoPanel.add(lifeTxtBx);
-	        infoFields[11] = lifeTxtBx;
-	        
-	        ecanLbl = new JLabel("ECAN:");
-	        ecanLbl.setBounds(565, 170, 70, 20);
-	        infoPanel.add(ecanLbl);
-	        ecanTxtBx = new JTextField(10);
-	        ecanTxtBx.setBounds(635, 170, 150, 20);
-	        infoPanel.add(ecanTxtBx);
-	        infoFields[12] = ecanTxtBx;
-	        
-	        nelsonLbl = new JLabel("Nelson:");
-	        nelsonLbl.setBounds(825, 170, 70, 20);
-	        infoPanel.add(nelsonLbl);
-	        nelsonTxtBx = new JTextField(10);
-	        nelsonTxtBx.setBounds(895, 170, 150, 20);
-	        infoPanel.add(nelsonTxtBx);
-	        infoFields[13] = nelsonTxtBx;
-	            	        	           	        
-	        fireLbl = new JLabel("Fire Type:");
-	        fireLbl.setBounds(565, 200, 70, 20);
-	        infoPanel.add(fireLbl);
-	        fireCmbo = new JComboBox(firestyle);
-	        fireCmbo.setSelectedIndex(0);
-	        fireCmbo.setBackground(Color.WHITE);
-	        fireCmbo.setBounds(635, 200, 150, 20);
-	        infoPanel.add(fireCmbo);
-	        
-	        fuelLbl = new JLabel("Fuel:");
-	        fuelLbl.setBounds(825, 200, 70, 20);
-	        infoPanel.add(fuelLbl);
-	        fuelCmbo = new JComboBox(fueltype);
-	        fuelCmbo.setSelectedIndex(0);
-	        fuelCmbo.setBackground(Color.WHITE);
-	        fuelCmbo.setBounds(895, 200, 150, 20);
-	        infoPanel.add(fuelCmbo);
-	        
-//	Form Buttons
-	        prntConsentBtn = new JButton("Print Consent");
-	        prntConsentBtn.setBounds(545, 260, 150, 25);
-	        infoPanel.add(prntConsentBtn);
-	        
-	        cancelPermitReqBtn = new JButton("Cancel");
-	        cancelPermitReqBtn.setBounds(720, 260, 150, 25);
-	        infoPanel.add(cancelPermitReqBtn);
-	        
-	        savePermitReqBtn = new JButton("Save Permit Details");
-	        savePermitReqBtn.setBounds(895, 260, 150, 25);
-	        infoPanel.add(savePermitReqBtn);
-	        
-	        saveFireBtn = new JButton("Save Fire Details");
-	        saveFireBtn.setBounds(375, 200, 150, 25);
-	        infoPanel.add(saveFireBtn);
-
-
-	        this.setLayout(null);
-	        this.add(tablePanel); 
-	        this.add(infoPanel);
-	        
-		  	tablePanel.add(scrollPane, BorderLayout.CENTER);
-		  	tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);       
-		  	
-		  //Checks & Updates Fire details 
-		  	fireIDTxtBx.addFocusListener(new FocusListener() {
-		        public void focusGained(FocusEvent e) {
-		        };
-		        public void focusLost(FocusEvent e) {
-		          if (!e.isTemporary()) {
-		            String content = fireIDTxtBx.getText();
-		            emptyFire();
-		            updateFireDetails(content);
-		          }
+	    modelLbl = new JLabel("Model:");
+	    modelLbl.setBounds(825, 140, 70, 20);
+	    infoPanel.add(modelLbl);
+	    modelTxtBx = new JTextField(10);
+	    modelTxtBx.setBounds(895, 140, 150, 20);
+	    infoPanel.add(modelTxtBx);
+	    infoFields[10] = modelTxtBx;
+	    
+	    lifeLbl = new JLabel("Life Time:");
+	    lifeLbl.setBounds(305, 170, 70, 20);
+	    infoPanel.add(lifeLbl);
+	    lifeTxtBx = new JTextField(10);
+	    lifeTxtBx.setBounds(375, 170, 150, 20);
+	    infoPanel.add(lifeTxtBx);
+	    infoFields[11] = lifeTxtBx;
+	    
+	    ecanLbl = new JLabel("ECAN:");
+	    ecanLbl.setBounds(565, 170, 70, 20);
+	    infoPanel.add(ecanLbl);
+	    ecanTxtBx = new JTextField(10);
+	    ecanTxtBx.setBounds(635, 170, 150, 20);
+	    infoPanel.add(ecanTxtBx);
+	    infoFields[12] = ecanTxtBx;
+	    
+	    nelsonLbl = new JLabel("Nelson:");
+	    nelsonLbl.setBounds(825, 170, 70, 20);
+	    infoPanel.add(nelsonLbl);
+	    nelsonTxtBx = new JTextField(10);
+	    nelsonTxtBx.setBounds(895, 170, 150, 20);
+	    infoPanel.add(nelsonTxtBx);
+	    infoFields[13] = nelsonTxtBx;
+	    
+	    fireLbl = new JLabel("Fire Type:");
+	    fireLbl.setBounds(565, 200, 70, 20);
+	    infoPanel.add(fireLbl);
+	    fireCmbo = new JComboBox(firestyle);
+	    fireCmbo.setSelectedIndex(0);
+	    fireCmbo.setBackground(Color.WHITE);
+	    fireCmbo.setBounds(635, 200, 150, 20);
+	    infoPanel.add(fireCmbo);
+	    
+	    fuelLbl = new JLabel("Fuel:");
+	    fuelLbl.setBounds(825, 200, 70, 20);
+	    infoPanel.add(fuelLbl);
+	    fuelCmbo = new JComboBox(fueltype);
+	    fuelCmbo.setSelectedIndex(0);
+	    fuelCmbo.setBackground(Color.WHITE);
+	    fuelCmbo.setBounds(895, 200, 150, 20);
+	    infoPanel.add(fuelCmbo);
+	    
+//	Form	 Buttons
+	    prntConsentBtn = new JButton("Print Consent");
+	    prntConsentBtn.setBounds(545, 260, 150, 25);
+	    infoPanel.add(prntConsentBtn);
+	    
+	    cancelPermitReqBtn = new JButton("Cancel");
+	    cancelPermitReqBtn.setBounds(720, 260, 150, 25);
+	    infoPanel.add(cancelPermitReqBtn);
+	    
+	    savePermitReqBtn = new JButton("Save Permit Details");
+	    savePermitReqBtn.setBounds(895, 260, 150, 25);
+	    infoPanel.add(savePermitReqBtn);
+	    
+	    saveFireBtn = new JButton("Save Fire Details");
+	    saveFireBtn.setBounds(375, 200, 150, 25);
+	    infoPanel.add(saveFireBtn);
+	    
+	    
+	    this.setLayout(null);
+	    this.add(tablePanel); 
+	    this.add(infoPanel);
+	    
+	    tablePanel.add(scrollPane, BorderLayout.CENTER);
+	    tablePanel.add(permitsTbl.getTableHeader(), BorderLayout.NORTH);       
+	    
+	    //Checks & Updates Fire details 
+	    fireIDTxtBx.addFocusListener(new FocusListener() {
+	    	public void focusGained(FocusEvent e) {
+	    	};
+	    		public void focusLost(FocusEvent e) {
+	    			if (!e.isTemporary()) {
+	    				String content = fireIDTxtBx.getText();
+	    				emptyFire();
+	    				updateFireDetails(content);
+	    			}
 		        }
-		      });
-
-		  	
-		  	permitsTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-				@Override
-				public void valueChanged(ListSelectionEvent arg0) {
-					if (!arg0.getValueIsAdjusting()){
-						rowSelected=true;
-			//			pp.setFormsLocked();
-						try{
-						param = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
-						
-						displayClientDetails(param);
-						detailsTxtArea.setText(pp.DisplayClientDetails(param));
-						
+		    });
+	  	permitsTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+	  		@Override
+	  		public void valueChanged(ListSelectionEvent arg0) {
+	  			if (!arg0.getValueIsAdjusting()){
+	  				rowSelected=true;
+			//		pp.setFormsLocked();
+	  				try{
+	  					invoiceNum = permitsTbl.getValueAt(permitsTbl.getSelectedRow(), 0).toString();
+						displayClientDetails(invoiceNum);
+						detailsTxtArea.setText(pp.DisplayClientDetails(invoiceNum));						
 						} catch (IndexOutOfBoundsException e){
 							//Ignoring IndexOutOfBoundsExceptions!
 						}
 					}
 				}
 		  	});
-	        
-	        
-		  	savePermitReqBtn.addActionListener( new ActionListener()
-		  	{
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-			        { 	// Check a Customer has been selected
-			        	if (rowSelected){
-			        		validator val = new validator();	
-			        		val.validatePermit(infoFields);		// validate/transform user data
-			        		if (!val.getValidEntries()){		// display errors
-			        			JOptionPane.showMessageDialog(null, val.getmsg());
-			        		}
-			        		else {	// update database
-			        			updateConsent();
-			        			pp.showMessage("Updating Consent...");
-			        		}
-			        	}else {	//	No Customer selected
-			        		pp.showMessage("No details to Save");			        		
-			        	}
-				    }					
+	  	savePermitReqBtn.addActionListener( new ActionListener() {
+	  		@Override
+	  		public void actionPerformed(ActionEvent arg0) {
+	  				{ 	// Check a Customer has been selected
+	  					if (rowSelected){
+	  						val.validatePermit();
+	  						if(val.getValidEntries()){
+	  							pp.showMessage("Saving Consent Details.");
+	  							updateConsent();
+	  						} else{
+	  							JOptionPane.showMessageDialog(null, val.getMsg());
+	  						}
+	  					}else {	//	No Customer selected
+	  						pp.showMessage("No Client Selected");			        		
+	  					}
+	  				}					
 				}
 		  	});
-
-		  	cancelPermitReqBtn.addActionListener( new ActionListener()
-		  	{
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
+	  	cancelPermitReqBtn.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
 			        { 
 			        	resetTable();
 				    }					
 				}
 		  	});
-
-	        prntConsentBtn.addActionListener( new ActionListener()
-		  	{
-				@Override
-				public void actionPerformed(ActionEvent arg0) 
-			    { 
+	  	prntConsentBtn.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) 
+			    	{ 
 			        // Check a Customer has been selected
-			        if (rowSelected){
-			        		        	
+			        if (rowSelected){        	
 			        	int input = JOptionPane.showConfirmDialog(null,"Mark Consent as Printed and Sent to Council?\n "
 			        			+ "This Customer will no longer display on this page!",  "Mark Consent Sent?", JOptionPane.YES_NO_OPTION);
-			        	if (input == 0){
-
-			        		updateAsSent();		        		
-			        		pp.showMessage("Sorry... Printing not enabled");		        		
-
-					        resetTable();
+			        	if (input == 0)
+			        		{			        		
+				        		cnst.fillConsent(invoiceNum, conDeets);
+				        		pp.showMessage("Updating Permit");	
+				        		updateAsSent();
+				        		resetTable();	        								
+				        	} else{
+				        		cnst.fillConsent(invoiceNum, conDeets);
 			        	}
 		        	}else {	//	No Customer selected
 		        		pp.showMessage("No details to Print");			        				      
 			       	}			        
 				}
 		  	});
-		  	
-	
-		  	saveFireBtn.addActionListener( new ActionListener()
-		  	{
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-			        { 			       
-			        		validator val = new validator();	
-			        		 JOptionPane.showMessageDialog(null, "Validation not running!");
-			        		 
-			        		 //CHECK 			        		 
-//			        		val.validateFire(infoFields);		// validate/transform user data
-//			        		if (!val.getValidEntries()){		// display errors
-//			        			JOptionPane.showMessageDialog(null, val.getmsg());
-//			        		}
-//			        		else {	// update database
-			        		 	pp.showMessage("Updating Fire...");
-			        			updateFire();
-//			        		}	
+	  	saveFireBtn.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+			        { 		
+			        	val.validateFire();
+  						if(val.getValidEntries()){
+  							pp.showMessage("Saving Fire Details.");
+  							updateFire();
+  						} else{
+  							JOptionPane.showMessageDialog(null, val.getMsg());
+  						}	
 				    }					
 				}
 		  	});
-		  	
-		  	
-
-// PRE-LOAD Table data for first tab		  	
-		  	resetTable();
-		  	
+		  	// PRE-LOAD Table data for first tab		  	
+		  	resetTable();		  	
 	  }
 	
-
-		
-	  
-		protected void resetTable() {
+    protected void resetTable() {
 			
-			ResultSet rs = pp.getResults(0);
-		  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 
-		  	
-		  	spaceHeader();
-		  	
-			param = "";  
-	      	permitsTbl.clearSelection();
-			rowSelected=false;
-	      	for(Component control : infoPanel.getComponents())
+		ResultSet rs = pp.getResults(0);
+	  	permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
+	  	spaceHeader();		  	
+	  	invoiceNum = "";  
+    	permitsTbl.clearSelection();
+		rowSelected=false;
+	     	for(Component control : infoPanel.getComponents())
 	      	{
 	      	    if(control instanceof JTextField)
 	      	    {
@@ -499,8 +474,7 @@ class PermitsReqPanel extends JPanel {
 			ecanTxtBx.setText("");
 			nelsonTxtBx.setText("");
 			fireCmbo.setSelectedItem(0);
-			fuelCmbo.setSelectedItem(0);
-		
+			fuelCmbo.setSelectedItem(0);	
 	}
 
 
@@ -516,7 +490,7 @@ class PermitsReqPanel extends JPanel {
 		
         	pm = conn.prepareCall(updateConsent);
         	
-        	pm.setString(1, param);
+        	pm.setString(1, invoiceNum);
         	pm.setString(2, getLot());
         	pm.setString(3, getDP());
         	pm.setString(4, getConsent());
@@ -554,7 +528,7 @@ class PermitsReqPanel extends JPanel {
 		
 		    	pm = conn.prepareCall(updateSent);
 			
-		    	pm.setString(1, param);
+		    	pm.setString(1, invoiceNum);
 			
 		    	pm.executeUpdate();
 		    	}
@@ -604,7 +578,7 @@ class PermitsReqPanel extends JPanel {
       	
 		private void displayClientDetails(String parameter) {
 			
-			rs2 = pp.getDetails(qry, param);
+			rs2 = pp.getDetails(qry, invoiceNum);
 			
 	        	 try {
 					while(rs2.next()){
@@ -734,7 +708,9 @@ class PermitsReqPanel extends JPanel {
 	        header.repaint();
 	  }
 		      
-	    
+	    public void setValue(String str){
+	    	valueTxtBx.setText(str);
+	    }
 	    public JTable getPermitsTbl(){
 	    	return permitsTbl;
 	    }
