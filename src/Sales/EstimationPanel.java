@@ -296,9 +296,10 @@ class EstimationPanel extends JPanel {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-
+							//The date the estimation was sent to the customer
 							updateEstimistionDate();
 							resetTable();
+							clearFields();
 
 						} else {
 							// TODO fallback to some Runtime.exec(..) voodoo?
@@ -477,14 +478,14 @@ class EstimationPanel extends JPanel {
 
 	public boolean validateData(){
 		Boolean isError = false;
-		error = " ";
+		error = "";
 		if (txtBxFire.getText().equals("")){
 			isError = true;
 			//Cannot be null or more than 15 chars
 			error = error + "FIRE: can not be empty\n";
-		}else if(txtBxFire.getText().length() > 30){
+		}else if(txtBxFire.getText().length() > 50){
 			isError = true;
-			error = error + "FIRE: can not be more than 30 letters\n";
+			error = error + "FIRE: can not be more than 50 letters\n";
 		}
 		try {
 
@@ -504,6 +505,10 @@ class EstimationPanel extends JPanel {
 			//Display number error message 
 			isError = true;
 			error = error + "PRICE: can only contain numbers\n";
+		}
+		if (comBxInstType.getSelectedItem() == null){
+			isError = true;
+			error = error + "INSTALL TYPE: must be selected\n";
 		}
 		if (comBxSlsPerson.getSelectedItem() == null){
 			isError = true;

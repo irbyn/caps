@@ -11,9 +11,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 //import java.sql.Date;
 import java.sql.Time;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -84,8 +86,11 @@ class SiteCheckPanel extends JPanel {
 	private JCheckBox chckBxSCheckComp;
 	private Date date;
 	private int userID;
-	
+	private TimeZone timeZone;
+
 	public SiteCheckPanel(ConnDetails conDeets, SalesPane sp) {
+
+		timeZone = TimeZone.getTimeZone("NZDT");
 
 		this.sp = sp;
 		this.conDeets = conDeets;
@@ -129,52 +134,43 @@ class SiteCheckPanel extends JPanel {
 		lblSChkBooking = new JLabel("Site Check Booking:");
 		lblSChkBooking.setBounds(478, 68, 128, 14);
 		infoPanel.add(lblSChkBooking);
-		
-		date = new java.sql.Date(Calendar.getInstance().getTime().getTime());
 
-		SimpleDateFormat dtModel = new SimpleDateFormat("dd.MMM.yyyy");
+		date = new java.sql.Date(Calendar.getInstance(timeZone).getTime().getTime());
+
 		spnDate = new JSpinner(new SpinnerDateModel());
-		spnDate.setEditor(new JSpinner.DateEditor(spnDate, dtModel.toPattern()));
+		spnDate.setEditor(new JSpinner.DateEditor(spnDate, "dd.MMM.yyyy"));
 		spnDate.setBounds(634, 65, 130, 20);
 		spnDate.setValue(date);
 		infoPanel.add(spnDate);
 
-		SimpleDateFormat tmModel = new SimpleDateFormat("HH:MM");
+		/*		spnDate.addActionListener( new ActionListener(){
+
+		});*/
+
+		SpinnerDateModel modelTime = new SpinnerDateModel();
+		modelTime.setCalendarField(Calendar.MINUTE);
+
+		//SimpleDateFormat tmModel = new SimpleDateFormat("HH:MM");
+		//spnTime = new JSpinner(modelTime);
 		spnTime = new JSpinner(new SpinnerDateModel());
-		spnTime.setEditor(new JSpinner.DateEditor(spnTime, tmModel.toPattern()));
+		spnTime.setEditor(new JSpinner.DateEditor(spnTime,"dd.MMM.yyyy HH:MM"));
 		spnTime.setBounds(784, 65, 130, 20);
 		spnTime.setValue(date);
 		infoPanel.add(spnTime);
+
+		System.out.println(spnTime.getValue());
 
 		comBxSChkDoneBy = new JComboBox<String>();
 		comBxSChkDoneBy.setBackground(Color.WHITE);
 		comBxSChkDoneBy.setBounds(634, 115, 284, 20);
 		infoPanel.add(comBxSChkDoneBy);
 
-
 		GetJobs job = new GetJobs(conDeets);
-
-		//String[] installUr = job.getInstallers();
-
-		/*DefaultComboBoxModel model = new DefaultComboBoxModel( installUr );
-			      comBxSChkDoneBy.setModel( model );   
-		 */   
 		String[] SC = job.getSiteChecker();
 
 		DefaultComboBoxModel<String> modelSC = new DefaultComboBoxModel<String>( SC );
 		comBxSChkDoneBy.setModel(modelSC);
 		comBxSChkDoneBy.setSelectedItem(null);
-
-		//GetJobs job = new GetJobs(conDeets);
-		/*		String[] installType = job.getInstallers();
-
-		DefaultComboBoxModel model = new DefaultComboBoxModel( installType );
-		comBxSChkDoneBy.setModel( model );*/
-		/*		
-		String[] SC = job.getSiteChecker();
-		DefaultComboBoxModel<String> modelSC = new DefaultComboBoxModel<String>( SC );
-		comBxSChkDoneBy.setModel( modelSC );*/
-
 
 		lblSiteCheckBy = new JLabel("Site Check By:");
 		lblSiteCheckBy.setBounds(478, 118, 128, 14);
@@ -200,18 +196,6 @@ class SiteCheckPanel extends JPanel {
 		chckBxSCheckComp.setBounds(834, 165, 97, 23);
 		infoPanel.add(chckBxSCheckComp);
 
-		/*		rdbtnSCheckBooked = new JRadioButton("Site Check Booked");
-		rdbtnSCheckBooked.setBounds(634, 168, 128, 23);
-		infoPanel.add(rdbtnSCheckBooked);
-
-		rdbtnSCheckCompleted = new JRadioButton("Site Check Completed");
-		rdbtnSCheckCompleted.setBounds(770, 168, 150, 23);
-		infoPanel.add(rdbtnSCheckCompleted);*/
-
-		/*group = new ButtonGroup();
-		group.add(rdbtnSCheckBooked);
-		group.add(rdbtnSCheckCompleted);*/
-
 		tablePanel.add(scrollPane, BorderLayout.CENTER);
 		tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
 
@@ -223,7 +207,6 @@ class SiteCheckPanel extends JPanel {
 					try{
 						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 1).toString();
 						paramSID = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
-						sp.showMessage("Retrieving Data");
 						txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
 						displaySiteDetails(paramSID);
 						rowSelected=true;
@@ -240,12 +223,11 @@ class SiteCheckPanel extends JPanel {
 			public void actionPerformed(ActionEvent arg0) { 
 
 				if(rowSelected){
-					//If validate data is false then there is no error
-					//if (validatedata() == false){
 					//Check to see if the user is sure about creating the customer
-					int dialogButton = JOptionPane.YES_NO_OPTION;
+					/*int dialogButton = JOptionPane.YES_NO_OPTION;
 					int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to update this sale?","Warning",dialogButton);
-					if(dialogResult == JOptionPane.YES_OPTION){
+					if(dialogResult == JOptionPane.YES_OPTION){*/
+					if (!validatedata()){
 						// Saving code here -- add customer to the database
 						sp.showMessage("Updating Sale");
 						updateSiteCheck(paramSID);
@@ -257,8 +239,9 @@ class SiteCheckPanel extends JPanel {
 						}
 						resetTable();
 						clearFields();
+						//}						
+
 					}
-					//}
 				}else{
 					JOptionPane.showMessageDialog(null, "You must select a row first.");
 				}
@@ -329,19 +312,54 @@ class SiteCheckPanel extends JPanel {
 
 	public boolean validatedata(){
 		Boolean errorChk = false;
-		String error = " ";
-		//Check if all text boxes are all filled in correctly
-		//List<String> errors = new ArrayList<String>();
+		String error = "";
 
-		if (!spnDate.getValue().equals(date)){
+		Calendar yesterday = Calendar.getInstance(timeZone);
+		yesterday.add(Calendar.DATE, -1);
+
+		Date dateVal = (Date) spnDate.getValue();	
+		Date timeVal = (Date) spnTime.getValue();
+
+		System.out.println("SPN Date " + spnDate.getValue());
+		System.out.println("SPN Time " + spnTime.getValue());
+
+		TimeZone timeZone = TimeZone.getTimeZone("NZDT");
+		//Calendar calendar = Calendar.getInstance(timeZone);
+
+		Calendar bef = Calendar.getInstance(timeZone);
+		bef.setTime(dateVal);
+		bef.set(Calendar.AM_PM, Calendar.PM);
+		bef.set(Calendar.HOUR, 19);		
+		Date befo = bef.getTime();
+
+		Calendar aft = Calendar.getInstance(timeZone);		
+		aft.setTime(dateVal);
+		aft.set(Calendar.AM_PM, Calendar.PM);
+		aft.set(Calendar.HOUR, 7);
+		//aft.clear(Calendar.MILLISECOND);	
+		System.out.println("Date Value: " + dateVal);
+		System.out.println("Before: " + bef.getTime());
+		System.out.println("after: " +aft.getTime());
+		System.out.println("TimeValue: " +timeVal);
+
+		Date afte = aft.getTime();
+
+		if (dateVal.before(yesterday.getTime())){
 			errorChk = true;
-			//Cannot be null or more than 15 chars
-			error = error + "FIRST NAME: can not be empty\n";
+			error = error + "DATE: must be set for the future\n";
+		}		
+		if (timeVal.before(befo) || timeVal.after(afte)){
+			errorChk = true;
+			error = error + "TIME: must be between 8am and 8pm\n";
 		}
 		if (comBxSChkDoneBy.getSelectedItem() == null){
 			errorChk = true;
 			error = error + "DONE BY: can not be empty\n";
 		} 
+		if (!chckBxSCheckBooked.isSelected() && !chckBxSCheckComp.isSelected()){
+			errorChk = true;
+			error = error + "BOOKED: please select if the site check is \nbooked or completed\n";
+		}
 
 		//Check to see if any errors has occured
 		if (errorChk == true){
@@ -374,7 +392,7 @@ class SiteCheckPanel extends JPanel {
 					Boolean booked 				= rs.getBoolean("Site Check Booked");
 					String salesPerson 			= rs.getString("Done By");
 					userID						= rs.getInt("User ID");
-					
+
 					if (SCdate==null){
 						spnDate.setValue(date);
 					}else{
@@ -415,12 +433,12 @@ class SiteCheckPanel extends JPanel {
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
 
 			sm = conn.prepareCall(update);
-			
+
 			sm.setString(1, parameter);
 			sm.setString(2, getDate());
 			sm.setString(3, getTime());
 			sm.setInt(4, getInstID());
-			
+
 			sm.setBoolean(5, getBooked());
 			sm.setBoolean(6, getCompleted());
 
@@ -437,19 +455,18 @@ class SiteCheckPanel extends JPanel {
 		}			
 	}
 
-
 	public String getDate(){  	
-		
-    	Date dte = (Date) spnDate.getValue(); 
-       	SimpleDateFormat sdf1 = new SimpleDateFormat("dd-MMM-yyyy");
-    	String dt = sdf1.format(dte);
+
+		Date dte = (Date) spnDate.getValue(); 
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+		String dt = sdf1.format(dte);
 		return dt; 
 	}
 
 	public String getTime(){
 		Date tim = (Date) spnTime.getValue(); 
-       	SimpleDateFormat sdf2 = new SimpleDateFormat("HH:MM");
-    	String tm = sdf2.format(tim);
+		SimpleDateFormat sdf2 = new SimpleDateFormat("HH:MM");
+		String tm = sdf2.format(tim);
 		return tm;
 	}
 
@@ -466,7 +483,7 @@ class SiteCheckPanel extends JPanel {
 			sm.setString(1, slSName);
 
 			ResultSet rs = sm.executeQuery();
-			
+
 			while (rs.next()){
 				slsID = rs.getInt("UserID");
 			}
@@ -479,7 +496,7 @@ class SiteCheckPanel extends JPanel {
 		{ 
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}
-		
+
 		return slsID;
 
 	}
@@ -499,7 +516,7 @@ class SiteCheckPanel extends JPanel {
 			return false;
 		}
 	}
-	
+
 	public JPanel getInfoPanel(){
 		return infoPanel;
 	}
