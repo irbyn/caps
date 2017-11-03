@@ -67,8 +67,7 @@ class QuotePanel extends JPanel {
 	private String getQuoteDetails = "{Call AWS_WCH_DB.dbo.[s_SalesQuoteDetails](?,?)}";
 	private String updateQuote = "{Call AWS_WCH_DB.dbo.[s_SalesUpdateQuote] (?,?,?,?,?,?,?)}";
 	private String rmvSiteCheck = "{Call AWS_WCH_DB.dbo.[s_SalesRmvSiteCheck] (?)}";
-
-	//private String slsID = "";  
+  
 	private String custID = "";
 	private String saleID = "";  
 	private ResultSet rs;
@@ -88,10 +87,6 @@ class QuotePanel extends JPanel {
 	private String sck;
 	private String pht;
 
-	private String qutFile;
-	private String siteFile;
-	private String photoFile;
-
 	private Boolean rowSelected = false;
 	private Boolean qutExists = false;
 	private Boolean siteExists = false;
@@ -107,8 +102,7 @@ class QuotePanel extends JPanel {
 
 	private JTableHeader header;
 	private TableColumnModel columnModel;
-	private JPanel tablePanel;
-	private JPanel infoPanel;
+
 	private JTable salesTbl;
 	private DefaultTableModel model1;
 
@@ -119,21 +113,24 @@ class QuotePanel extends JPanel {
 	private JScrollPane qutSP;
 	private JButton removeQutBtn;
 	private JButton viewQutBtn;
-
-	private JPanel sitePanel;
+	
+	private JPanel tablePanel;
+	private JPanel infoPanel;
+	private JPanel sitePanel;	
+	private JPanel photoPanel;
+	
 	private DefaultListModel siteLM;
 	private JList siteDZ;
 	private JScrollPane siteSP;
-
-	private JPanel photoPanel;	
+	
 	private DefaultListModel photoLM;
 	private JList photoDZ;
 	private JScrollPane photoSP;
 
-	private JLabel lblReesCode; 
-	private JLabel lblQuoteNum; 
-	private JTextField txtBxReesCode;
-	private JTextField txtBxQuoteNum;
+	private JLabel reeesCodeLbl; 
+	private JLabel quoteNumLbl; 
+	private JTextField reesCodeTxtBx;
+	private JTextField quoteNumTxtBx;
 
 	private JCheckBox chBcRmvSC;
 	private JButton removBtn;	
@@ -157,7 +154,6 @@ class QuotePanel extends JPanel {
 	private Boolean lockForm;
 	private ConnDetails conDeets;
 	private SalesPane sp;
-
 
 	public QuotePanel(ConnDetails conDetts, SalesPane spn) {
 
@@ -198,23 +194,23 @@ class QuotePanel extends JPanel {
 		detailsTxtArea.setEditable(false);
 		infoPanel.add(detailsTxtArea);
 
-		lblReesCode = new JLabel("Rees Code");
-		lblReesCode.setBounds(386, 25, 74, 14);
-		infoPanel.add(lblReesCode);
+		reeesCodeLbl = new JLabel("Rees Code");
+		reeesCodeLbl.setBounds(386, 25, 74, 14);
+		infoPanel.add(reeesCodeLbl);
 
-		lblQuoteNum = new JLabel("Quote Number");
-		lblQuoteNum.setBounds(622, 25, 95, 14);
-		infoPanel.add(lblQuoteNum);
+		quoteNumLbl = new JLabel("Quote Number");
+		quoteNumLbl.setBounds(622, 25, 95, 14);
+		infoPanel.add(quoteNumLbl);
 
-		txtBxReesCode = new JTextField();
-		txtBxReesCode.setBounds(477, 22, 100, 20);
-		infoPanel.add(txtBxReesCode);
-		txtBxReesCode.setColumns(10);
+		reesCodeTxtBx = new JTextField();
+		reesCodeTxtBx.setBounds(477, 22, 100, 20);
+		infoPanel.add(reesCodeTxtBx);
+		reesCodeTxtBx.setColumns(10);
 
-		txtBxQuoteNum = new JTextField();
-		txtBxQuoteNum.setBounds(722, 22, 100, 20);
-		infoPanel.add(txtBxQuoteNum);
-		txtBxQuoteNum.setColumns(10);
+		quoteNumTxtBx = new JTextField();
+		quoteNumTxtBx.setBounds(722, 22, 100, 20);
+		infoPanel.add(quoteNumTxtBx);
+		quoteNumTxtBx.setColumns(10);
 
 		qutPanel = new JPanel();
 		qutPanel.setBounds(622, 74, 200, 175); 
@@ -629,16 +625,16 @@ class QuotePanel extends JPanel {
 
 		saveAllowed=true;
 		msg = "";
-		if (!txtBxReesCode.getText().equals("") || !txtBxQuoteNum.getText().equals("") || qutLM.getSize()>0 || siteLM.getSize()>0 || photoLM.getSize()>0){
+		if (!reesCodeTxtBx.getText().equals("") || !quoteNumTxtBx.getText().equals("") || qutLM.getSize()>0 || siteLM.getSize()>0 || photoLM.getSize()>0){
 
-			if (txtBxReesCode.getText().length() > 11){
+			if (reesCodeTxtBx.getText().length() > 11){
 				msg = msg + "Rees Code can not be more than 8 characters\n";
 				saveAllowed=false;
 			}
 
 			try {
-				Integer.parseInt(txtBxQuoteNum.getText());
-				if(txtBxQuoteNum.getText().length() > 9){
+				Integer.parseInt(quoteNumTxtBx.getText());
+				if(quoteNumTxtBx.getText().length() > 9){
 					msg = msg + "Quote can not be more than 9 numbers\n";
 					saveAllowed=false;
 				}
@@ -759,8 +755,8 @@ class QuotePanel extends JPanel {
 
 		rowSelected=false;
 		custID = "";
-		txtBxReesCode.setText("");
-		txtBxQuoteNum.setText("");
+		reesCodeTxtBx.setText("");
+		quoteNumTxtBx.setText("");
 		detailsTxtArea.setText("");
 		clearDrops();
 		viewQutBtn.setVisible(false);
@@ -850,11 +846,11 @@ class QuotePanel extends JPanel {
 	}
 
 	public String getReesCode(){
-		return txtBxReesCode.getText();
+		return reesCodeTxtBx.getText();
 	}
 
 	public String getQuoteNum(){
-		return txtBxQuoteNum.getText();
+		return quoteNumTxtBx.getText();
 	}
 
 	public void getNumbers(){
@@ -884,12 +880,12 @@ class QuotePanel extends JPanel {
 	/*				if (rees==null){
 						txtBxReesCode.setText("");
 					}else{*/
-						txtBxReesCode.setText(rees);
+						reesCodeTxtBx.setText(rees);
 					//}
 					/*if (quote == null ){
 						txtBxQuoteNum.setText("");
 					}else{*/
-						txtBxQuoteNum.setText(quote);
+						quoteNumTxtBx.setText(quote);
 					//}
 				
 				}
