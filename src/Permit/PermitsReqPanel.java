@@ -385,9 +385,11 @@ class PermitsReqPanel extends JPanel {
 	  					if (rowSelected){
 	  						val.validatePermit();
 	  						if(val.getValidEntries()){
+	  			        		String inv = invoiceNum;	
 	  							pp.showMessage("Saving Consent Details.");
 	  							updateConsent();
 	  							resetTable();
+	  							reselectRow(inv);
 	  						} else{
 	  							JOptionPane.showMessageDialog(null, val.getMsg());
 	  						}
@@ -467,7 +469,13 @@ class PermitsReqPanel extends JPanel {
 	      	    }
 	      	}
 	}
-
+    protected void reselectRow(String inv) {
+    	for (int i = 0; i < permitsTbl.getRowCount(); i++){
+    		if (inv.equals(permitsTbl.getModel().getValueAt(i, 0).toString())){
+    			permitsTbl.setRowSelectionInterval(i, i);
+    		}
+    	}
+    }
 	    protected void emptyFire() {
 			makeTxtBx.setText("");
 			modelTxtBx.setText("");
@@ -584,18 +592,7 @@ class PermitsReqPanel extends JPanel {
 	        	 try {
 					while(rs2.next()){
 								    					
-/*			        	String invoice 			= rs2.getString("Invoice");
-			        	String rees				= rs2.getString("Rees");
-						 String customerName 	= rs2.getString("CustomerName");
-						 String customerAddress = rs2.getString("CustomerAddress");
-						 String customerSuburb 	= rs2.getString("CustomerSuburb");
-						 String customerPostCode= rs2.getString("CustomerPostCode");
-						 String customerPhone 	= rs2.getString("CustomerPhone");
-						 String customerMobile 	= rs2.getString("CustomerMobile");
-						 String customerEmail 	= rs2.getString("CustomerEmail");
-						 String streetAddress 	= rs2.getString("StreetAddress");
-						 String suburb 			= rs2.getString("Suburb");
-*/						 String status 			= rs2.getString("PermitStatus");
+						 String status 			= rs2.getString("PermitStatus");
 						 String consent 		= rs2.getString("Consent");						 						
 						 String lot 			= rs2.getString("Lot");
 						 String dP 				= rs2.getString("DP"); 
@@ -766,7 +763,6 @@ class PermitsReqPanel extends JPanel {
 	    	else{
 		    	return false;	    		
 	    	}
-
 	    }
 	    
 	    public String getFireCode(){
