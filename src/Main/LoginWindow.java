@@ -46,6 +46,9 @@ public class LoginWindow extends JFrame{
 	private ConnDetails conDeets;
 
 	public LoginWindow() {
+		
+		conDeets = new ConnDetails();
+	//	connecting = new CreateConnection();
 
 		// setting up JFrame
 		getContentPane().setLayout(null);
@@ -110,9 +113,7 @@ public class LoginWindow extends JFrame{
 				dispose();//Close the login window
 				}else{
 					JOptionPane.showMessageDialog(null, "Failed to log in");
-				}
-
-				
+				}				
 			}
 		});
 
@@ -161,10 +162,9 @@ public class LoginWindow extends JFrame{
 
 			String update = "{" + getuserPass +"(?,?)}";
 			
-			String dbURL = "jdbc:sqlserver://wch-db.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:47947";
-
-			String user = "nhfnKGF519hinsd897665465jbsdsf";
-			String pass = "NJiugi7btdjyFbe99n9n09UU";
+			String dbURL = conDeets.getURL();    
+			String user = conDeets.getUser();    
+			String pass = conDeets.getPass();    
 
 			Connection conn = DriverManager.getConnection(dbURL, user, pass);
 			

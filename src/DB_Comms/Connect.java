@@ -15,15 +15,15 @@ public class Connect {
 
 	   static final String user = "Khgv92367hdkfug9";
 	   static final String pass = "Locei02h84b5KJUVaW";*/
-	
+	/*
 		static final String dbURL = "jdbc:sqlserver://wch-db.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:47947";
 
 	   static final String user = "nhfnKGF519hinsd897665465jbsdsf";
 	   static final String pass = "NJiugi7btdjyFbe99n9n09UU";
-	
+	*/
 	
 	   public static void main(String[] args) {
-		   
+/*		   
 	        Connection conn = null;
 	        Statement stmt = null;
 	 
@@ -87,6 +87,6 @@ public class Connect {
 	            }
 	        }
 	 	   //	System.out.println("KGIGIYGKGVKH");   
-	   }
+	*/   }
 	   
 	}

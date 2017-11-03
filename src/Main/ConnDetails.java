@@ -6,18 +6,24 @@ package Main;
  * Security protocols to be developed!
  */
 public class ConnDetails {
-	static final String dbURL = "jdbc:sqlserver://wchdb.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:1433";
-	private String user = "Khgv92367hdkfug9";
-	private String pass = "Locei02h84b5KJUVaW";
+	
+	private String dbURL;
+	private String user;
+	private String pass;
 	
 	public ConnDetails(){
-
+	
+		dbURL = "jdbc:sqlserver://wch-db.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:47947";
+		user = "nhfnKGF519hinsd897665465jbsdsf";
+		pass = "NJiugi7btdjyFbe99n9n09UU";
+		
 	}
 
-	public ConnDetails(String usr, String pwd){
+/*	public ConnDetails(String usr, String pwd){
 		this.user = usr;
 		this.pass = pwd;		
 	}
+	*/
 	
 	public String getURL(){
 		return this.dbURL;

@@ -33,10 +33,6 @@ public class CreateConnection implements Connection {
 		private String pass;
 		private String dbURL;
 
-//		static final String dbURL = "jdbc:sqlserver://wchdb.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:1433";
-//		static final String user = "Khgv92367hdkfug9";
-//		static final String pass = "Locei02h84b5KJUVaW";
-
 	public Connection CreateConnection(ConnDetails conDeets) {
 		  
   		user = conDeets.getUser();
