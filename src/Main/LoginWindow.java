@@ -161,7 +161,7 @@ public class LoginWindow extends JFrame{
 
 			String update = "{" + getuserPass +"(?,?)}";
 			
-			String dbURL = "jdbc:sqlserver://wchdb.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:1433";
+			String dbURL = "jdbc:sqlserver://wch-db.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:47947";
 
 			String user = "nhfnKGF519hinsd897665465jbsdsf";
 			String pass = "NJiugi7btdjyFbe99n9n09UU";

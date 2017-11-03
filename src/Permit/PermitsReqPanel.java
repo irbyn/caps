@@ -387,6 +387,7 @@ class PermitsReqPanel extends JPanel {
 	  						if(val.getValidEntries()){
 	  							pp.showMessage("Saving Consent Details.");
 	  							updateConsent();
+	  							resetTable();
 	  						} else{
 	  							JOptionPane.showMessageDialog(null, val.getMsg());
 	  						}
