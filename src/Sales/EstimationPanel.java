@@ -14,7 +14,6 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Main.GetJobs;
-import Permit.validator;
 import net.proteanit.sql.DbUtils;
 
 import java.awt.Font;
@@ -23,7 +22,6 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -45,9 +43,9 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 class EstimationPanel extends JPanel {
-	private JTextField txtBxFire;
-	private JTextField txtBxPrice;
-	private JTextField txtBxComment;	
+	private JTextField fireTxtBx;
+	private JTextField priceTxtBx;
+	private JTextField commentTxtBx;	
 	private int [] columnWidth = {50, 50, 70, 150, 100, 100, 100, 50, 50, 50}; 
 	private String getEstimationDetails = "call AWS_WCH_DB.dbo.s_SalesEstimationDetails";
 	private String updateEstimation = "call AWS_WCH_DB.dbo.s_SalesUpdateEstimation";
@@ -69,32 +67,23 @@ class EstimationPanel extends JPanel {
 	private DefaultTableModel model1;
 	private JTextArea txtAreaCustInfo;
 	private JLabel siteAddrLbl;
-	private JLabel lblPrice;
-	private JLabel lblInstallType;
-	//private JLabel lblSiteCheck;
-	private JLabel lblComment;
-	private JLabel lblSalesPrsn;
-	//private JLabel lblSChkDoneBy;
-	private JComboBox<String> comBxInstType;
-	//private JComboBox<String> comBxSChkDoneBy;
-	//private JCheckBox chckBxToBook;
-	//private JCheckBox chckBxSChkComp;
-	//private JSpinner spnTimeDate;
-	private JComboBox<String> comBxSlsPerson;
-	private JLabel lblFire;
+	private JLabel PriceLbl;
+	private JLabel InstallTypelbl;
+	private JLabel commentlbl;
+	private JLabel salesPrsnlbl;
+	private JComboBox<String> instTypeComBx;
+	private JComboBox<String> slsPersonComBx;
+	private JLabel firelbl;
 	private String error;
-	private JButton btnSendEmail;
-	private JButton btnCancel;
-	private JButton btnSave;
+	private JButton sendEmailBtn;
+	private JButton cancelBtn;
+	private JButton saveBtn;
 	private SalesPane sp;
-	private validator vv;
-	private GetJobs gj;
 	private ConnDetails conDeets;
 
 	public EstimationPanel(ConnDetails ConDeets, SalesPane sp) {
 		this.sp = sp;
 		this.conDeets = ConDeets;
-		//vp = new validator();
 		rowSelected = false;
 
 		connecting = new CreateConnection();
@@ -136,107 +125,73 @@ class EstimationPanel extends JPanel {
 		infoPanel.add(txtAreaCustInfo);
 
 
-		txtBxFire = new JTextField();
-		txtBxFire.setBounds(588, 30, 218, 20);
-		infoPanel.add(txtBxFire);
-		txtBxFire.setColumns(10);
+		fireTxtBx = new JTextField();
+		fireTxtBx.setBounds(588, 30, 218, 20);
+		infoPanel.add(fireTxtBx);
+		fireTxtBx.setColumns(10);
 
-		txtBxPrice = new JTextField();
-		txtBxPrice.setColumns(10);
-		txtBxPrice.setBounds(887, 30, 129, 20);
-		infoPanel.add(txtBxPrice);
+		priceTxtBx = new JTextField();
+		priceTxtBx.setColumns(10);
+		priceTxtBx.setBounds(887, 30, 129, 20);
+		infoPanel.add(priceTxtBx);
 
-		lblPrice = new JLabel("Price:");
-		lblPrice.setBounds(837, 33, 46, 14);
-		infoPanel.add(lblPrice);
+		PriceLbl = new JLabel("Price:");
+		PriceLbl.setBounds(837, 33, 46, 14);
+		infoPanel.add(PriceLbl);
 
-		comBxInstType = new JComboBox<String>();
-		comBxInstType.setBackground(Color.WHITE);
-		comBxInstType.setBounds(588, 65, 428, 20);
-		infoPanel.add(comBxInstType);
+		instTypeComBx = new JComboBox<String>();
+		instTypeComBx.setBackground(Color.WHITE);
+		instTypeComBx.setBounds(588, 65, 428, 20);
+		infoPanel.add(instTypeComBx);
 
-		lblInstallType = new JLabel("Install Type:");
-		lblInstallType.setBounds(451, 62, 104, 14);
-		infoPanel.add(lblInstallType);
+		InstallTypelbl = new JLabel("Install Type:");
+		InstallTypelbl.setBounds(451, 62, 104, 14);
+		infoPanel.add(InstallTypelbl);
 
-		/*lblSiteCheck = new JLabel("Site Check:");
-		lblSiteCheck.setBounds(454, 96, 104, 14);
-		infoPanel.add(lblSiteCheck);
+		commentTxtBx = new JTextField();
+		commentTxtBx.setBounds(588, 151, 428, 62);
+		infoPanel.add(commentTxtBx);
+		commentTxtBx.setColumns(10);
 
-		chckBxToBook = new JCheckBox("To Book:");
-		chckBxToBook.setBounds(588, 92, 74, 23);
-		infoPanel.add(chckBxToBook);
+		commentlbl = new JLabel("Email Comment:");
+		commentlbl.setBounds(454, 151, 124, 14);
+		infoPanel.add(commentlbl);
 
-/*		comBxSChkDoneBy = new JComboBox<String>();
-		comBxSChkDoneBy.setBackground(Color.WHITE);
-		comBxSChkDoneBy.setBounds(755, 124, 261, 20);
-		infoPanel.add(comBxSChkDoneBy);
+		salesPrsnlbl = new JLabel("Sales Person:");
+		salesPrsnlbl.setBounds(454, 230, 104, 14);
+		infoPanel.add(salesPrsnlbl);
 
-		lblSChkDoneBy = new JLabel("Site Check Done By:");
-		lblSChkDoneBy.setBounds(454, 127, 128, 14);
-		infoPanel.add(lblSChkDoneBy);*/
+		slsPersonComBx = new JComboBox<String>();
+		slsPersonComBx.setBackground(Color.WHITE);
+		slsPersonComBx.setBounds(588, 224, 218, 20);
+		infoPanel.add(slsPersonComBx);
 
-		/*SimpleDateFormat dt = new SimpleDateFormat("dd.MMM.yyyy");
-		spnTimeDate = new JSpinner(new SpinnerDateModel());
-		spnTimeDate.setEditor(new JSpinner.DateEditor(spnTimeDate, dt.toPattern()));
-		spnTimeDate.setBounds(755, 96, 261, 20);
-		infoPanel.add(spnTimeDate);
+		firelbl = new JLabel("Fire:");
+		firelbl.setBounds(451, 33, 104, 14);
+		infoPanel.add(firelbl);
 
-		chckBxSChkComp = new JCheckBox("Site Check Completed");
-		chckBxSChkComp.setBounds(588, 124, 171, 23);
-		infoPanel.add(chckBxSChkComp);*/
+		sendEmailBtn = new JButton("Send Email");
+		sendEmailBtn.setBounds(868, 255, 148, 23);
+		infoPanel.add(sendEmailBtn);
 
-		txtBxComment = new JTextField();
-		txtBxComment.setBounds(588, 151, 428, 62);
-		infoPanel.add(txtBxComment);
-		txtBxComment.setColumns(10);
+		cancelBtn = new JButton("Cancel");
+		cancelBtn.setBounds(451, 255, 148, 23);
+		infoPanel.add(cancelBtn);
 
-		lblComment = new JLabel("Email Comment:");
-		lblComment.setBounds(454, 151, 124, 14);
-		infoPanel.add(lblComment);
-
-		lblSalesPrsn = new JLabel("Sales Person:");
-		lblSalesPrsn.setBounds(454, 230, 104, 14);
-		infoPanel.add(lblSalesPrsn);
-
-		comBxSlsPerson = new JComboBox<String>();
-		comBxSlsPerson.setBackground(Color.WHITE);
-		comBxSlsPerson.setBounds(588, 224, 218, 20);
-		infoPanel.add(comBxSlsPerson);
-
-		lblFire = new JLabel("Fire:");
-		lblFire.setBounds(451, 33, 104, 14);
-		infoPanel.add(lblFire);
-
-		btnSendEmail = new JButton("Send Email");
-		btnSendEmail.setBounds(868, 255, 148, 23);
-		infoPanel.add(btnSendEmail);
-
-		btnCancel = new JButton("Cancel");
-		btnCancel.setBounds(451, 255, 148, 23);
-		infoPanel.add(btnCancel);
-
-		btnSave = new JButton("Save Details");
-		btnSave.setBounds(658, 255, 148, 23);
-		infoPanel.add(btnSave);
+		saveBtn = new JButton("Save Details");
+		saveBtn.setBounds(658, 255, 148, 23);
+		infoPanel.add(saveBtn);
 
 		GetJobs job = new GetJobs(conDeets);
 		String[] installType = job.getInstallType();
 		DefaultComboBoxModel<String> modelInst = new DefaultComboBoxModel<String>(installType);
-		comBxInstType.setModel( modelInst );
-		comBxInstType.setSelectedItem(null);
-		/*		
-		String[] SC = job.getSiteChecker();
-		DefaultComboBoxModel<String> modelSC = new DefaultComboBoxModel<String>( SC );
-		comBxSChkDoneBy.setModel( modelSC );*/
+		instTypeComBx.setModel( modelInst );
+		instTypeComBx.setSelectedItem(null);
 
-		/*DefaultComboBoxModel modelSC = new DefaultComboBoxModel( SC );
-		comBxSlsPerson.setModel( modelSC ); */
-
-		String[] SELL = job.getSales();
-		DefaultComboBoxModel<String> modelSell = new DefaultComboBoxModel<String>(SELL);
-		comBxSlsPerson.setModel(modelSell); 
-		comBxSlsPerson.setSelectedItem(null);
+		String[] sell = job.getSales();
+		DefaultComboBoxModel<String> modelSell = new DefaultComboBoxModel<String>(sell);
+		slsPersonComBx.setModel(modelSell); 
+		slsPersonComBx.setSelectedItem(null);
 
 		this.setLayout(null);
 		this.add(tablePanel); 
@@ -263,7 +218,7 @@ class EstimationPanel extends JPanel {
 			}
 		});
 
-		btnSendEmail.addActionListener(new ActionListener(){
+		sendEmailBtn.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0){
 				//Validating that the email can actually be sent
@@ -310,7 +265,7 @@ class EstimationPanel extends JPanel {
 			}
 		});
 
-		btnCancel.addActionListener(new ActionListener(){
+		cancelBtn.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0){
 				//if there is unsaved data
@@ -320,21 +275,21 @@ class EstimationPanel extends JPanel {
 					if(dialogResult == JOptionPane.YES_OPTION){
 						resetTable();
 						//reset all the blank fields within the estimation tab
-						txtBxFire.setText(null);
-						txtBxPrice.setText(null);
-						comBxInstType.setSelectedItem(null);
+						fireTxtBx.setText(null);
+						priceTxtBx.setText(null);
+						instTypeComBx.setSelectedItem(null);
 						//chckBxToBook.setSelected(false);
 						//comBxSChkDoneBy.setSelectedItem(null);
 						//spnTimeDate.setEditor(new JSpinner.DateEditor(spnTimeDate, dt.toPattern()));
 						//chckBxSChkComp.setSelected(false);
-						txtBxComment.setText(null);
-						comBxSlsPerson.setSelectedItem(null);
+						commentTxtBx.setText(null);
+						slsPersonComBx.setSelectedItem(null);
 					}
 				}				
 			}
 		});
 
-		btnSave.addActionListener(new ActionListener(){
+		saveBtn.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0){
 				if (rowSelected){
@@ -455,10 +410,10 @@ class EstimationPanel extends JPanel {
 					String instType 		= rs.getString("Install Type");
 					String salesPerson 		= rs.getString("Salesperson");
 
-					txtBxFire.setText(fire);
-					txtBxPrice.setText(price);
-					comBxInstType.setSelectedItem(instType);
-					comBxSlsPerson.setSelectedItem(salesPerson);
+					fireTxtBx.setText(fire);
+					priceTxtBx.setText(price);
+					instTypeComBx.setSelectedItem(instType);
+					slsPersonComBx.setSelectedItem(salesPerson);
 				}
 			}
 		}
@@ -469,29 +424,29 @@ class EstimationPanel extends JPanel {
 	}
 
 	public void clearFields(){
-		txtBxFire.setText("");
-		txtBxPrice.setText("");
-		comBxInstType.setSelectedItem(null);
-		txtBxComment.setText("");
-		comBxSlsPerson.setSelectedItem(null);
+		fireTxtBx.setText("");
+		priceTxtBx.setText("");
+		instTypeComBx.setSelectedItem(null);
+		commentTxtBx.setText("");
+		slsPersonComBx.setSelectedItem(null);
 	}
 
 	public boolean validateData(){
 		Boolean isError = false;
 		error = "";
-		if (txtBxFire.getText().equals("")){
+		if (fireTxtBx.getText().equals("")){
 			isError = true;
 			//Cannot be null or more than 15 chars
 			error = error + "FIRE: can not be empty\n";
-		}else if(txtBxFire.getText().length() > 50){
+		}else if(fireTxtBx.getText().length() > 50){
 			isError = true;
 			error = error + "FIRE: can not be more than 50 letters\n";
 		}
 		try {
 
-			if(!txtBxPrice.getText().equals("")){
-				Integer.parseInt(txtBxPrice.getText());
-				if(4 <= txtBxPrice.getText().length() && txtBxPrice.getText().length() >= 5){
+			if(!priceTxtBx.getText().equals("")){
+				Integer.parseInt(priceTxtBx.getText());
+				if(4 <= priceTxtBx.getText().length() && priceTxtBx.getText().length() >= 5){
 					isError = true;
 					error = error + "PRCIE: must be between 2000 - 99999\n";
 				}
@@ -506,11 +461,11 @@ class EstimationPanel extends JPanel {
 			isError = true;
 			error = error + "PRICE: can only contain numbers\n";
 		}
-		if (comBxInstType.getSelectedItem() == null){
+		if (instTypeComBx.getSelectedItem() == null){
 			isError = true;
 			error = error + "INSTALL TYPE: must be selected\n";
 		}
-		if (comBxSlsPerson.getSelectedItem() == null){
+		if (slsPersonComBx.getSelectedItem() == null){
 			isError = true;
 			error = error + "SALESPERSON: must be selected\n";
 		}
@@ -520,25 +475,25 @@ class EstimationPanel extends JPanel {
 	public Boolean checkTxtBx(){
 		Boolean newData = false;
 		//add in combx for Install type and the date spinner 
-		if (!txtAreaCustInfo.getText().equals("") || !txtBxFire.getText().equals("") || txtBxPrice.getText().equals("")
-				|| !(comBxInstType.getSelectedItem()== null) || !txtBxComment.getText().equals("") || !(comBxSlsPerson.getSelectedItem() == null )){
+		if (!txtAreaCustInfo.getText().equals("") || !fireTxtBx.getText().equals("") || priceTxtBx.getText().equals("")
+				|| !(instTypeComBx.getSelectedItem()== null) || !commentTxtBx.getText().equals("") || !(slsPersonComBx.getSelectedItem() == null )){
 			newData = true;
 		}
 		return newData;
 	}
 
 	public String getFire(){
-		return txtBxFire.getText();
+		return fireTxtBx.getText();
 	}
 
 	public String getPrice(){
-		return txtBxPrice.getText();
+		return priceTxtBx.getText();
 	}
 
 	//get the ID from what's in the combo box 
 	public int getInstTypeID(){
 		int instID = 0;
-		String instType = (String) comBxInstType.getSelectedItem();
+		String instType = (String) instTypeComBx.getSelectedItem();
 		CallableStatement sm = null;
 		try {
 
@@ -569,7 +524,7 @@ class EstimationPanel extends JPanel {
 	//get the ID from what's in the combo box
 	public int getSlsPersonID(){
 		int slsID = 0;
-		String slSName = (String) comBxSlsPerson.getSelectedItem();
+		String slSName = (String) slsPersonComBx.getSelectedItem();
 		CallableStatement sm = null;
 		try {
 			String update = "{" + getSlsID +"(?)}";	
@@ -596,7 +551,7 @@ class EstimationPanel extends JPanel {
 	}
 
 	public String getComment(){
-		return txtBxComment.getText();
+		return commentTxtBx.getText();
 	}	
 
 	public Date getDate(){
@@ -607,8 +562,8 @@ class EstimationPanel extends JPanel {
 	public boolean emailCanBeSent(){
 		getEstDetails(paramSID);
 		//if its not filled out show pop up to save details 
-		String instType = (String) comBxInstType.getSelectedItem();
-		String slsPerson = (String) comBxSlsPerson.getSelectedItem();
+		String instType = (String) instTypeComBx.getSelectedItem();
+		String slsPerson = (String) slsPersonComBx.getSelectedItem();
 
 		if (getFire().equals("") || getPrice().equals("") || instType.equals("") || slsPerson.equals("")){
 			JOptionPane.showMessageDialog(null, "Cannot send email! \nEnsure all fields are saved");
@@ -621,7 +576,7 @@ class EstimationPanel extends JPanel {
 	public String getEmailBody(){
 		String form = "";
 		int basePrice = 0;
-		String instType = (String) comBxInstType.getSelectedItem();
+		String instType = (String) instTypeComBx.getSelectedItem();
 		CallableStatement sm = null;
 		try {
 
@@ -647,8 +602,8 @@ class EstimationPanel extends JPanel {
 		}
 
 		String custName = sp.getCustName();
-		String comment = txtBxComment.getText();
-		int price = Integer.parseInt(txtBxPrice.getText()) + basePrice;
+		String comment = commentTxtBx.getText();
+		int price = Integer.parseInt(priceTxtBx.getText()) + basePrice;
 		String email = "";
 		if (comment.equals("")){
 			email = "Hello " + custName + "\n\n--------------------------------------------\n\n" + form + "\n\nESTIMATED PRICE: $" + price + "\n\n--------------------------------------------\n\n";

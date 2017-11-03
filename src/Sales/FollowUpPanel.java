@@ -78,9 +78,9 @@ class FollowUpPanel extends JPanel {
 	private SimpleDateFormat dt;
 	private JRadioButton rdBtnNxtFlwUp;
 	private JRadioButton rdBtnInvoice;
-	private JRadioButton rdBtnSoldEls;
-	private JButton btnCancel;
-	private JButton btnSave;
+	private JRadioButton soldElsrdBtn;
+	private JButton cancelBtn;
+	private JButton saveBtn;
 	//private JButton btnViewSC;
 	//private JButton btnViewQuote;
 	//private JButton btnViewPhoto;
@@ -89,7 +89,7 @@ class FollowUpPanel extends JPanel {
 	private JButton viewPhotoBtn;
 	private Boolean rowSelected;
 	private Date date;
-	public ButtonGroup group;
+	public ButtonGroup btnGroup;
 	
 	private File quote;
 	private File site;
@@ -106,8 +106,8 @@ class FollowUpPanel extends JPanel {
 	private String sitePfx = "SC_";
 	private String photoPfx = "PH_";
 
-	private JTextField txtBxInvNumb;
-	private JTextField txtBxComment;
+	private JTextField invNumbTxtBx;
+	private JTextField commentTxtBx;
 
 	public FollowUpPanel(ConnDetails ConDeets, SalesPane sp) {
 
@@ -163,27 +163,27 @@ class FollowUpPanel extends JPanel {
 				rdBtnInvoice.setBounds(708, 109, 109, 23);
 				infoPanel.add(rdBtnInvoice);
 
-				rdBtnSoldEls = new JRadioButton("Sold Elsewhere");
-				rdBtnSoldEls.setBounds(708, 135, 151, 23);
-				infoPanel.add(rdBtnSoldEls);
+				soldElsrdBtn = new JRadioButton("Sold Elsewhere");
+				soldElsrdBtn.setBounds(708, 135, 151, 23);
+				infoPanel.add(soldElsrdBtn);
 
-				group = new ButtonGroup();
-				group.add(rdBtnNxtFlwUp);
-				group.add(rdBtnInvoice);
-				group.add(rdBtnSoldEls);
+				btnGroup = new ButtonGroup();
+				btnGroup.add(rdBtnNxtFlwUp);
+				btnGroup.add(rdBtnInvoice);
+				btnGroup.add(soldElsrdBtn);
 
-				txtBxInvNumb = new JTextField();
-				txtBxInvNumb.setBounds(882, 110, 164, 20);
-				infoPanel.add(txtBxInvNumb);
-				txtBxInvNumb.setColumns(10);
+				invNumbTxtBx = new JTextField();
+				invNumbTxtBx.setBounds(882, 110, 164, 20);
+				infoPanel.add(invNumbTxtBx);
+				invNumbTxtBx.setColumns(10);
 
-				btnCancel = new JButton("Cancel");
-				btnCancel.setBounds(708, 255, 164, 23);
-				infoPanel.add(btnCancel);
+				cancelBtn = new JButton("Cancel");
+				cancelBtn.setBounds(708, 255, 164, 23);
+				infoPanel.add(cancelBtn);
 
-				btnSave = new JButton("Save Details");
-				btnSave.setBounds(882, 255, 164, 23);
-				infoPanel.add(btnSave);
+				saveBtn = new JButton("Save Details");
+				saveBtn.setBounds(882, 255, 164, 23);
+				infoPanel.add(saveBtn);
 				
 				viewSiteBtn = new JButton("View Site Check PDF");
 				viewSiteBtn.setBounds(708, 165, 164, 23);
@@ -221,14 +221,14 @@ class FollowUpPanel extends JPanel {
 				followUpComLbl.setBounds(729, 30, 130, 14);
 				infoPanel.add(followUpComLbl);
 				
-				txtBxComment = new JTextField();
-				txtBxComment.setBounds(729, 48, 317, 44);
-				infoPanel.add(txtBxComment);
-				txtBxComment.setColumns(10);
+				commentTxtBx = new JTextField();
+				commentTxtBx.setBounds(729, 48, 317, 44);
+				infoPanel.add(commentTxtBx);
+				commentTxtBx.setColumns(10);
 				
-				JLabel lblFollowUp = new JLabel("Follow Up Comments");
-				lblFollowUp.setBounds(281, 20, 127, 14);
-				infoPanel.add(lblFollowUp);
+				JLabel FollowUplbl = new JLabel("Follow Up Comments");
+				FollowUplbl.setBounds(281, 20, 127, 14);
+				infoPanel.add(FollowUplbl);
 				
 				this.setLayout(null);
 				this.add(tablePanel); 
@@ -257,7 +257,7 @@ class FollowUpPanel extends JPanel {
 					}
 				});
 
-				btnSave.addActionListener( new ActionListener(){
+				saveBtn.addActionListener( new ActionListener(){
 					@Override
 					public void actionPerformed(ActionEvent arg0) {		
 						if (validateData()){
@@ -270,7 +270,7 @@ class FollowUpPanel extends JPanel {
 						}
 						else{
 							updateFollowup();
-							if (rdBtnNxtFlwUp.isSelected() && !txtBxComment.getText().equals("")){
+							if (rdBtnNxtFlwUp.isSelected() && !commentTxtBx.getText().equals("")){
 								addComment();
 							}
 						}
@@ -283,7 +283,7 @@ class FollowUpPanel extends JPanel {
 					}
 				});
 				
-				btnCancel.addActionListener( new ActionListener(){
+				cancelBtn.addActionListener( new ActionListener(){
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
 									resetTable();
@@ -392,9 +392,9 @@ class FollowUpPanel extends JPanel {
 	
 	public void clearFields(){
 		spnDate.setValue(date);
-		txtBxInvNumb.setText("");
-		txtBxComment.setText("");
-		group.clearSelection();
+		invNumbTxtBx.setText("");
+		commentTxtBx.setText("");
+		btnGroup.clearSelection();
 	}
 
 	public JTable getSalesTbl(){
@@ -407,7 +407,7 @@ class FollowUpPanel extends JPanel {
 	
 	public Boolean validateData(){
 		boolean valid = true;
-		if(group.getSelection() == null){
+		if(btnGroup.getSelection() == null){
 			valid = false;
 		}
 		return valid;
@@ -517,11 +517,11 @@ class FollowUpPanel extends JPanel {
 	}
 	
 	public int getInvNum(){
-		return Integer.parseInt(txtBxInvNumb.getText());
+		return Integer.parseInt(invNumbTxtBx.getText());
 	}
 	
 	public String getComment(){
-		return txtBxComment.getText();
+		return commentTxtBx.getText();
 	}
 
 	protected void checkForFiles() {

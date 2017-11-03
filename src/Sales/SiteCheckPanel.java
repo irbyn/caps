@@ -70,22 +70,19 @@ class SiteCheckPanel extends JPanel {
 	private JPanel infoPanel;
 	private JTable salesTbl;
 
-	private JTextArea txtAreaCustInfo;
-	private JLabel lblSChkBooking;
-	private JLabel lblSiteCheckBy;
-	private JSpinner spnDate;
-	private JSpinner spnTime;
-	private JComboBox<String> comBxSChkDoneBy;
-	private JButton btnCancel;
-	private JButton btnSave;
-	private ButtonGroup group;
+	private JTextArea custInfoTxtArea;
+	private JLabel sChkBookingLbl;
+	private JLabel siteCheckByLbl;
+	private JSpinner dateSpn;
+	private JSpinner timeSpn;
+	private JComboBox<String> sChkDoneByComBx;
+	private JButton cancelBtn;
+	private JButton saveBtn;
 	private Boolean rowSelected;
-	//private JRadioButton rdbtnSCheckBooked;
-	//private JRadioButton rdbtnSCheckCompleted;
-	private JCheckBox chckBxSCheckBooked;
-	private JCheckBox chckBxSCheckComp;
+	
+	private JCheckBox sCheckBookedChckBx;
+	private JCheckBox sCheckCompChckBx;
 	private Date date;
-	private int userID;
 	private TimeZone timeZone;
 
 	public SiteCheckPanel(ConnDetails conDeets, SalesPane sp) {
@@ -110,91 +107,80 @@ class SiteCheckPanel extends JPanel {
 
 		//Panel for the table
 		tablePanel = new JPanel();
-		tablePanel.setBounds(20, 20, 1025, 260);  //setPreferredSize(new Dimension(0, 300));      
+		tablePanel.setBounds(20, 20, 1025, 260);       
 		tablePanel.setLayout(new BorderLayout());
 
 		//Content panel
 		infoPanel = new JPanel();
-		infoPanel.setBounds(0, 280, 1077, 289);  //setPreferredSize(new Dimension(0, 300));
+		infoPanel.setBounds(0, 280, 1077, 289);  
 		infoPanel.setLayout(null);
 
-		/*		txtAreaCustInfo = new JTextArea();
-		txtAreaCustInfo.setEditable(false);
-		txtAreaCustInfo.setBounds(23, 24, 382, 237);
-		infoPanel.add(txtAreaCustInfo);*/
+		custInfoTxtArea = new JTextArea("");
+		custInfoTxtArea.setBounds(20, 20, 250, 260);
+		custInfoTxtArea.setBorder(BorderFactory.createEtchedBorder());
+		custInfoTxtArea.setBackground(LtGray);
+		custInfoTxtArea.setLineWrap(true);
+		custInfoTxtArea.setEditable(false);
+		infoPanel.add(custInfoTxtArea);
 
-		txtAreaCustInfo = new JTextArea("");
-		txtAreaCustInfo.setBounds(20, 20, 250, 260);
-		txtAreaCustInfo.setBorder(BorderFactory.createEtchedBorder());
-		txtAreaCustInfo.setBackground(LtGray);
-		txtAreaCustInfo.setLineWrap(true);
-		txtAreaCustInfo.setEditable(false);
-		infoPanel.add(txtAreaCustInfo);
-
-		lblSChkBooking = new JLabel("Site Check Booking:");
-		lblSChkBooking.setBounds(478, 68, 128, 14);
-		infoPanel.add(lblSChkBooking);
+		sChkBookingLbl = new JLabel("Site Check Booking:");
+		sChkBookingLbl.setBounds(478, 68, 128, 14);
+		infoPanel.add(sChkBookingLbl);
 
 		date = new java.sql.Date(Calendar.getInstance(timeZone).getTime().getTime());
 
-		spnDate = new JSpinner(new SpinnerDateModel());
-		spnDate.setEditor(new JSpinner.DateEditor(spnDate, "dd.MMM.yyyy"));
-		spnDate.setBounds(634, 65, 130, 20);
-		spnDate.setValue(date);
-		infoPanel.add(spnDate);
-
-		/*		spnDate.addActionListener( new ActionListener(){
-
-		});*/
+		dateSpn = new JSpinner(new SpinnerDateModel());
+		dateSpn.setEditor(new JSpinner.DateEditor(dateSpn, "dd.MMM.yyyy"));
+		dateSpn.setBounds(634, 65, 130, 20);
+		dateSpn.setValue(date);
+		infoPanel.add(dateSpn);
 
 		SpinnerDateModel modelTime = new SpinnerDateModel();
 		modelTime.setCalendarField(Calendar.MINUTE);
 
-		//SimpleDateFormat tmModel = new SimpleDateFormat("HH:MM");
-		//spnTime = new JSpinner(modelTime);
-		spnTime = new JSpinner(new SpinnerDateModel());
-		spnTime.setEditor(new JSpinner.DateEditor(spnTime,"dd.MMM.yyyy HH:MM"));
-		spnTime.setBounds(784, 65, 130, 20);
-		spnTime.setValue(date);
-		infoPanel.add(spnTime);
+		timeSpn = new JSpinner(new SpinnerDateModel());
+		timeSpn.setEditor(new JSpinner.DateEditor(timeSpn,"dd.MMM.yyyy HH:MM"));
+		timeSpn.setBounds(784, 65, 130, 20);
+		timeSpn.setValue(date);
+		infoPanel.add(timeSpn);
 
-		System.out.println(spnTime.getValue());
+		System.out.println(timeSpn.getValue());
 
-		comBxSChkDoneBy = new JComboBox<String>();
-		comBxSChkDoneBy.setBackground(Color.WHITE);
-		comBxSChkDoneBy.setBounds(634, 115, 284, 20);
-		infoPanel.add(comBxSChkDoneBy);
+		sChkDoneByComBx = new JComboBox<String>();
+		sChkDoneByComBx.setBackground(Color.WHITE);
+		sChkDoneByComBx.setBounds(634, 115, 284, 20);
+		infoPanel.add(sChkDoneByComBx);
 
 		GetJobs job = new GetJobs(conDeets);
 		String[] SC = job.getSiteChecker();
 
 		DefaultComboBoxModel<String> modelSC = new DefaultComboBoxModel<String>( SC );
-		comBxSChkDoneBy.setModel(modelSC);
-		comBxSChkDoneBy.setSelectedItem(null);
+		sChkDoneByComBx.setModel(modelSC);
+		sChkDoneByComBx.setSelectedItem(null);
 
-		lblSiteCheckBy = new JLabel("Site Check By:");
-		lblSiteCheckBy.setBounds(478, 118, 128, 14);
-		infoPanel.add(lblSiteCheckBy);
+		siteCheckByLbl = new JLabel("Site Check By:");
+		siteCheckByLbl.setBounds(478, 118, 128, 14);
+		infoPanel.add(siteCheckByLbl);
 
-		btnCancel = new JButton("Cancel");
-		btnCancel.setBounds(478, 209, 148, 23);
-		infoPanel.add(btnCancel);
+		cancelBtn = new JButton("Cancel");
+		cancelBtn.setBounds(478, 209, 148, 23);
+		infoPanel.add(cancelBtn);
 
-		btnSave = new JButton("Save Details");
-		btnSave.setBounds(770, 209, 148, 23);
-		infoPanel.add(btnSave);
+		saveBtn = new JButton("Save Details");
+		saveBtn.setBounds(770, 209, 148, 23);
+		infoPanel.add(saveBtn);
 
 		this.setLayout(null);
 		this.add(tablePanel); 
 		this.add(infoPanel);
 
-		chckBxSCheckBooked = new JCheckBox("Booked");
-		chckBxSCheckBooked.setBounds(634, 165, 97, 23);
-		infoPanel.add(chckBxSCheckBooked);
+		sCheckBookedChckBx = new JCheckBox("Booked");
+		sCheckBookedChckBx.setBounds(634, 165, 97, 23);
+		infoPanel.add(sCheckBookedChckBx);
 
-		chckBxSCheckComp = new JCheckBox("Completed");
-		chckBxSCheckComp.setBounds(834, 165, 97, 23);
-		infoPanel.add(chckBxSCheckComp);
+		sCheckCompChckBx = new JCheckBox("Completed");
+		sCheckCompChckBx.setBounds(834, 165, 97, 23);
+		infoPanel.add(sCheckCompChckBx);
 
 		tablePanel.add(scrollPane, BorderLayout.CENTER);
 		tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
@@ -207,7 +193,7 @@ class SiteCheckPanel extends JPanel {
 					try{
 						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 1).toString();
 						paramSID = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
-						txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
+						custInfoTxtArea.setText(sp.DisplayClientDetails(param));
 						displaySiteDetails(paramSID);
 						rowSelected=true;
 					} catch (IndexOutOfBoundsException e){
@@ -217,7 +203,7 @@ class SiteCheckPanel extends JPanel {
 			}
 		});	
 
-		btnSave.addActionListener( new ActionListener()
+		saveBtn.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent arg0) { 
@@ -232,7 +218,7 @@ class SiteCheckPanel extends JPanel {
 						sp.showMessage("Updating Sale");
 						updateSiteCheck(paramSID);
 						//Displaying confirmation message
-						if (chckBxSCheckComp.isSelected()){
+						if (sCheckCompChckBx.isSelected()){
 							JOptionPane.showMessageDialog(null, sp.getCustName() + " has been moved to quotes\n"
 									+ "They will be in the quotes table once the\n"
 									+ "sitecheck date has passed");
@@ -248,7 +234,7 @@ class SiteCheckPanel extends JPanel {
 			}
 		});
 
-		btnCancel.addActionListener( new ActionListener()
+		cancelBtn.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -274,7 +260,7 @@ class SiteCheckPanel extends JPanel {
 		spaceHeader();
 		rowSelected=false;
 		param = "";
-		txtAreaCustInfo.setText("");
+		custInfoTxtArea.setText("");
 	}	
 
 	public JTable getSalesTbl(){
@@ -284,8 +270,8 @@ class SiteCheckPanel extends JPanel {
 	public Boolean checkTxtBx(){
 		Boolean newData = false;
 		//add in combx for Install type and the date spinner 
-		if (!txtAreaCustInfo.getText().equals("") 
-				|| !(comBxSChkDoneBy.getSelectedIndex() == 0) || chckBxSCheckBooked.isSelected() || chckBxSCheckComp.isSelected()){
+		if (!custInfoTxtArea.getText().equals("") 
+				|| !(sChkDoneByComBx.getSelectedIndex() == 0) || sCheckBookedChckBx.isSelected() || sCheckCompChckBx.isSelected()){
 			newData = true;
 		}
 		return newData;
@@ -303,11 +289,11 @@ class SiteCheckPanel extends JPanel {
 
 	public void clearFields(){
 		//Set all the text boxes to blank
-		spnDate.setValue(date);
-		spnTime.setValue(date);
-		comBxSChkDoneBy.setSelectedItem(null);
-		chckBxSCheckBooked.setSelected(false);
-		chckBxSCheckComp.setSelected(false);
+		dateSpn.setValue(date);
+		timeSpn.setValue(date);
+		sChkDoneByComBx.setSelectedItem(null);
+		sCheckBookedChckBx.setSelected(false);
+		sCheckCompChckBx.setSelected(false);
 	}
 
 	public boolean validatedata(){
@@ -317,14 +303,13 @@ class SiteCheckPanel extends JPanel {
 		Calendar yesterday = Calendar.getInstance(timeZone);
 		yesterday.add(Calendar.DATE, -1);
 
-		Date dateVal = (Date) spnDate.getValue();	
-		Date timeVal = (Date) spnTime.getValue();
+		Date dateVal = (Date) dateSpn.getValue();	
+		Date timeVal = (Date) timeSpn.getValue();
 
-		System.out.println("SPN Date " + spnDate.getValue());
-		System.out.println("SPN Time " + spnTime.getValue());
+		System.out.println("SPN Date " + dateSpn.getValue());
+		System.out.println("SPN Time " + timeSpn.getValue());
 
 		TimeZone timeZone = TimeZone.getTimeZone("NZDT");
-		//Calendar calendar = Calendar.getInstance(timeZone);
 
 		Calendar bef = Calendar.getInstance(timeZone);
 		bef.setTime(dateVal);
@@ -354,11 +339,11 @@ class SiteCheckPanel extends JPanel {
 			errorChk = true;
 			error = error + "TIME: must be between 8am and 8pm\n";
 		}
-		if (comBxSChkDoneBy.getSelectedItem() == null){
+		if (sChkDoneByComBx.getSelectedItem() == null){
 			errorChk = true;
 			error = error + "DONE BY: can not be empty\n";
 		} 
-		if (!chckBxSCheckBooked.isSelected() && !chckBxSCheckComp.isSelected()){
+		if (!sCheckBookedChckBx.isSelected() && !sCheckCompChckBx.isSelected()){
 			errorChk = true;
 			error = error + "BOOKED: please select if the site check is \nbooked or completed\n";
 		}
@@ -393,29 +378,29 @@ class SiteCheckPanel extends JPanel {
 					Time time 					= rs.getTime("Site Check Time");
 					Boolean booked 				= rs.getBoolean("Site Check Booked");
 					String salesPerson 			= rs.getString("Done By");
-					userID						= rs.getInt("User ID");
+					//int userID						= rs.getInt("User ID");
 
 					if (SCdate==null){
-						spnDate.setValue(date);
+						dateSpn.setValue(date);
 					}else{
-						spnDate.setValue(SCdate);
+						dateSpn.setValue(SCdate);
 					}
 					if (time == null ){
-						spnTime.setValue(date);
+						timeSpn.setValue(date);
 					}else{
-						spnTime.setValue(time);
+						timeSpn.setValue(time);
 					}
 					if (booked==false){
-						chckBxSCheckBooked.setSelected(false);
+						sCheckBookedChckBx.setSelected(false);
 						//group.clearSelection();
 					}else{
-						chckBxSCheckBooked.setSelected(true);
+						sCheckBookedChckBx.setSelected(true);
 					}
 					if(salesPerson == null){
-						comBxSChkDoneBy.setSelectedItem(null);
+						sChkDoneByComBx.setSelectedItem(null);
 					}
 					else{
-						comBxSChkDoneBy.setSelectedItem(salesPerson);
+						sChkDoneByComBx.setSelectedItem(salesPerson);
 					}
 				}
 			}
@@ -459,14 +444,14 @@ class SiteCheckPanel extends JPanel {
 
 	public String getDate(){  	
 
-		Date dte = (Date) spnDate.getValue(); 
+		Date dte = (Date) dateSpn.getValue(); 
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
 		String dt = sdf1.format(dte);
 		return dt; 
 	}
 
 	public String getTime(){
-		Date tim = (Date) spnTime.getValue(); 
+		Date tim = (Date) timeSpn.getValue(); 
 		SimpleDateFormat sdf2 = new SimpleDateFormat("HH:MM");
 		String tm = sdf2.format(tim);
 		return tm;
@@ -475,7 +460,7 @@ class SiteCheckPanel extends JPanel {
 	public int getInstID(){
 		//get the ID from what's in the combo box
 		int slsID = 0;
-		String slSName = (String) comBxSChkDoneBy.getSelectedItem();
+		String slSName = (String) sChkDoneByComBx.getSelectedItem();
 		CallableStatement sm = null;
 		try {
 			String update = "{" + getInstID +"(?)}";	
@@ -504,7 +489,7 @@ class SiteCheckPanel extends JPanel {
 	}
 
 	public Boolean getBooked(){
-		if (chckBxSCheckBooked.isSelected()){
+		if (sCheckBookedChckBx.isSelected()){
 			return true;
 		}else{
 			return false;
@@ -512,7 +497,7 @@ class SiteCheckPanel extends JPanel {
 	}
 
 	public boolean getCompleted(){
-		if (chckBxSCheckComp.isSelected()){
+		if (sCheckCompChckBx.isSelected()){
 			return true;
 		}else{
 			return false;
