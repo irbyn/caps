@@ -173,10 +173,10 @@ class CCCToClientPanel extends JPanel {
 							        resetTable();
 					        	}
 						   }else{
-								pp.showMessage("Check Customer Balance Paid before Saving");
+							   JOptionPane.showMessageDialog(null, "Check Customer Balance Paid before Saving");
 						   }
 					   }else {
-						   pp.showMessage("Select a Customer before Saving");
+						   JOptionPane.showMessageDialog(null, "Select a Customer before Saving");
 					   }
 					}					
 				}

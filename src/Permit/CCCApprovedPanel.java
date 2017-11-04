@@ -134,11 +134,8 @@ class CCCApprovedPanel extends JPanel {
 		    model2 = new DefaultTableModel(colNames,0);
 	        cccTbl = new JTable(model2);
 	        cccTbl.setAutoCreateRowSorter(true);
-	        
-	        JScrollPane sp = new JScrollPane(cccTbl);
-		  
-	        hd= cccTbl.getTableHeader();
-	        
+	        JScrollPane sp = new JScrollPane(cccTbl);		  
+	        hd= cccTbl.getTableHeader();        
 	        cm = hd.getColumnModel();
 		  	spaceHeader(cm, colWidth);
 	        add(hd);
@@ -191,10 +188,20 @@ class CCCApprovedPanel extends JPanel {
 			});
 			savePermitReqBtn.addActionListener( new ActionListener()
 			{
+				/*
+			model2 = new DefaultTableModel(colNames,0);
+	        cccTbl = new JTable(model2);
+	        cccTbl.setAutoCreateRowSorter(true);
+	        JScrollPane sp = new JScrollPane(cccTbl);		  
+	        hd= cccTbl.getTableHeader();        
+	        cm = hd.getColumnModel();
+		  	spaceHeader(cm, colWidth);
+	        add(hd);
+				 * */
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 				   { 
-					   if (rowSelected){
+					   if (cccTbl.getRowCount()>0){
 					   getCCCApproved();
 					   pp.showMessage("Updating Permit...");
 					   }else {

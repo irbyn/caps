@@ -142,6 +142,7 @@ class ProdStatementPanel extends JPanel {
 		    warningLbl.setText("");
 		    warningLbl.setVisible(false);
 		    warningLbl.setForeground(Color.RED);
+		    
 		    warningLbl.setBounds(400, 20, 400, 80);
 		    infoPanel.add(warningLbl);		    
 		    
