@@ -467,7 +467,7 @@ class CustomerPanel extends JPanel {
 					if (!validatedata()){	
 						if (!validSiteCheck()){			
 
-							if (!checkDBForCust().next()){
+							//if (!checkDBForCust().next()){
 								//If the customer doesn't yet exist create a new customer and sale
 								if (!rowSelected){
 									createCustAndSale();
@@ -484,20 +484,20 @@ class CustomerPanel extends JPanel {
 									clearFields();
 									createCustBtn.setEnabled(true);
 								}
-							}else{
+							/*}else{
 								JOptionPane.showMessageDialog(null, "This customer already exists! \nPlease search and edit them \nfrom the customer table.");
 								resetTable();
 								clearFields();
-							}
+							}*/
 						}
 					}
 				} catch (HeadlessException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				} catch (SQLException e) {
+				} /*catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
+				}*/
 			}
 		});
 

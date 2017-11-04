@@ -227,9 +227,7 @@ class SiteCheckPanel extends JPanel {
 									+ "sitecheck date has passed");
 						}
 						resetTable();
-						clearFields();
-						//}						
-
+						clearFields();				
 					}
 				}else{
 					JOptionPane.showMessageDialog(null, "You must select a row first.");
@@ -293,7 +291,6 @@ class SiteCheckPanel extends JPanel {
 	public void clearFields(){
 		//Set all the text boxes to blank
 		dateSpn.setValue(date);
-		//timeSpn.setValue(date);
 		timeComboBox.setSelectedIndex(8);
 		sChkDoneByComBx.setSelectedItem(null);
 		sCheckBookedChckBx.setSelected(false);
@@ -308,41 +305,11 @@ class SiteCheckPanel extends JPanel {
 		yesterday.add(Calendar.DATE, -1);
 
 		Date dateVal = (Date) dateSpn.getValue();	
-		//Date timeVal = (Date) timeSpn.getValue();
-
-		System.out.println("SPN Date " + dateSpn.getValue());
-		//System.out.println("SPN Time " + timeSpn.getValue());
-		System.out.println(timeComboBox.getSelectedItem());
-		/*TimeZone timeZone = TimeZone.getTimeZone("NZDT");
-
-		Calendar bef = Calendar.getInstance(timeZone);
-		bef.setTime(dateVal);
-		bef.set(Calendar.AM_PM, Calendar.PM);
-		bef.set(Calendar.HOUR, 19);		
-		Date befo = bef.getTime();
-
-		Calendar aft = Calendar.getInstance(timeZone);		
-		aft.setTime(dateVal);
-		aft.set(Calendar.AM_PM, Calendar.PM);
-		aft.set(Calendar.HOUR, 7);
-		//aft.clear(Calendar.MILLISECOND);	
-		System.out.println("Date Value: " + dateVal);
-		System.out.println("Before: " + bef.getTime());
-		System.out.println("after: " +aft.getTime());*/
-		//System.out.println("TimeValue: " +timeVal);
-
 		
-		
-		//Date afte = aft.getTime();
-
 		if (dateVal.before(yesterday.getTime())){
 			errorChk = true;
 			error = error + "DATE: must be set for the future\n";
 		}		
-/*		if (timeVal.before(befo) || timeVal.after(afte)){
-			errorChk = true;
-			error = error + "TIME: must be between 8am and 8pm\n";
-		}*/
 		if (sChkDoneByComBx.getSelectedItem() == null){
 			errorChk = true;
 			error = error + "DONE BY: can not be empty\n";
@@ -389,11 +356,63 @@ class SiteCheckPanel extends JPanel {
 					}else{
 						dateSpn.setValue(SCdate);
 					}
-/*					if (time == null ){
-						timeSpn.setValue(date);
+					if (time == null ){
+						timeComboBox.setSelectedItem(null);
 					}else{
-						timeSpn.setValue(time);
-					}*/
+						
+						if (time.toString().equals("08:00:00")){
+							timeComboBox.setSelectedIndex(0);
+						}else if (time.toString().equals("08:30:00")){
+							timeComboBox.setSelectedIndex(1);
+						}else if (time.toString().equals("09:00:00")){
+							timeComboBox.setSelectedIndex(2);
+						}else if (time.toString().equals("09:30:00")){
+							timeComboBox.setSelectedIndex(3);
+						}else if (time.toString().equals("10:00:00")){
+							timeComboBox.setSelectedIndex(4);
+						}else if (time.toString().equals("10:30:00")){
+							timeComboBox.setSelectedIndex(5);
+						}else if (time.toString().equals("11:00:00")){
+							timeComboBox.setSelectedIndex(6);
+						}else if (time.toString().equals("11:30:00")){
+							timeComboBox.setSelectedIndex(7);
+						}else if (time.toString().equals("12:00:00")){
+							timeComboBox.setSelectedIndex(8);
+						}else if (time.toString().equals("12:30:00")){
+							timeComboBox.setSelectedIndex(9);
+						}else if (time.toString().equals("13:00:00")){
+							timeComboBox.setSelectedIndex(10);
+						}else if (time.toString().equals("13:30:00")){
+							timeComboBox.setSelectedIndex(11);
+						}else if (time.toString().equals("14:00:00")){
+							timeComboBox.setSelectedIndex(12);
+						}else if (time.toString().equals("14:30:00")){
+							timeComboBox.setSelectedIndex(13);
+						}else if (time.toString().equals("15:00:00")){
+							timeComboBox.setSelectedIndex(14);
+						}else if (time.toString().equals("15:30:00")){
+							timeComboBox.setSelectedIndex(15);
+						}else if (time.toString().equals("16:00:00")){
+							timeComboBox.setSelectedIndex(16);
+						}else if (time.toString().equals("16:30:00")){
+							timeComboBox.setSelectedIndex(17);
+						}else if (time.toString().equals("17:00:00")){
+							timeComboBox.setSelectedIndex(18);
+						}else if (time.toString().equals("17:30:00")){
+							timeComboBox.setSelectedIndex(19);
+						}else if (time.toString().equals("18:00:00")){
+							timeComboBox.setSelectedIndex(20);
+						}else if (time.toString().equals("18:30:00")){
+							timeComboBox.setSelectedIndex(21);
+						}else if (time.toString().equals("19:00:00")){
+							timeComboBox.setSelectedIndex(22);
+						}else if (time.toString().equals("19:30:00")){
+							timeComboBox.setSelectedIndex(23);
+						}else if (time.toString().equals("20:00:00")){
+							timeComboBox.setSelectedIndex(24);
+						}
+						
+					}
 					if (booked==false){
 						sCheckBookedChckBx.setSelected(false);
 						//group.clearSelection();
@@ -455,10 +474,6 @@ class SiteCheckPanel extends JPanel {
 	}
 
 	public String getTime(){
-		//Date tim = (Date) timeSpn.getValue(); 
-		/*SimpleDateFormat sdf2 = new SimpleDateFormat("HH:MM");
-		String tm = sdf2.format.parse(timeComboBox.getSelectedItem());
-	*/	
 		java.sql.Time ppstime = null;
 		 SimpleDateFormat format = new SimpleDateFormat("HH:mm"); // 12 hour format
 
@@ -466,8 +481,6 @@ class SiteCheckPanel extends JPanel {
 			try {
 				d1 = (java.util.Date)format.parse((String) timeComboBox.getSelectedItem());
 				ppstime = new java.sql.Time(d1.getTime());
-		
-				System.out.println("............."+ppstime);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

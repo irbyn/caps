@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.security.MessageDigest;
@@ -130,11 +131,11 @@ public class AdminPanel extends JFrame {
 	private Homescreen homescreen;
 
 	public AdminPanel(Homescreen hs){
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Homescreen.class.getResource("/wfs-logo-16.png")));
+		
 		rowSelected = false;
-		//user = User;
-		//pass = Pass;
-
-		this.homescreen =hs;// new Homescreen(user, pass);		
+	
+		this.homescreen =hs;	
 		//PASS THE LOGIN DETAILS TO Class connectionDetails
 		conDeets = new ConnDetails();
 		
@@ -142,6 +143,7 @@ public class AdminPanel extends JFrame {
 		setPreferredSize(new Dimension(1100, 700));
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setTitle("WorkFlow Solutions");
 
 		connecting = new CreateConnection();
 

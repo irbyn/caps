@@ -3,6 +3,7 @@ package Main;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -46,9 +47,8 @@ public class LoginWindow extends JFrame{
 	private ConnDetails conDeets;
 
 	public LoginWindow() {
-		
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Homescreen.class.getResource("/wfs-logo-16.png")));
 		conDeets = new ConnDetails();
-	//	connecting = new CreateConnection();
 
 		// setting up JFrame
 		getContentPane().setLayout(null);

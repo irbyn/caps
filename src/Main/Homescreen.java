@@ -4,8 +4,12 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Image;
+import java.awt.Toolkit;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -24,6 +28,8 @@ import Permit.PermitPane;
 import Admin.AdminLogin;
 
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.CallableStatement;
@@ -62,6 +68,7 @@ public class Homescreen extends JFrame {
 	public Color selected= Color.decode("#70a6ff");
 
 	public Homescreen(String User, String Pass) {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Homescreen.class.getResource("/wfs-logo-16.png")));
 
 		user = User;
 		pass = Pass;
@@ -76,6 +83,12 @@ public class Homescreen extends JFrame {
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setTitle("WorkFlow Solutions");
+/*		try {
+			   Image image = new ImageIcon("/desktopApp/res/wfs-logo-16.png").getImage();
+			   frame.setIconImage(image);
+			}catch(Exception e){
+			   System.out.println("Application icon not found");
+			}*/
 
 		// creating main button JPanel (blue)
 		btnPanel = new JPanel();

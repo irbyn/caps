@@ -7,6 +7,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -65,6 +66,8 @@ public class AdminLogin extends JFrame{
 
 
 	public AdminLogin(Homescreen hs) {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Homescreen.class.getResource("/wfs-logo-16.png")));
+		
 	this.homescreen = hs;
 	
 	// setting up JFrame
@@ -72,6 +75,7 @@ public class AdminLogin extends JFrame{
 	setPreferredSize(new Dimension(400, 250));
 	setResizable(false);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setTitle("WorkFlow Solutions");
 
 	// creating main button JPanel (blue)
 	logPanel = new JPanel();
