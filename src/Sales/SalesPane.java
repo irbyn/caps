@@ -107,7 +107,7 @@ public class SalesPane extends JPanel
 		salesP.addTab("Estimation", estimation);
 		salesP.addTab("Site Checks", siteCheck);
 		salesP.addTab("Quotes", quote);
-		salesP.addTab("Follow ups", followUp);
+		salesP.addTab("Follow Ups", followUp);
 		add(salesP);   
 
 		//If a different tab is clicked

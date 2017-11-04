@@ -566,7 +566,7 @@ class EstimationPanel extends JPanel {
 		String slsPerson = (String) slsPersonComBx.getSelectedItem();
 
 		if (getFire().equals("") || getPrice().equals("") || instType.equals("") || slsPerson.equals("")){
-			JOptionPane.showMessageDialog(null, "Cannot send email! \nEnsure all fields are saved");
+			JOptionPane.showMessageDialog(null, "Cannot send email! \nEnsure all fields are saved first");
 			return false;
 		}else{
 			return true;

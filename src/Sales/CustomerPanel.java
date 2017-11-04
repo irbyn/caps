@@ -685,7 +685,7 @@ class CustomerPanel extends JPanel {
 			error = error + "SUBURB: can not be empty\n";
 		} else if(pSuburbTxtBx.getText().length() > 20){
 			errorChk = true;
-			error = error + "SUBURB: can not be longer than 30 letters\n";
+			error = error + "SUBURB: can not be longer than 20 letters\n";
 		}
 
 		if (pAreaCodeTxtBx.getText().equals("")){

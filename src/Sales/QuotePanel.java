@@ -441,7 +441,12 @@ class QuotePanel extends JPanel {
 				{ 
 					if(rowSelected){
 						if(validateData()){						   
-							saveDocuments();
+							
+							if (!reesCodeTxtBx.getText().equals("") && !quoteNumTxtBx.getText().equals("")){
+								String custName = sp.getCustName();
+								JOptionPane.showMessageDialog(null,  custName +" has been moved to Follow Ups!");
+								saveDocuments();
+							}
 						}
 					}
 					else {
@@ -627,7 +632,11 @@ class QuotePanel extends JPanel {
 		msg = "";
 		if (!reesCodeTxtBx.getText().equals("") || !quoteNumTxtBx.getText().equals("") || qutLM.getSize()>0 || siteLM.getSize()>0 || photoLM.getSize()>0){
 
-			if (reesCodeTxtBx.getText().length() > 11){
+			if (reesCodeTxtBx.getText().equals("")){
+				msg = msg + "Rees Code can not be empty\n";
+				saveAllowed=false;
+			}
+			else if (reesCodeTxtBx.getText().length() > 11){
 				msg = msg + "Rees Code can not be more than 8 characters\n";
 				saveAllowed=false;
 			}
@@ -641,7 +650,7 @@ class QuotePanel extends JPanel {
 			}
 			catch (NumberFormatException e) {
 				//Display number error message 
-				msg = msg + "Quote can only contain numbers\n";
+				msg = msg + "Quote can not be empty and\ncan only contain numbers\n";
 				saveAllowed=false;
 			}
 

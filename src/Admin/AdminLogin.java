@@ -85,7 +85,7 @@ public class AdminLogin extends JFrame{
 	getContentPane().add(logPanel);
 
 	//Personal Customer Information
-	lbllogIn = new JLabel("Admin Log in");
+	lbllogIn = new JLabel("Admin Login");
 	lbllogIn.setBounds(36, 25, 162, 28);
 	logPanel.add(lbllogIn);
 	lbllogIn.setFont(new Font("Arial", Font.BOLD, 20));
@@ -107,7 +107,7 @@ public class AdminLogin extends JFrame{
 	txtBxPassword.setBounds(194, 110, 123, 20);
 	logPanel.add(txtBxPassword);
 
-	loginBtn = new JButton("Log In");
+	loginBtn = new JButton("Login");
 	loginBtn.setBounds(231, 164, 86, 24);
 	logPanel.add(loginBtn);
 
@@ -177,7 +177,7 @@ public class AdminLogin extends JFrame{
 
 			String update = "{" + getuserPass +"(?,?)}";
 			
-			String dbURL = "jdbc:sqlserver://wchdb.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:1433";
+			String dbURL = "jdbc:sqlserver://wch-db.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:47947";
 
 			String user = "nhfnKGF519hinsd897665465jbsdsf";
 			String pass = "NJiugi7btdjyFbe99n9n09UU";

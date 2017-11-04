@@ -81,16 +81,12 @@ class FollowUpPanel extends JPanel {
 	private JRadioButton soldElsrdBtn;
 	private JButton cancelBtn;
 	private JButton saveBtn;
-	//private JButton btnViewSC;
-	//private JButton btnViewQuote;
-	//private JButton btnViewPhoto;
 	private JButton viewSiteBtn;
 	private JButton viewQutBtn;
 	private JButton viewPhotoBtn;
 	private Boolean rowSelected;
 	private Date date;
 	public ButtonGroup btnGroup;
-	
 	private File quote;
 	private File site;
 	private File photo;
@@ -100,7 +96,7 @@ class FollowUpPanel extends JPanel {
 	private ImageIcon fll;
 	private ImageIcon pic;
 	private File[] photosArr;
-	
+
 	private String folder = "//C:/pdfs/Invoice/";
 	private String qutPfx = "QUT_";
 	private String sitePfx = "SC_";
@@ -130,215 +126,212 @@ class FollowUpPanel extends JPanel {
 
 		//Panel for the table
 		tablePanel = new JPanel();
-				tablePanel.setBounds(20, 20, 1025, 260);  //setPreferredSize(new Dimension(0, 300));      
-				tablePanel.setLayout(new BorderLayout());
+		tablePanel.setBounds(20, 20, 1025, 260);  //setPreferredSize(new Dimension(0, 300));      
+		tablePanel.setLayout(new BorderLayout());
 
-				//Content panel
-				infoPanel = new JPanel();
-				infoPanel.setBounds(0, 280, 1077, 289);  //setPreferredSize(new Dimension(0, 300));
-				infoPanel.setLayout(null);
+		//Content panel
+		infoPanel = new JPanel();
+		infoPanel.setBounds(0, 280, 1077, 289);  //setPreferredSize(new Dimension(0, 300));
+		infoPanel.setLayout(null);
 
-				txtAreaCustInfo = new JTextArea("");
-				txtAreaCustInfo.setBounds(20, 20, 250, 260);
-				txtAreaCustInfo.setBorder(BorderFactory.createEtchedBorder());
-				txtAreaCustInfo.setBackground(LtGray);
-				txtAreaCustInfo.setLineWrap(true);
-				txtAreaCustInfo.setEditable(false);
-				infoPanel.add(txtAreaCustInfo);
+		txtAreaCustInfo = new JTextArea("");
+		txtAreaCustInfo.setBounds(20, 20, 250, 260);
+		txtAreaCustInfo.setBorder(BorderFactory.createEtchedBorder());
+		txtAreaCustInfo.setBackground(LtGray);
+		txtAreaCustInfo.setLineWrap(true);
+		txtAreaCustInfo.setEditable(false);
+		infoPanel.add(txtAreaCustInfo);
 
-				date = new java.sql.Date(Calendar.getInstance().getTime().getTime());
-				
-				SimpleDateFormat dtModel = new SimpleDateFormat("dd.MMM.yyyy");
-				spnDate = new JSpinner(new SpinnerDateModel());
-				spnDate.setEditor(new JSpinner.DateEditor(spnDate, dtModel.toPattern()));
-				spnDate.setBounds(882, 8, 164, 20);
-				spnDate.setValue(date);
-				infoPanel.add(spnDate);
+		date = new java.sql.Date(Calendar.getInstance().getTime().getTime());
 
-				rdBtnNxtFlwUp = new JRadioButton("Next Follow Up");
-				rdBtnNxtFlwUp.setBounds(708, 7, 151, 23);
-				infoPanel.add(rdBtnNxtFlwUp);
+		SimpleDateFormat dtModel = new SimpleDateFormat("dd.MMM.yyyy");
+		spnDate = new JSpinner(new SpinnerDateModel());
+		spnDate.setEditor(new JSpinner.DateEditor(spnDate, dtModel.toPattern()));
+		spnDate.setBounds(882, 8, 164, 20);
+		spnDate.setValue(date);
+		infoPanel.add(spnDate);
 
-				rdBtnInvoice = new JRadioButton("Invoice");
-				rdBtnInvoice.setBounds(708, 109, 109, 23);
-				infoPanel.add(rdBtnInvoice);
+		rdBtnNxtFlwUp = new JRadioButton("Next Follow Up");
+		rdBtnNxtFlwUp.setBounds(708, 7, 151, 23);
+		infoPanel.add(rdBtnNxtFlwUp);
 
-				soldElsrdBtn = new JRadioButton("Sold Elsewhere");
-				soldElsrdBtn.setBounds(708, 135, 151, 23);
-				infoPanel.add(soldElsrdBtn);
+		rdBtnInvoice = new JRadioButton("Invoice");
+		rdBtnInvoice.setBounds(708, 109, 109, 23);
+		infoPanel.add(rdBtnInvoice);
 
-				btnGroup = new ButtonGroup();
-				btnGroup.add(rdBtnNxtFlwUp);
-				btnGroup.add(rdBtnInvoice);
-				btnGroup.add(soldElsrdBtn);
+		soldElsrdBtn = new JRadioButton("Sold Elsewhere");
+		soldElsrdBtn.setBounds(708, 135, 151, 23);
+		infoPanel.add(soldElsrdBtn);
 
-				invNumbTxtBx = new JTextField();
-				invNumbTxtBx.setBounds(882, 110, 164, 20);
-				infoPanel.add(invNumbTxtBx);
-				invNumbTxtBx.setColumns(10);
+		btnGroup = new ButtonGroup();
+		btnGroup.add(rdBtnNxtFlwUp);
+		btnGroup.add(rdBtnInvoice);
+		btnGroup.add(soldElsrdBtn);
 
-				cancelBtn = new JButton("Cancel");
-				cancelBtn.setBounds(708, 255, 164, 23);
-				infoPanel.add(cancelBtn);
+		invNumbTxtBx = new JTextField();
+		invNumbTxtBx.setBounds(882, 110, 164, 20);
+		infoPanel.add(invNumbTxtBx);
+		invNumbTxtBx.setColumns(10);
 
-				saveBtn = new JButton("Save Details");
-				saveBtn.setBounds(882, 255, 164, 23);
-				infoPanel.add(saveBtn);
-				
-				viewSiteBtn = new JButton("View Site Check PDF");
-				viewSiteBtn.setBounds(708, 165, 164, 23);
-				infoPanel.add(viewSiteBtn);
-				
-				viewQutBtn = new JButton("View Quote PDF");
-				viewQutBtn.setBounds(708, 202, 164, 23);
-				infoPanel.add(viewQutBtn);
-				
-				viewPhotoBtn = new JButton("View Photo(s)");
-				viewPhotoBtn.setBounds(882, 165, 164, 23);
-				infoPanel.add(viewPhotoBtn);
-				
-				model2 = new DefaultTableModel();  
-				model2.setRowCount(0);	
-				
-				JPanel commentpanel = new JPanel();
-				commentpanel.setBounds(280, 44, 400, 236);
-				commentpanel.setLayout(new BorderLayout());
-				infoPanel.add(commentpanel);
-					
-				commentTbl = new JTable(model2);
-				commentTbl.setAutoCreateRowSorter(true);
-				
-				headerComm= commentTbl.getTableHeader();
-				columnModelComm = headerComm.getColumnModel();
-				add(headerComm);
-				
-				JScrollPane scrollPaneComment = new JScrollPane(commentTbl);		
-				
-				commentpanel.add(scrollPaneComment, BorderLayout.CENTER);
-				commentpanel.add(commentTbl.getTableHeader(), BorderLayout.NORTH);
-				
-				JLabel followUpComLbl = new JLabel("Follow Up Comment");
-				followUpComLbl.setBounds(729, 30, 130, 14);
-				infoPanel.add(followUpComLbl);
-				
-				commentTxtBx = new JTextField();
-				commentTxtBx.setBounds(729, 48, 317, 44);
-				infoPanel.add(commentTxtBx);
-				commentTxtBx.setColumns(10);
-				
-				JLabel FollowUplbl = new JLabel("Follow Up Comments");
-				FollowUplbl.setBounds(281, 20, 127, 14);
-				infoPanel.add(FollowUplbl);
-				
-				this.setLayout(null);
-				this.add(tablePanel); 
-				this.add(infoPanel);
+		cancelBtn = new JButton("Cancel");
+		cancelBtn.setBounds(708, 255, 164, 23);
+		infoPanel.add(cancelBtn);
 
-				tablePanel.add(scrollPane, BorderLayout.CENTER);
-				tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
+		saveBtn = new JButton("Save Details");
+		saveBtn.setBounds(882, 255, 164, 23);
+		infoPanel.add(saveBtn);
 
-				salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-					@Override
-					public void valueChanged(ListSelectionEvent arg0) {
-						if (!arg0.getValueIsAdjusting()){
-							rowSelected=true;
-							try{
-								param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 1).toString();
-								paramSID = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
-								//displayClientDetails(param);
-								txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
-								getComments();
-								checkForFiles();
-								
-							} catch (IndexOutOfBoundsException e){
+		viewSiteBtn = new JButton("View Site Check PDF");
+		viewSiteBtn.setBounds(708, 165, 164, 23);
+		infoPanel.add(viewSiteBtn);
 
-							}
+		viewQutBtn = new JButton("View Quote PDF");
+		viewQutBtn.setBounds(708, 202, 164, 23);
+		infoPanel.add(viewQutBtn);
+
+		viewPhotoBtn = new JButton("View Photo(s)");
+		viewPhotoBtn.setBounds(882, 165, 164, 23);
+		infoPanel.add(viewPhotoBtn);
+
+		model2 = new DefaultTableModel();  
+		model2.setRowCount(0);	
+
+		JPanel commentpanel = new JPanel();
+		commentpanel.setBounds(280, 44, 400, 236);
+		commentpanel.setLayout(new BorderLayout());
+		infoPanel.add(commentpanel);
+
+		commentTbl = new JTable(model2);
+		commentTbl.setAutoCreateRowSorter(true);
+
+		headerComm= commentTbl.getTableHeader();
+		columnModelComm = headerComm.getColumnModel();
+		add(headerComm);
+
+		JScrollPane scrollPaneComment = new JScrollPane(commentTbl);		
+
+		commentpanel.add(scrollPaneComment, BorderLayout.CENTER);
+		commentpanel.add(commentTbl.getTableHeader(), BorderLayout.NORTH);
+
+		JLabel followUpComLbl = new JLabel("Follow Up Comment");
+		followUpComLbl.setBounds(729, 30, 130, 14);
+		infoPanel.add(followUpComLbl);
+
+		commentTxtBx = new JTextField();
+		commentTxtBx.setBounds(729, 48, 317, 44);
+		infoPanel.add(commentTxtBx);
+		commentTxtBx.setColumns(10);
+
+		JLabel FollowUplbl = new JLabel("Follow Up Comments");
+		FollowUplbl.setBounds(281, 20, 127, 14);
+		infoPanel.add(FollowUplbl);
+
+		this.setLayout(null);
+		this.add(tablePanel); 
+		this.add(infoPanel);
+
+		tablePanel.add(scrollPane, BorderLayout.CENTER);
+		tablePanel.add(salesTbl.getTableHeader(), BorderLayout.NORTH);
+
+		salesTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent arg0) {
+				if (!arg0.getValueIsAdjusting()){
+					rowSelected=true;
+					try{
+						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 1).toString();
+						paramSID = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
+						//displayClientDetails(param);
+						txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
+						getComments();
+						checkForFiles();
+
+					} catch (IndexOutOfBoundsException e){
+
+					}
+				}
+			}
+		});
+
+		saveBtn.addActionListener( new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {		
+				if (validateData()){
+					//if invoice is sleceted create a new install
+					if (rdBtnInvoice.isSelected()){
+						createInstall();
+					}
+					else{
+						updateFollowup();
+						if (rdBtnNxtFlwUp.isSelected() && !commentTxtBx.getText().equals("")){
+							addComment();
 						}
 					}
-				});
+					resetTable();
+					clearFields();
+				}
+				else{
+					JOptionPane.showMessageDialog(null, "You must first select a row.");
+				}
+			}
+		});
 
-				saveBtn.addActionListener( new ActionListener(){
-					@Override
-					public void actionPerformed(ActionEvent arg0) {		
-						if (validateData()){
-							
-						
-						
-						//if invoice is sleceted create a new install
-						if (rdBtnInvoice.isSelected()){
-							createInstall();
-						}
-						else{
-							updateFollowup();
-							if (rdBtnNxtFlwUp.isSelected() && !commentTxtBx.getText().equals("")){
-								addComment();
-							}
-						}
-						resetTable();
-						clearFields();
-						}
-						else{
-							JOptionPane.showMessageDialog(null, "You must first select a row.");
+		cancelBtn.addActionListener( new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				resetTable();
+				clearFields();				
+			}
+		});
+
+		viewSiteBtn.addActionListener( new ActionListener()
+		{	@Override
+			public void actionPerformed(ActionEvent arg0) {
+
+			if (siteExists){
+				if (Desktop.isDesktopSupported()) {
+					try {
+						Desktop.getDesktop().open(site);
+					} catch (IOException ex) {
+					}
+				}
+			}			   
+		}
+		});
+
+		viewQutBtn.addActionListener( new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+
+				if (qutExists){
+					if (Desktop.isDesktopSupported()) {
+						try {
+							Desktop.getDesktop().open(quote);
+						} catch (IOException ex) {
 						}
 					}
-				});
-				
-				cancelBtn.addActionListener( new ActionListener(){
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-									resetTable();
-									clearFields();				
+				}			   
+			}
+
+		});
+
+		viewPhotoBtn.addActionListener( new ActionListener()
+		{	@Override
+			public void actionPerformed(ActionEvent arg0) {
+			int ph = photosArr.length;
+			sp.showMessage("" + ph);
+			for (int i =0; i< ph; i++){
+				if (photosArr[i].exists())
+					if (Desktop.isDesktopSupported()) {
+						try {
+							Desktop.getDesktop().open(photosArr[i]);
+						} catch (IOException ex) {
+						}
 					}
-				});
-	
-				viewSiteBtn.addActionListener( new ActionListener()
-				{	@Override
-					public void actionPerformed(ActionEvent arg0) {
+			}			   
+		}
 
-					if (siteExists){
-						if (Desktop.isDesktopSupported()) {
-							try {
-								Desktop.getDesktop().open(site);
-							} catch (IOException ex) {
-							}
-						}
-					}			   
-				}
-				});
-				
-				viewQutBtn.addActionListener( new ActionListener(){
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-
-					if (qutExists){
-						if (Desktop.isDesktopSupported()) {
-							try {
-								Desktop.getDesktop().open(quote);
-							} catch (IOException ex) {
-							}
-						}
-					}			   
-				}
-
-				});
-				
-				viewPhotoBtn.addActionListener( new ActionListener()
-				{	@Override
-					public void actionPerformed(ActionEvent arg0) {
-					int ph = photosArr.length;
-					sp.showMessage("" + ph);
-					for (int i =0; i< ph; i++){
-						if (photosArr[i].exists())
-							if (Desktop.isDesktopSupported()) {
-								try {
-									Desktop.getDesktop().open(photosArr[i]);
-								} catch (IOException ex) {
-								}
-							}
-					}			   
-				}
-
-				});
+		});
 	}
 
 	protected void resetTable() {
@@ -354,7 +347,7 @@ class FollowUpPanel extends JPanel {
 		param = "";
 		txtAreaCustInfo.setText("");
 	}	
-	
+
 	public void getComments(){
 		CallableStatement sm = null;
 		try {
@@ -365,7 +358,7 @@ class FollowUpPanel extends JPanel {
 			sm = conn.prepareCall(comm);
 			sm.setString(1, paramSID);
 			rs2 = sm.executeQuery();
-			
+
 			commentTbl.setModel(DbUtils.resultSetToTableModel(rs2));
 			spaceHeader(columnModelComm, columnWidthComm);
 		}
@@ -389,7 +382,7 @@ class FollowUpPanel extends JPanel {
 		header.repaint();
 		headerComm.repaint();
 	}   
-	
+
 	public void clearFields(){
 		spnDate.setValue(date);
 		invNumbTxtBx.setText("");
@@ -404,17 +397,17 @@ class FollowUpPanel extends JPanel {
 	public JPanel getInfoPanel(){
 		return infoPanel;
 	}
-	
+
 	public Boolean validateData(){
 		boolean valid = true;
 		if(btnGroup.getSelection() == null){
 			valid = false;
 		}
 		return valid;
-		
+
 	}
 
-	
+
 	public void updateFollowup(){
 		CallableStatement pm = null;
 		try {
@@ -443,11 +436,11 @@ class FollowUpPanel extends JPanel {
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}			
 	}
-	
+
 	public void addComment(){
-		
+
 		date = new java.sql.Date(Calendar.getInstance().getTime().getTime());
-		
+
 		CallableStatement pm = null;
 		try {
 			String update = "{" + addComment +"(?,?,?)}";
@@ -455,7 +448,7 @@ class FollowUpPanel extends JPanel {
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
 
 			pm = conn.prepareCall(update);			
-			
+
 			pm.setString(1, paramSID);
 			pm.setString(2, getComment());
 			pm.setDate(3, (java.sql.Date) date);
@@ -471,7 +464,7 @@ class FollowUpPanel extends JPanel {
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}			
 	}
-	
+
 	public void createInstall(){
 		CallableStatement pm = null;
 		try {
@@ -493,10 +486,10 @@ class FollowUpPanel extends JPanel {
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}		
 	}
-	
+
 	public String getStatus(){
 		String status = "";
-		
+
 		if (rdBtnInvoice.isSelected()){
 			status = "Active";
 		}else if(rdBtnNxtFlwUp.isSelected()){
@@ -508,18 +501,18 @@ class FollowUpPanel extends JPanel {
 		//return the status of the sale determined from the radio buttons
 		return	status;
 	}
-	
+
 	public String getDate(){  	
-    	Date dte = (Date) spnDate.getValue(); 
-       	SimpleDateFormat sdf1 = new SimpleDateFormat("dd-MMM-yyyy");
-    	String dt = sdf1.format(dte);
+		Date dte = (Date) spnDate.getValue(); 
+		SimpleDateFormat sdf1 = new SimpleDateFormat("dd-MMM-yyyy");
+		String dt = sdf1.format(dte);
 		return dt; 
 	}
-	
+
 	public int getInvNum(){
 		return Integer.parseInt(invNumbTxtBx.getText());
 	}
-	
+
 	public String getComment(){
 		return commentTxtBx.getText();
 	}

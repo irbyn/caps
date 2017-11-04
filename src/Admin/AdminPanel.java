@@ -53,6 +53,7 @@ public class AdminPanel extends JFrame {
 	private String qryCreateUser = "call AWS_WCH_DB.dbo.a_createNewUser";
 	private String upUserPass = "call AWS_WCH_DB.dbo.a_UpdateUserPass";
 	private String upUser = "call AWS_WCH_DB.dbo.a_UpdateUser";
+	private String ifUNExists = "call AWS_WCH_DB.dbo.a_userExists";
 	private String param = "";
 	private String paramAID = "";
 	private Homescreen hs;
@@ -67,8 +68,6 @@ public class AdminPanel extends JFrame {
 	private JPanel infoPanel;
 	private JTable adminTbl;
 	private DefaultTableModel model1;
-	private JTextArea detailsTxtArea;
-	private CreateConnection conn;
 
 	private JTextField fNameTxtBx;
 	private JTextField lNameTxtBx;
@@ -132,13 +131,12 @@ public class AdminPanel extends JFrame {
 
 	public AdminPanel(Homescreen hs){
 		setIconImage(Toolkit.getDefaultToolkit().getImage(Homescreen.class.getResource("/wfs-logo-16.png")));
-		
+
 		rowSelected = false;
-	
+
 		this.homescreen =hs;	
-		//PASS THE LOGIN DETAILS TO Class connectionDetails
 		conDeets = new ConnDetails();
-		
+
 		getContentPane().setLayout(null);
 		setPreferredSize(new Dimension(1100, 700));
 		setResizable(false);
@@ -222,7 +220,7 @@ public class AdminPanel extends JFrame {
 		lNameTxtBx.setColumns(10);
 
 		lblPhone = new JLabel("Phone Number:");
-		lblPhone.setBounds(26, 205, 85, 15);
+		lblPhone.setBounds(26, 205, 109, 15);
 		infoPanel.add(lblPhone);
 
 		phoneTxtBx = new JTextField();
@@ -298,7 +296,7 @@ public class AdminPanel extends JFrame {
 		reConnPasstxtBx.setBounds(496, 300, 201, 24);
 		infoPanel.add(reConnPasstxtBx);
 
-		rePassLbl = new JLabel("Re Confirm Password:");
+		rePassLbl = new JLabel("Reconfirm Password:");
 		rePassLbl.setBounds(359, 305, 134, 14);
 		infoPanel.add(rePassLbl);
 
@@ -331,6 +329,7 @@ public class AdminPanel extends JFrame {
 
 		chckbxAccAct = new JCheckBox("Active Account");
 		chckbxAccAct.setBounds(26, 50, 134, 23);
+		chckbxAccAct.setSelected(true);
 		infoPanel.add(chckbxAccAct);
 
 		modifyUserBtn = new JButton("Modify");
@@ -392,7 +391,7 @@ public class AdminPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0){
 				//showMessage("Updating Consent Received");
-				
+
 				String pwd = new String(passtxtBx.getPassword());
 				if (!pwd.equals("")){
 					updateUserAndPass();
@@ -400,7 +399,7 @@ public class AdminPanel extends JFrame {
 				else{
 					updateUser();
 				}
-				
+
 				disableFields();
 				clearFields();
 				updateBtn.setEnabled(false);
@@ -430,11 +429,11 @@ public class AdminPanel extends JFrame {
 		createNewUserBtn.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0){
+				clearFields();
 				chckbxAccAct.setSelected(true);
 				modifyUserBtn.setEnabled(false);
 				createNewUserBtn.setEnabled(false);
 				saveNewUserBtn.setEnabled(true);
-				clearFields();
 				enableFields();
 			}
 
@@ -443,11 +442,18 @@ public class AdminPanel extends JFrame {
 		saveNewUserBtn.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0){
-				createNewUser();
-				saveNewUserBtn.setEnabled(false);
-				clearFields();
-				disableFields();
-				resetTable();
+				if (!validData()){
+					if (validUsername()){
+						if (!validatePassword()){
+							createNewUser();
+							saveNewUserBtn.setEnabled(false);
+							clearFields();
+							disableFields();
+							resetTable();
+						}
+						
+					}
+				}
 			}
 		});
 
@@ -621,7 +627,7 @@ public class AdminPanel extends JFrame {
 			stm.setString(9, getNZHHANum());
 			stm.setString(10, getUsername());
 			stm.setString(11, getCouncNum());
-			stm.setInt(12, getReeseNum());
+			stm.setInt(12, getReesNum());
 			stm.setBoolean(13, getSiteCheck());
 			stm.setBoolean(14, getInstall());
 			stm.setBoolean(15, getSell());
@@ -664,14 +670,14 @@ public class AdminPanel extends JFrame {
 			stm.setString(10, getNZHHANum());
 			stm.setString(11, getUsername());
 			stm.setString(12, getCouncNum());
-			stm.setInt(13, getReeseNum());
+			stm.setInt(13, getReesNum());
 			stm.setBoolean(14, getSiteCheck());
 			stm.setBoolean(15, getInstall());
 			stm.setBoolean(16, getSell());
 			stm.setInt(17, getRanked());
 			stm.setString(18, getRoleType());
 			stm.setBoolean(19, getAccStatus());
-			
+
 			stm.executeUpdate();
 		}
 		catch (SQLServerException sqex)
@@ -683,7 +689,7 @@ public class AdminPanel extends JFrame {
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}			
 	}
-	
+
 	protected void updateUserAndPass() {
 		CallableStatement stm = null;
 		try {
@@ -705,7 +711,7 @@ public class AdminPanel extends JFrame {
 			stm.setString(10, getNZHHANum());
 			stm.setString(11, getUsername());
 			stm.setString(12, getCouncNum());
-			stm.setInt(13, getReeseNum());
+			stm.setInt(13, getReesNum());
 			stm.setBoolean(14, getSiteCheck());
 			stm.setBoolean(15, getInstall());
 			stm.setBoolean(16, getSell());
@@ -713,11 +719,11 @@ public class AdminPanel extends JFrame {
 			stm.setString(18, getRoleType());
 			stm.setBoolean(19, getAccStatus());
 			stm.setInt(20, Integer.parseInt(paramAID));
-			
+
 			getHash();
-			
+
 			stm.setString(21, md5Hash);
-			
+
 			stm.executeUpdate();
 		}
 		catch (SQLServerException sqex)
@@ -752,13 +758,190 @@ public class AdminPanel extends JFrame {
 		param = "";
 	}
 
-	private void validateData(){
+	private Boolean validatePassword(){
+//		passtxtBx.setEditable(true);
+//		reConnPasstxtBx.setEditable(false);
+
+		Boolean error = false; 
 		String pwd = new String(passtxtBx.getPassword());
 		String reConPwd = new String(reConnPasstxtBx.getPassword());
-		if (!pwd.equals(""))
+		if (pwd.equals("") || pwd.equals(null) || reConPwd.equals("") || reConPwd.equals(null)){
+			error = true;
+			JOptionPane.showMessageDialog(null, "Password cannot be empty");
+		}else{
 			if (!pwd.equals(reConPwd)){
+				error = true;
 				JOptionPane.showMessageDialog(null, "Ensure both passwords are the same");
 			}
+			
+		}
+		System.out.println(pwd + " " + reConPwd);
+		System.out.println(error);
+		return error;
+	}
+
+	private Boolean validData(){
+		Boolean error = false;
+		String msg = "";
+		//First Name 
+		if (!fNameTxtBx.getText().equals("")){
+			if(fNameTxtBx.getText().length() > 15){
+				error = true;
+				msg = msg + "FIRST NAME: can not be more than 15 letters\n";
+			}
+		}else{
+			error = true;
+			msg = msg + "FIRST NAME: can not be empty\n";
+		}
+		//Last name
+		if (!lNameTxtBx.getText().equals("")){
+			if(lNameTxtBx.getText().length() > 15){
+				error = true;
+				msg = msg + "LAST NAME: can not be more than 15 letters\n";
+			}
+		}else{
+			error = true;
+			msg = msg + "LAST NAME: can not be empty\n";
+		}
+		//Phone number 
+		if (!phoneTxtBx.getText().equals("")){
+			try {
+
+				Integer.parseInt(phoneTxtBx.getText());
+				if(phoneTxtBx.getText().length() > 10){
+					error = true;
+					msg = msg + "PHONE NUMBER: can not be more than 10 numbers\n";
+				}
+			}
+			catch (NumberFormatException e) {
+				//Display number error message 
+				error = true;
+				msg = msg + "PHONE NUMBER: can only contain numbers\n";
+			}
+		}
+		//mobile number 
+		if (!mobileTxtBx.getText().equals("")){
+			try {
+
+				Integer.parseInt(mobileTxtBx.getText());
+				if(mobileTxtBx.getText().length() > 10){
+					error = true;
+					msg = msg + "PHONE NUMBER: can not be more than 10 numbers\n";
+				}
+			}
+			catch (NumberFormatException e) {
+				//Display number error message 
+				error = true;
+				msg = msg + "PHONE NUMBER: can only contain numbers\n";
+			}
+		}
+		//email
+		if (emailtxtBx.getText().equals("")){
+			error = true;
+			msg = msg + "EMAIL: can not be empty\n";
+		}else if (!emailtxtBx.getText().contains("@")){
+			error = true;
+			msg = msg + "EMAIL: must contain an @ \n";
+		}else if(emailtxtBx.getText().length() > 50){
+			error = true;
+			msg = msg + "EMAIL: can not be longer than 30 letters\n";
+		}
+		//Postal address
+		if (pAddrtxtBx.getText().length() > 50){
+			error = true;
+			msg = msg + "STREET ADDRESS: can not be longer than 50 letters\n";
+		}
+		//Suburb
+		if(pSuburbtxtbx.getText().length() > 20){
+			error = true;
+			msg = msg + "SUBURB: can not be longer than 30 letters\n";
+		}
+		//Post code
+		if (!pAreaCodetxtBx.getText().equals("")){
+			try {
+				//Convert Post code
+				Integer.parseInt(pAreaCodetxtBx.getText());
+				if(pAreaCodetxtBx.getText().length() > 6){
+					error = true;
+					msg = msg + "POST CODE: can not be more than 6 numbers\n";
+				}
+			}
+			catch (NumberFormatException e) {
+				//Display number error message 
+				error = true;
+				msg = msg + "POST CODE: can only contain numbers\n";
+			}
+		}
+
+		if (!NZHHANumTxtBx.getText().equals("" ) && !NZHHANumTxtBx.getText().equals(null) ){
+			try {
+				Integer.parseInt(NZHHANumTxtBx.getText());
+				if(NZHHANumTxtBx.getText().length() > 8){
+					error = true;
+					msg = msg + "NZHHA NUMBER: can not be more than 8 numbers\n";
+				}
+			}
+			catch (NumberFormatException e) {
+				//Display number error message 
+				error = true;
+				msg = msg + "NZHHA NUMBER: can only contain numbers\n";
+			}
+		}
+
+		//Council number 
+		if (!councNumtxtBx.getText().equals("") && !councNumtxtBx.getText().equals("")){
+			try {
+				Integer.parseInt(councNumtxtBx.getText());
+				if(councNumtxtBx.getText().length() > 8){
+					error = true;
+					msg = msg + "COUNCIL NUMBER: can not be more than 8 numbers\n";
+				}
+			}
+			catch (NumberFormatException e) {
+				//Display number error message 
+				error = true;
+				msg = msg + "COUNCIL NUMBER: can only contain numbers\n";
+			}
+		}
+
+		//Rees number
+		if (!reeseNumbtxtBx.getText().equals("") && !reeseNumbtxtBx.getText().equals("")){
+			try {
+				Integer.parseInt(reeseNumbtxtBx.getText());
+			}
+			catch (NumberFormatException e) {
+				//Display number error message 
+				error = true;
+				msg = msg + "REES NUMBER: can only contain numbers\n";
+			}
+		}
+		
+		if (!chckbxSales.isSelected() && !chckbxInstaller.isSelected() && !chckbxSCheck.isSelected()){
+			error = true;
+			msg = msg + "TICK BOXES: at least one of the tick boxes must be ticked\n";
+		}
+		
+		if (roleTypeCmbBx.getSelectedItem() == null){
+			error = true;
+			msg = msg + "ROLE TYPE: must a select a role type\n";
+		}
+	
+		//Rees number
+		if (!rankTxtBx.getText().equals("") && !rankTxtBx.getText().equals("")){
+			try {
+				Integer.parseInt(rankTxtBx.getText());
+			}
+			catch (NumberFormatException e) {
+				//Display number error message 
+				error = true;
+				msg = msg + "RANK: must be a number\n";
+			}
+		}
+		//if there is an error print the message
+		if (error){
+			JOptionPane.showMessageDialog(null, msg);
+		}
+		return error;
 	}
 
 	private void disableFields(){
@@ -863,7 +1046,7 @@ public class AdminPanel extends JFrame {
 	public String getPAreaCode(){
 		return pAreaCodetxtBx.getText();
 	}
-	public String getNZHHANum(){
+	public String getNZHHANum(){	
 		return NZHHANumTxtBx.getText();
 	}
 	public String getUsername(){
@@ -872,7 +1055,10 @@ public class AdminPanel extends JFrame {
 	public String getCouncNum(){
 		return councNumtxtBx.getText();
 	}
-	public int getReeseNum(){
+	public int getReesNum(){
+		if (reeseNumbtxtBx.getText().equals("") || reeseNumbtxtBx.getText().equals(null)){
+			return 0;
+		}
 		return Integer.parseInt(reeseNumbtxtBx.getText());
 	}
 	public Boolean getSiteCheck(){
@@ -898,6 +1084,9 @@ public class AdminPanel extends JFrame {
 		}
 	}
 	public int getRanked(){
+		if (rankTxtBx.getText().equals("") || rankTxtBx.getText().equals(null)){
+			return 0;
+		}
 		return Integer.parseInt(rankTxtBx.getText()); 
 	}
 	public String getRoleType(){
@@ -916,13 +1105,13 @@ public class AdminPanel extends JFrame {
 	public void showMessage(String msg) {
 		hs.showMsg(msg);
 	}
-	
+
 	public void getHash(){
 		String username = usertxtBx.getText();
 		String pwd = new String(passtxtBx.getPassword());
 		computeMD5Hash(pwd+username);
 	}
-	
+
 	public void computeMD5Hash(String userPass)
 	{
 		try {
@@ -948,6 +1137,42 @@ public class AdminPanel extends JFrame {
 		}
 	}
 
+	public Boolean usernameExists(){
+		Boolean error = false;
+		CallableStatement sm = null;
+		try {
+
+			String username = "{" + ifUNExists +"(?)}";	
+			Connection conn = connecting.CreateConnection(conDeets);	        	   	
+
+			sm = conn.prepareCall(username);
+			sm.setString(1, usertxtBx.getText());
+
+			rs = sm.executeQuery();	 
+
+			if (rs.next()){
+				error = true;	
+			}
+		}
+		catch(Exception ex)
+		{ 
+			JOptionPane.showMessageDialog(null, ex.toString());
+		}		
+		return error;
+	}
+
+	public Boolean validUsername(){
+		if (!usertxtBx.getText().equals("")){
+			if (usernameExists()){
+				JOptionPane.showMessageDialog(null, "USERNAME: already exists");
+				return false;
+			}
+		}else{
+			JOptionPane.showMessageDialog(null, "USERNAME: cannot be empty ");
+			return false;
+		}
+		return true;
+	}
 
 }
 

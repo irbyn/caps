@@ -65,7 +65,7 @@ public class LoginWindow extends JFrame{
 		getContentPane().add(logPanel);
 
 		//Personal Customer Information
-		lbllogIn = new JLabel("Log in");
+		lbllogIn = new JLabel("Login");
 		lbllogIn.setBounds(36, 25, 87, 28);
 		logPanel.add(lbllogIn);
 		lbllogIn.setFont(new Font("Arial", Font.BOLD, 20));
