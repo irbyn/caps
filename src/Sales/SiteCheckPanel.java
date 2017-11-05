@@ -318,7 +318,7 @@ class SiteCheckPanel extends JPanel {
 			sm.setInt(1, Integer.parseInt(parameter));
 
 			rs = sm.executeQuery();	 
-
+			conn.close();
 			if (rs==null){
 				JOptionPane.showMessageDialog(null, "null query");
 			}
@@ -431,7 +431,7 @@ class SiteCheckPanel extends JPanel {
 			sm.setBoolean(6, getCompleted());
 
 			sm.executeUpdate();
-
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -477,7 +477,7 @@ class SiteCheckPanel extends JPanel {
 			sm.setString(1, slSName);
 
 			ResultSet rs = sm.executeQuery();
-
+			conn.close();
 			while (rs.next()){
 				slsID = rs.getInt("UserID");
 			}

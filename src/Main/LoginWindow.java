@@ -166,7 +166,8 @@ public class LoginWindow extends JFrame{
 			sm.setString(2, txtBxUsername.getText());
 
 			rs = sm.executeQuery();	 
-
+			conn.close();
+			
 			if (rs.next()){
 				login = true;
 			}

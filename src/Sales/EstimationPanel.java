@@ -342,6 +342,7 @@ class EstimationPanel extends JPanel {
 			sm.setInt(5, getSlsPersonID());
 
 			sm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -366,6 +367,7 @@ class EstimationPanel extends JPanel {
 			sm.setDate(2, getDate());
 
 			sm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -389,7 +391,7 @@ class EstimationPanel extends JPanel {
 			sm.setInt(1, Integer.parseInt(parameter));
 
 			rs = sm.executeQuery();	 
-
+			conn.close();
 			if (rs==null){
 				JOptionPane.showMessageDialog(null, "null query");
 			}
@@ -496,6 +498,7 @@ class EstimationPanel extends JPanel {
 			sm.setString(1, instType);
 
 			ResultSet rs = sm.executeQuery();
+			conn.close();
 			while (rs.next()){
 				instID = rs.getInt("InstallTypeID");
 			}
@@ -526,6 +529,7 @@ class EstimationPanel extends JPanel {
 			sm.setString(1, slSName);
 
 			ResultSet rs = sm.executeQuery();
+			conn.close();
 			while (rs.next()){
 				slsID = rs.getInt("UserID");
 			}
@@ -579,6 +583,7 @@ class EstimationPanel extends JPanel {
 			sm.setString(1, instType);
 
 			ResultSet rs = sm.executeQuery();
+			conn.close();
 			while (rs.next()){
 				form = rs.getString("EmailFromLetter");
 				basePrice = rs.getInt("BasePrice");

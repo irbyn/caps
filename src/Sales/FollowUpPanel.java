@@ -145,6 +145,7 @@ class FollowUpPanel extends JPanel {
 
 		rdBtnNxtFlwUp = new JRadioButton("Next Follow Up");
 		rdBtnNxtFlwUp.setBounds(708, 7, 151, 23);
+		rdBtnNxtFlwUp.setSelected(true);
 		infoPanel.add(rdBtnNxtFlwUp);
 
 		rdBtnInvoice = new JRadioButton("Invoice");
@@ -248,23 +249,25 @@ class FollowUpPanel extends JPanel {
 		saveBtn.addActionListener( new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {		
-				if (validateData()){
-					//if invoice is sleceted create a new install
-					if (rdBtnInvoice.isSelected()){
-						createInstall();
-					}
-					else{
-						updateFollowup();
-						if (rdBtnNxtFlwUp.isSelected() && !commentTxtBx.getText().equals("")){
-							addComment();
+				if (rowSelected){
+					if (validateData()){
+						//if invoice is sleceted create a new install
+						if (rdBtnInvoice.isSelected()){
+							createInstall();
 						}
+						else{
+							updateFollowup();
+							if (rdBtnNxtFlwUp.isSelected() && !commentTxtBx.getText().equals("")){
+								addComment();
+							}
+						}
+						resetTable();
+						clearFields();
 					}
-					resetTable();
-					clearFields();
 				}
 				else{
 					JOptionPane.showMessageDialog(null, "You must first select a row.");
-				}
+				}		
 			}
 		});
 
@@ -313,13 +316,14 @@ class FollowUpPanel extends JPanel {
 			int ph = photosArr.length;
 			sp.showMessage("" + ph);
 			for (int i =0; i< ph; i++){
-				if (photosArr[i].exists())
+				if (photosArr[i].exists()){
 					if (Desktop.isDesktopSupported()) {
 						try {
 							Desktop.getDesktop().open(photosArr[i]);
 						} catch (IOException ex) {
 						}
 					}
+				}
 			}			   
 		}
 
@@ -350,6 +354,7 @@ class FollowUpPanel extends JPanel {
 			sm = conn.prepareCall(comm);
 			sm.setString(1, paramSID);
 			rs2 = sm.executeQuery();
+			conn.close();
 
 			commentTbl.setModel(DbUtils.resultSetToTableModel(rs2));
 			spaceHeader(columnModelComm, columnWidthComm);
@@ -379,7 +384,7 @@ class FollowUpPanel extends JPanel {
 		spnDate.setValue(date);
 		invNumbTxtBx.setText("");
 		commentTxtBx.setText("");
-		btnGroup.clearSelection();
+		rdBtnNxtFlwUp.setSelected(true);
 	}
 
 	public JTable getSalesTbl(){
@@ -392,8 +397,31 @@ class FollowUpPanel extends JPanel {
 
 	public Boolean validateData(){
 		boolean valid = true;
-		if(btnGroup.getSelection() == null){
+		String msg = "";
+		if (commentTxtBx.getText().length() > 256){
 			valid = false;
+			msg = msg + "COMMENT: can not be more that 255 letters\n";
+		}
+		if(rdBtnInvoice.isSelected())
+		{		
+			if (!invNumbTxtBx.getText().equals(null) && !invNumbTxtBx.getText().equals("")){		
+				try {
+					//Convert Invoice number
+					Integer.parseInt(invNumbTxtBx.getText());
+				}
+				catch (NumberFormatException e) {
+					//Display number error message 
+					valid = false;
+					msg = msg + "INVOICE NUMBER: can only contain numbers\n";
+					}
+			}else{
+				valid = false;
+				msg = msg + "INVOICE NUMBER: can not be empty\n";
+			}
+		}
+		
+		if (!valid){
+			JOptionPane.showMessageDialog(null, msg);
 		}
 		return valid;
 
@@ -418,6 +446,7 @@ class FollowUpPanel extends JPanel {
 			}
 
 			pm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -446,6 +475,7 @@ class FollowUpPanel extends JPanel {
 			pm.setDate(3, (java.sql.Date) date);
 
 			pm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -468,6 +498,7 @@ class FollowUpPanel extends JPanel {
 			pm.setInt(1, Integer.parseInt(paramSID));
 			pm.setInt(2, getInvNum());
 			pm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{

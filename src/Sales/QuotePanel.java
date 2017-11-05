@@ -55,7 +55,6 @@ class QuotePanel extends JPanel {
 	private String getQuoteDetails = "{Call AWS_WCH_DB.dbo.[s_SalesQuoteDetails](?,?)}";
 	private String updateQuote = "{Call AWS_WCH_DB.dbo.[s_SalesUpdateQuote] (?,?,?,?,?,?,?)}";
 	private String rmvSiteCheck = "{Call AWS_WCH_DB.dbo.[s_SalesRmvSiteCheck] (?)}";
-
 	private String custID = "";
 	private String saleID = "";  
 	private ResultSet rs;
@@ -454,6 +453,7 @@ class QuotePanel extends JPanel {
 			pm.setString(7, getPhotoLoaded());
 
 			pm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -612,7 +612,6 @@ class QuotePanel extends JPanel {
 					saveAllowed=false;	
 				}
 			}
-
 			if (siteLM.getSize()>1){
 				msg = msg +"Only one SiteCheck can be saved\n";
 				saveAllowed=false;
@@ -818,7 +817,7 @@ class QuotePanel extends JPanel {
 			sm.setInt(2, Integer.parseInt(custID));
 
 			rs = sm.executeQuery();	 
-
+			conn.close();
 			if (rs==null){
 				JOptionPane.showMessageDialog(null, "null query");
 			}
@@ -850,6 +849,7 @@ class QuotePanel extends JPanel {
 			pm.setString(1,	saleID);
 
 			pm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
