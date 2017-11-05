@@ -1,9 +1,10 @@
 package Sales;
 
+//Description: This class allows the sales person to see which sales need following up and record which sales close. 
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -11,17 +12,14 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -35,18 +33,13 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-
 import com.microsoft.sqlserver.jdbc.SQLServerException;
-
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import net.proteanit.sql.DbUtils;
-
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import java.awt.Component;
-import javax.swing.JTextPane;
 
 class FollowUpPanel extends JPanel {
 	private int [] columnWidth = {30, 30, 80, 100, 100, 100, 40, 40, 40, 50, 50};
@@ -75,7 +68,6 @@ class FollowUpPanel extends JPanel {
 	private JTable commentTbl;
 	private JTextArea txtAreaCustInfo;
 	private JSpinner spnDate;
-	private SimpleDateFormat dt;
 	private JRadioButton rdBtnNxtFlwUp;
 	private JRadioButton rdBtnInvoice;
 	private JRadioButton soldElsrdBtn;
@@ -126,12 +118,12 @@ class FollowUpPanel extends JPanel {
 
 		//Panel for the table
 		tablePanel = new JPanel();
-		tablePanel.setBounds(20, 20, 1025, 260);  //setPreferredSize(new Dimension(0, 300));      
+		tablePanel.setBounds(20, 20, 1025, 260);      
 		tablePanel.setLayout(new BorderLayout());
 
 		//Content panel
 		infoPanel = new JPanel();
-		infoPanel.setBounds(0, 280, 1077, 289);  //setPreferredSize(new Dimension(0, 300));
+		infoPanel.setBounds(0, 280, 1077, 289);
 		infoPanel.setLayout(null);
 
 		txtAreaCustInfo = new JTextArea("");
@@ -208,6 +200,7 @@ class FollowUpPanel extends JPanel {
 		columnModelComm = headerComm.getColumnModel();
 		add(headerComm);
 
+		//Create the comments panel and table 
 		JScrollPane scrollPaneComment = new JScrollPane(commentTbl);		
 
 		commentpanel.add(scrollPaneComment, BorderLayout.CENTER);
@@ -241,7 +234,6 @@ class FollowUpPanel extends JPanel {
 					try{
 						param = salesTbl.getValueAt(salesTbl.getSelectedRow(), 1).toString();
 						paramSID = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
-						//displayClientDetails(param);
 						txtAreaCustInfo.setText(sp.DisplayClientDetails(param));
 						getComments();
 						checkForFiles();

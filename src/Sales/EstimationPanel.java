@@ -1,5 +1,8 @@
 package Sales; 
 
+//Description: This class allows the salesperson to email out an 
+//estimation of a quote to the customer on the spot based of the entered information  
+
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -8,21 +11,17 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-
 import com.microsoft.sqlserver.jdbc.SQLServerException;
-
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Main.GetJobs;
 import net.proteanit.sql.DbUtils;
-
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -30,14 +29,12 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -46,7 +43,7 @@ class EstimationPanel extends JPanel {
 	private JTextField fireTxtBx;
 	private JTextField priceTxtBx;
 	private JTextField commentTxtBx;	
-	private int [] columnWidth = {50, 50, 70, 150, 100, 100, 100, 50, 50, 50}; 
+	private int [] columnWidth = {50, 50, 70, 100, 100, 100, 100, 50, 100, 100}; 
 	private String getEstimationDetails = "call AWS_WCH_DB.dbo.s_SalesEstimationDetails";
 	private String updateEstimation = "call AWS_WCH_DB.dbo.s_SalesUpdateEstimation";
 	private String addEstimationDate = "call AWS_WCH_DB.dbo.s_SalesUpdateEstimationDate";
@@ -124,7 +121,6 @@ class EstimationPanel extends JPanel {
 		txtAreaCustInfo.setEditable(false);
 		infoPanel.add(txtAreaCustInfo);
 
-
 		fireTxtBx = new JTextField();
 		fireTxtBx.setBounds(588, 30, 218, 20);
 		infoPanel.add(fireTxtBx);
@@ -182,12 +178,14 @@ class EstimationPanel extends JPanel {
 		saveBtn.setBounds(658, 255, 148, 23);
 		infoPanel.add(saveBtn);
 
+		//Get all the current install types 
 		GetJobs job = new GetJobs(conDeets);
 		String[] installType = job.getInstallType();
 		DefaultComboBoxModel<String> modelInst = new DefaultComboBoxModel<String>(installType);
 		instTypeComBx.setModel( modelInst );
 		instTypeComBx.setSelectedItem(null);
 
+		//Get the active users whi can sell
 		String[] sell = job.getSales();
 		DefaultComboBoxModel<String> modelSell = new DefaultComboBoxModel<String>(sell);
 		slsPersonComBx.setModel(modelSell); 
@@ -223,8 +221,6 @@ class EstimationPanel extends JPanel {
 			public void actionPerformed(ActionEvent arg0){
 				//Validating that the email can actually be sent
 				if (emailCanBeSent()){
-
-
 					int dialogButton = JOptionPane.YES_NO_OPTION;
 					int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to mark this email as sent?\n"
 							+ "There is no going back!\n"
@@ -278,10 +274,6 @@ class EstimationPanel extends JPanel {
 						fireTxtBx.setText(null);
 						priceTxtBx.setText(null);
 						instTypeComBx.setSelectedItem(null);
-						//chckBxToBook.setSelected(false);
-						//comBxSChkDoneBy.setSelectedItem(null);
-						//spnTimeDate.setEditor(new JSpinner.DateEditor(spnTimeDate, dt.toPattern()));
-						//chckBxSChkComp.setSelected(false);
 						commentTxtBx.setText(null);
 						slsPersonComBx.setSelectedItem(null);
 					}
@@ -566,7 +558,7 @@ class EstimationPanel extends JPanel {
 		String slsPerson = (String) slsPersonComBx.getSelectedItem();
 
 		if (getFire().equals("") || getPrice().equals("") || instType.equals("") || slsPerson.equals("")){
-			JOptionPane.showMessageDialog(null, "Cannot send email! \nEnsure all fields are saved first");
+			JOptionPane.showMessageDialog(null, "Cannot send email! \nEnsure all fields are saved \nin the database first");
 			return false;
 		}else{
 			return true;

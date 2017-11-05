@@ -1,19 +1,15 @@
 package Main;
 
-import java.awt.Color;
+//Description: This is the class that only allows sales people to log into the application 
+
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
-
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-
 import com.microsoft.sqlserver.jdbc.SQLServerException;
-
-import DB_Comms.CreateConnection;
-
 import javax.swing.JPasswordField;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -25,8 +21,6 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.Time;
-import java.util.Date;
 import java.awt.event.ActionEvent;
 
 public class LoginWindow extends JFrame{
@@ -43,7 +37,6 @@ public class LoginWindow extends JFrame{
 	private JPanel logPanel;
 	private String md5Hash;
 	private ResultSet rs; 
-	private CreateConnection connecting;
 	private ConnDetails conDeets;
 
 	public LoginWindow() {

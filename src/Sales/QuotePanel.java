@@ -1,10 +1,11 @@
 package Sales; 
 
+//Description: Quotes and quote paths are saved in the quotes panel through drag and drop
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
-import java.awt.EventQueue;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
@@ -16,34 +17,23 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
-import javax.swing.DropMode;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
-import javax.swing.SpinnerDateModel;
 import javax.swing.TransferHandler;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -53,9 +43,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-
 import com.microsoft.sqlserver.jdbc.SQLServerException;
-
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Sales.SalesPane;
@@ -67,12 +55,11 @@ class QuotePanel extends JPanel {
 	private String getQuoteDetails = "{Call AWS_WCH_DB.dbo.[s_SalesQuoteDetails](?,?)}";
 	private String updateQuote = "{Call AWS_WCH_DB.dbo.[s_SalesUpdateQuote] (?,?,?,?,?,?,?)}";
 	private String rmvSiteCheck = "{Call AWS_WCH_DB.dbo.[s_SalesRmvSiteCheck] (?)}";
-  
+
 	private String custID = "";
 	private String saleID = "";  
 	private ResultSet rs;
 	private Color LtGray = Color.decode("#eeeeee");
-
 	private File quote;
 	private File site;
 	private File photo;
@@ -82,11 +69,9 @@ class QuotePanel extends JPanel {
 	private String qutPfx = "QUT_";
 	private String sitePfx = "SC_";
 	private String photoPfx = "PH_";
-
 	private String qut;
 	private String sck;
 	private String pht;
-
 	private Boolean rowSelected = false;
 	private Boolean qutExists = false;
 	private Boolean siteExists = false;
@@ -95,17 +80,12 @@ class QuotePanel extends JPanel {
 	private Boolean saveSC = false;
 	private Boolean savePH = false;
 	private Boolean saveAllowed = true;
-
 	private String msg;
-
 	private CreateConnection connecting;
-
 	private JTableHeader header;
 	private TableColumnModel columnModel;
-
 	private JTable salesTbl;
 	private DefaultTableModel model1;
-
 	private JTextArea detailsTxtArea;
 	private JPanel qutPanel;
 	private DefaultListModel qutLM;
@@ -113,51 +93,34 @@ class QuotePanel extends JPanel {
 	private JScrollPane qutSP;
 	private JButton removeQutBtn;
 	private JButton viewQutBtn;
-	
 	private JPanel tablePanel;
 	private JPanel infoPanel;
 	private JPanel sitePanel;	
 	private JPanel photoPanel;
-	
 	private DefaultListModel siteLM;
 	private JList siteDZ;
 	private JScrollPane siteSP;
-	
 	private DefaultListModel photoLM;
 	private JList photoDZ;
 	private JScrollPane photoSP;
-
 	private JLabel reeesCodeLbl; 
 	private JLabel quoteNumLbl; 
 	private JTextField reesCodeTxtBx;
 	private JTextField quoteNumTxtBx;
-
 	private JCheckBox chBcRmvSC;
 	private JButton removBtn;	
 	private JButton removeSiteBtn;
 	private JButton viewSiteBtn;
 	private JButton removePhotoBtn;
 	private JButton viewPhotoBtn;
-
-	private JTextField installTxtBx;
-	private JTextField siteTxtBx;
-	private JTextField photoTxtBx;
-
 	private JButton cancelSaleReqBtn; 
 	private JButton saveSaleReqBtn; 
-
-	private CreateConnection conn;
-
 	private ImageIcon fll;
 	private ImageIcon pic;
-
-	private Boolean lockForm;
 	private ConnDetails conDeets;
 	private SalesPane sp;
 
 	public QuotePanel(ConnDetails conDetts, SalesPane spn) {
-
-		this.lockForm = lockForm;
 		this.conDeets = conDetts;
 		this.sp = spn;
 
@@ -312,7 +275,6 @@ class QuotePanel extends JPanel {
 		viewQutBtn.addActionListener( new ActionListener()
 		{	@Override
 			public void actionPerformed(ActionEvent arg0) {
-
 			if (qutExists){
 				if (Desktop.isDesktopSupported()) {
 					try {
@@ -322,7 +284,6 @@ class QuotePanel extends JPanel {
 				}
 			}			   
 		}
-
 		});
 
 		viewSiteBtn.addActionListener( new ActionListener()
@@ -362,8 +323,7 @@ class QuotePanel extends JPanel {
 		removeQutBtn.addActionListener( new ActionListener()
 		{	@Override
 			public void actionPerformed(ActionEvent arg0) {
-
-			int i = qutDZ.getSelectedIndex();	//getSelectedValue();//getSelectedItem();
+			int i = qutDZ.getSelectedIndex();
 			if(i!=-1){
 				qutLM.remove(i);
 			}
@@ -377,7 +337,7 @@ class QuotePanel extends JPanel {
 		removeSiteBtn.addActionListener( new ActionListener()
 		{	@Override
 			public void actionPerformed(ActionEvent arg0) { 
-			int i = siteDZ.getSelectedIndex();	//getSelectedValue();//getSelectedItem();
+			int i = siteDZ.getSelectedIndex();
 			if(i!=-1){
 				siteLM.remove(i);
 			}
@@ -390,7 +350,7 @@ class QuotePanel extends JPanel {
 		removePhotoBtn.addActionListener( new ActionListener()
 		{	@Override
 			public void actionPerformed(ActionEvent arg0) {
-			int i = photoDZ.getSelectedIndex();	//getSelectedValue();//getSelectedItem();
+			int i = photoDZ.getSelectedIndex();
 			if(i!=-1){
 				photoLM.remove(i);
 			}
@@ -421,8 +381,6 @@ class QuotePanel extends JPanel {
 				else{
 					JOptionPane.showMessageDialog(null, "You must first selected a sale. ");
 				}
-
-
 			}
 		});
 
@@ -441,7 +399,6 @@ class QuotePanel extends JPanel {
 				{ 
 					if(rowSelected){
 						if(validateData()){						   
-							
 							if (!reesCodeTxtBx.getText().equals("") && !quoteNumTxtBx.getText().equals("")){
 								String custName = sp.getCustName();
 								JOptionPane.showMessageDialog(null,  custName +" has been moved to Follow Ups!");
@@ -467,7 +424,6 @@ class QuotePanel extends JPanel {
 					try{
 						saleID = salesTbl.getValueAt(salesTbl.getSelectedRow(), 0).toString();
 						custID= salesTbl.getValueAt(salesTbl.getSelectedRow(), 1).toString();
-
 						detailsTxtArea.setText(sp.DisplayClientDetails(custID));
 						getNumbers();
 						checkForFiles();
@@ -530,8 +486,6 @@ class QuotePanel extends JPanel {
 		} else if (qutLM.getSize() >0){
 			saveQuote(qutLM.getElementAt(0));		
 		}
-		//	quoteLM.removeElementAt(0);
-
 
 		if (siteExists || siteLM.getSize() >0 ){
 			sck = "Loaded";
@@ -568,15 +522,13 @@ class QuotePanel extends JPanel {
 		resetTable();
 	}
 
-	/*
-	 * Saves QUOTE to the correct file path
-	 */
+
+	// Saves QUOTE to the correct file path
 	protected void saveQuote(Object f){
 		if(f instanceof File){
 			quote = (File)f;
 			File src = new File(quote.getAbsolutePath());
 			File target = new File(folder+qutPfx+saleID+".pdf");
-
 			try {
 				Files.copy(src.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
@@ -586,15 +538,13 @@ class QuotePanel extends JPanel {
 		}
 	}
 
-	/*
-	 * Saves Sitechecks to the correct file path
-	 */
+
+	//Saves Sitechecks to the correct file path
 	protected void saveSite(Object f){
 		if(f instanceof File){
 			site = (File)f;
 			File src = new File(site.getAbsolutePath());
 			File target = new File(folder+sitePfx+saleID+".pdf");
-
 			try {
 				Files.copy(src.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
@@ -606,7 +556,6 @@ class QuotePanel extends JPanel {
 
 	protected void savePhoto(Object f, int fotoNum){
 		if(f instanceof File){
-
 			photo = (File)f;
 			File src = new File(photo.getAbsolutePath());
 			String file = photo.getAbsolutePath().toString();
@@ -623,11 +572,9 @@ class QuotePanel extends JPanel {
 	}
 
 
-	/*
-	 * Checks for any reason files should not be saved: too many or wrong type!
-	 */
-	protected Boolean validateData() {
 
+	//  Checks for any reason files should not be saved: too many or wrong type!
+	protected Boolean validateData() {
 		saveAllowed=true;
 		msg = "";
 		if (!reesCodeTxtBx.getText().equals("") || !quoteNumTxtBx.getText().equals("") || qutLM.getSize()>0 || siteLM.getSize()>0 || photoLM.getSize()>0){
@@ -704,7 +651,7 @@ class QuotePanel extends JPanel {
 	 */
 	protected void checkForFiles() {
 		//Check for stored Quote
-		quote = new File(folder+qutPfx+saleID+".pdf");//Uses InstallID/Quote number
+		quote = new File(folder+qutPfx+saleID+".pdf");
 		if (quote.exists()){
 			viewQutBtn.setVisible(true);
 			qutExists = true;
@@ -713,7 +660,7 @@ class QuotePanel extends JPanel {
 			qutExists = false;
 		}	
 		//Check for stored SiteCheck Forms	
-		site = new File(folder+sitePfx+saleID+".pdf");//Uses SaleID number
+		site = new File(folder+sitePfx+saleID+".pdf");
 		if (site.exists()){
 			viewSiteBtn.setVisible(true);
 			siteExists = true;
@@ -726,10 +673,9 @@ class QuotePanel extends JPanel {
 		File f = new File(folder);					
 		photosArr = f.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				return name.startsWith(photoPfx+saleID+"_");	//Uses SaleID number
+				return name.startsWith(photoPfx+saleID+"_");
 			}
 		});
-
 		if (photosArr.length>0){
 			viewPhotoBtn.setVisible(true);
 			photoExists = true;
@@ -737,7 +683,6 @@ class QuotePanel extends JPanel {
 			viewPhotoBtn.setVisible(false);
 			photoExists = false;
 		}
-
 	}
 
 
@@ -761,7 +706,6 @@ class QuotePanel extends JPanel {
 		ResultSet rs = sp.getResults(3);
 		salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 		spaceHeader(columnModel, columnWidth);
-
 		rowSelected=false;
 		custID = "";
 		reesCodeTxtBx.setText("");
@@ -884,19 +828,8 @@ class QuotePanel extends JPanel {
 
 					String rees 	= rs.getString("ReesCode");
 					String quote 	= rs.getString("QuoteNumber");
-					
-					
-	/*				if (rees==null){
-						txtBxReesCode.setText("");
-					}else{*/
-						reesCodeTxtBx.setText(rees);
-					//}
-					/*if (quote == null ){
-						txtBxQuoteNum.setText("");
-					}else{*/
-						quoteNumTxtBx.setText(quote);
-					//}
-				
+					reesCodeTxtBx.setText(rees);
+					quoteNumTxtBx.setText(quote);
 				}
 			}
 		}
@@ -905,7 +838,7 @@ class QuotePanel extends JPanel {
 			JOptionPane.showMessageDialog(null, ex.toString());
 		}
 	}
-	
+
 	public void removeSiteCheck(){
 		CallableStatement pm = null;
 		try {
@@ -937,9 +870,6 @@ class QuotePanel extends JPanel {
 	public Boolean doesPhotoExist(){
 		return photoExists;
 	}
-	private String getSaleID(){
-		return "1";
-	}
 	private String getQutLoaded() {
 		return qut;
 	}
@@ -949,7 +879,6 @@ class QuotePanel extends JPanel {
 	private String getPhotoLoaded() {
 		return pht;
 	}
-	
 	public JPanel getInfoPanel(){
 		return infoPanel;
 	}

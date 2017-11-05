@@ -1,10 +1,11 @@
 package Sales;
 
+//Description: Class where customers in the system are added, modified and sales are created
+
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -13,7 +14,6 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -21,18 +21,13 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-
 import com.microsoft.sqlserver.jdbc.SQLServerException;
-
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import net.proteanit.sql.DbUtils;
-
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.HeadlessException;
-
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JCheckBox;
@@ -48,7 +43,7 @@ class CustomerPanel extends JPanel {
 	private String qryOneValSearch = "call AWS_WCH_DB.dbo.s_SalesSearchValOneCustomer";
 	private String qryTwoValSearch = "call AWS_WCH_DB.dbo.s_SalesSearchValTwoCustomer";
 	private String qryAllValSearch = "call AWS_WCH_DB.dbo.s_SalesSearchValAllCustomer";
-	private int [] columnWidth = {50, 70, 150, 100, 100, 100}; 	
+	private int [] columnWidth = {50, 70, 100, 150, 100, 100}; 	
 	private String param = "";  
 	private ResultSet rs;
 	private ResultSet rs2;
@@ -63,7 +58,6 @@ class CustomerPanel extends JPanel {
 	private JTable salesTbl;
 	private DefaultTableModel model1;
 	private Boolean rowSelected;
-
 	private JTextField mobileNumTxtBx;
 	private JTextField sFNameTxtBx;
 	private JTextField sLNameTxtBx;
@@ -97,7 +91,6 @@ class CustomerPanel extends JPanel {
 	private JButton cancelBtn;
 	private JButton updateBtn;
 	private JButton createCustBtn;
-
 	private SalesPane sp;
 	private ConnDetails conDeets;
 	private JButton createSaleBtn;
@@ -466,41 +459,32 @@ class CustomerPanel extends JPanel {
 					//if valid sitecheck is false then the site address is valid
 					if (!validatedata()){	
 						if (!validSiteCheck()){			
-
-							//if (!checkDBForCust().next()){
-								//If the customer doesn't yet exist create a new customer and sale
-								if (!rowSelected){
-									createCustAndSale();
-									sp.showMessage("Creating New Customer and Sale");
-									resetTable();
-									clearFields();
-									createCustBtn.setEnabled(true);
-								}
-								//Otherwise just create a new sale
-								else{
-									createSale();
-									sp.showMessage("Creating new Sale");
-									resetTable();
-									clearFields();
-									createCustBtn.setEnabled(true);
-								}
-							/*}else{
-								JOptionPane.showMessageDialog(null, "This customer already exists! \nPlease search and edit them \nfrom the customer table.");
+							//If the customer doesn't yet exist create a new customer and sale
+							if (!rowSelected){
+								createCustAndSale();
+								sp.showMessage("Creating New Customer and Sale");
 								resetTable();
 								clearFields();
-							}*/
+								createCustBtn.setEnabled(true);
+							}
+							//Otherwise just create a new sale
+							else{
+								createSale();
+								sp.showMessage("Creating new Sale");
+								resetTable();
+								clearFields();
+								createCustBtn.setEnabled(true);
+							}
 						}
 					}
 				} catch (HeadlessException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				} /*catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}*/
+				}
 			}
 		});
 
+		//Clear the search fields
 		clearSchBtn.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0){
@@ -523,7 +507,7 @@ class CustomerPanel extends JPanel {
 					JOptionPane.showMessageDialog(null, "You have not choosen anything to search! \nPlease try again.");	
 				}else{
 					String qry;	
-
+					//Figure out which combination is being searched
 					if (!sFNameTxtBx.getText().equals("") && !sLNameTxtBx.getText().equals("") && !reesTxtBx.getText().equals("")){
 						qry = qryAllValSearch;	
 					}		
@@ -538,13 +522,10 @@ class CustomerPanel extends JPanel {
 
 					ResultSet rs = searchCust(qry);
 					salesTbl.setModel(DbUtils.resultSetToTableModel(rs));
-					//spaceHeader(columnModel, columnWidth);
 					rowSelected=false;
 					param = "";		
 				}	
 			}
-
-
 		});
 	}
 
@@ -572,11 +553,11 @@ class CustomerPanel extends JPanel {
 				pAreaCodeTxtBx.setText(customerPostCode);
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	} 
 
+	//Clear the table formatting 
 	public void spaceHeader(TableColumnModel colM, int[] colW) {
 		int i;
 		TableColumn tabCol = colM.getColumn(0);
@@ -586,7 +567,7 @@ class CustomerPanel extends JPanel {
 		}
 		header.repaint();
 	} 
-
+	//reset the table
 	protected void resetTable() {
 		ResultSet rs = sp.getResults(0);
 		salesTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
@@ -595,6 +576,7 @@ class CustomerPanel extends JPanel {
 		param = "";
 	}
 
+	//get the table
 	public JTable getSalesTbl(){
 		return salesTbl;
 	}
@@ -602,9 +584,6 @@ class CustomerPanel extends JPanel {
 	public boolean validatedata(){
 		Boolean errorChk = false;
 		String error = " ";
-		//Check if all text boxes are all filled in correctly
-		//List<String> errors = new ArrayList<String>();
-
 		if (fNameTxtBx.getText().equals("")){
 			errorChk = true;
 			//Cannot be null or more than 15 chars
@@ -659,7 +638,7 @@ class CustomerPanel extends JPanel {
 			}
 		}
 
-		//Make sure the email contails 
+		//Make sure the email contains an @ 
 		if (emailTxtBx.getText().equals("")){
 			errorChk = true;
 			error = error + "EMAIL: can not be empty\n";
@@ -714,13 +693,14 @@ class CustomerPanel extends JPanel {
 				error = error + "CHECK BOX: If the check box is selected \nplease ensure the addresses are the same\n";
 			}
 
-		//Check to see if any errors has occured
+		//Check to see if any errors has occurred
 		if (errorChk == true){
 			JOptionPane.showMessageDialog(null, error);
 		}
 		return errorChk;
 	}
 
+	//If creating the sale make sure it has a site address 
 	public Boolean validSiteCheck(){
 		Boolean errorChk = false;
 		String error = "";
@@ -741,11 +721,10 @@ class CustomerPanel extends JPanel {
 			error = error + "SUBURB: can not be longer than 20 letters\n";
 		}
 
-		//Check to see if any errors has occured
+		//Check to see if any errors has occurred
 		if (errorChk == true){
 			JOptionPane.showMessageDialog(null, error);
 		}
-
 		return errorChk;
 	}
 
@@ -856,7 +835,6 @@ class CustomerPanel extends JPanel {
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
 
 			sm = conn.prepareCall(update);
-
 
 			sm.setString(1, getFName());
 			sm.setString(2, getLName());

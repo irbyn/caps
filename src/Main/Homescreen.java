@@ -3,22 +3,13 @@ package Main;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Image;
 import java.awt.Toolkit;
-
-import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.Timer;
-
 import com.microsoft.sqlserver.jdbc.SQLServerException;
-
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Schedule.SchedulePane;
@@ -26,12 +17,7 @@ import Sales.SalesPane;
 import Installs.InstallsPane;
 import Permit.PermitPane;
 import Admin.AdminLogin;
-
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -51,44 +37,34 @@ public class Homescreen extends JFrame {
 	private JButton logOutBtn;
 	private JPanel btnPanel;
 	private JPanel contentPanel;
-	//private JPanel adminLoginPnl;
 	private SchedulePane schedulePanel;
 	private SalesPane salesPanel;
 	private InstallsPane installPanel;
 	private PermitPane permitPanel; 
 	private AdminLogin adminLogin;
+	private LoginWindow loginWindow;
 	private Homescreen hs;
 	private String loggedInUser = "call AWS_WCH_DB.dbo.h_loggedInUser";
 	private ResultSet rs;
-	
 	private ConnDetails conDeets;
-	private static String user;
-	private static String pass;
-
+	private String user;
 	public Color selected= Color.decode("#70a6ff");
 
 	public Homescreen(String User, String Pass) {
+		//Setting JFrame icon
 		setIconImage(Toolkit.getDefaultToolkit().getImage(Homescreen.class.getResource("/wfs-logo-16.png")));
-
 		user = User;
-		pass = Pass;
 		hs = this;
-		
+
 		//PASS THE LOGIN DETAILS TO Class connectionDetails
 		conDeets = new ConnDetails();
-		
+
 		// setting up JFrame
 		getContentPane().setLayout(null);
 		setPreferredSize(new Dimension(1100, 700));
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setTitle("WorkFlow Solutions");
-/*		try {
-			   Image image = new ImageIcon("/desktopApp/res/wfs-logo-16.png").getImage();
-			   frame.setIconImage(image);
-			}catch(Exception e){
-			   System.out.println("Application icon not found");
-			}*/
 
 		// creating main button JPanel (blue)
 		btnPanel = new JPanel();
@@ -162,7 +138,7 @@ public class Homescreen extends JFrame {
 
 		installBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+
 				if(installPanel==null){
 					installPanel = new InstallsPane(conDeets, hs);
 				}				
@@ -180,7 +156,7 @@ public class Homescreen extends JFrame {
 		permitBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(permitPanel==null){				
-				permitPanel = new PermitPane(conDeets, hs);
+					permitPanel = new PermitPane(conDeets, hs);
 				}
 				if (salesBtn.isDisplayable()|| schedulePanel.isDisplayable() || installPanel.isDisplayable()) {
 					contentPanel.removeAll();
@@ -192,7 +168,7 @@ public class Homescreen extends JFrame {
 				highlightButton(permitBtn);
 			}
 		});
-		
+
 		//Log into the Admin Panel
 		adminLoginBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -201,15 +177,17 @@ public class Homescreen extends JFrame {
 				setVisible(false); //Make the screen invisible
 			}
 		});
-		
+
 		logOutBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setVisible(false); //Make the screen invisible
+				loginWindow = new LoginWindow();
+				loginWindow.setVisible(true);
 				dispose();	
 			}
 		});
-		
-		// creating main content JPanel (red)
+
+		// creating main content JPanel
 		contentPanel = new JPanel();
 		contentPanel.setBounds(0, 40, 1100, 630);
 		contentPanel.setPreferredSize(new Dimension(1100, 630));
@@ -217,12 +195,12 @@ public class Homescreen extends JFrame {
 
 		// creating new panel objects from the panel classes containing their content
 		schedulePanel = new SchedulePane(conDeets, this); 
-		salesPanel = null;		//new SalesPane(conDeets, this);  
-		installPanel = null;	//new InstallsPane(conDeets, this);
-		permitPanel = null;		//new PermitPane(conDeets, this);
-		
+		salesPanel = null;	
+		installPanel = null;	
+		permitPanel = null;		
+
 		getuser();
-		
+
 		//Making the schedule the first view the user sees.  
 		contentPanel.add(schedulePanel);        		        
 		//Load the frame
@@ -230,49 +208,46 @@ public class Homescreen extends JFrame {
 		pack();
 	}
 
-	
-
-	
-	
 	protected void highlightButton(JButton btn) {
 		btn.setBackground(selected);
 		btn.setForeground(Color.WHITE);
 	}
-//returns all buttons to default color scheme
+	
+	//returns all buttons to default color scheme
 	protected void clearButton(JPanel infPanel) {
 		for(Component control : infPanel.getComponents())
-      	{	
-      	    if(control instanceof JButton)
-      	    {
-      	    	JButton ctrl = (JButton) control;
-      	    	ctrl.setBackground(null);
-      	    	ctrl.setForeground(Color.BLACK);
-      	    }
-      	}
+		{	
+			if(control instanceof JButton)
+			{
+				JButton ctrl = (JButton) control;
+				ctrl.setBackground(null);
+				ctrl.setForeground(Color.BLACK);
+			}
+		}
 	}
 
 	public void showMsg(String st){
-		  //      JFrame f = new JFrame();
-		        final JDialog msgDialog = new JDialog(frame, st);
-            	msgDialog.pack();
-            	msgDialog.setLocationRelativeTo(this);
-            	msgDialog.setSize(new Dimension(400, 0));
-            	msgDialog.setResizable(true);       
-		        
-		        Timer timer = new Timer(2000, new ActionListener() {
-		            public void actionPerformed(ActionEvent e) {
-		            	msgDialog.setVisible(false);
-		            	msgDialog.dispose();
-		           }
-		        });
-		        timer.setRepeats(false);
-		        timer.start();
-		        msgDialog.setVisible(true);
+		//      JFrame f = new JFrame();
+		final JDialog msgDialog = new JDialog(frame, st);
+		msgDialog.pack();
+		msgDialog.setLocationRelativeTo(this);
+		msgDialog.setSize(new Dimension(400, 0));
+		msgDialog.setResizable(true);       
+
+		Timer timer = new Timer(2000, new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				msgDialog.setVisible(false);
+				msgDialog.dispose();
+			}
+		});
+		timer.setRepeats(false);
+		timer.start();
+		msgDialog.setVisible(true);
 	}
 	public SchedulePane getSchedule(){
 		return schedulePanel;
 	}
-	
+
 	protected void getuser(){
 		CallableStatement sm = null;
 		try {
@@ -284,14 +259,14 @@ public class Homescreen extends JFrame {
 			sm = conn.prepareCall(update);
 
 			sm.setString(1, user);
-			
+
 			ResultSet qryResults = sm.executeQuery();
 			rs = qryResults;
 
+			//Setting who is logged into the application 
 			while(qryResults.next()){
 				lblUser.setText("Logged in as: " + rs.getString("Name"));
 			}
-			
 		}
 		catch (SQLServerException sqex)
 		{

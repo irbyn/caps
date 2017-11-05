@@ -1,23 +1,21 @@
 package Sales;
 
+//Description: This class allows a salesperson to book a site check for the sale
+
+
 import java.awt.BorderLayout;
-import java.awt.Choice;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
-//import java.sql.Date;
 import java.sql.Time;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -33,55 +31,44 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
-
 import com.microsoft.sqlserver.jdbc.SQLServerException;
-
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Main.GetJobs;
 import net.proteanit.sql.DbUtils;
-
 import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JRadioButton;
+
 
 class SiteCheckPanel extends JPanel {
 	private String siteDetails = "call AWS_WCH_DB.dbo.s_SalesSiteCheckDetails";
 	private String updateSite = "call AWS_WCH_DB.dbo.s_SalesUpdateSiteCheck";
 	private String getInstID = "call AWS_WCH_DB.dbo.s_SaleGetInstID";
-	private int [] columnWidth = {50, 50, 100, 70, 100, 100, 60, 50, 50};
+	private int [] columnWidth = {50, 50, 100, 100, 50, 100, 60, 50, 50, 70};
 	private String param = "";
 	private String paramSID = "";
 	private ResultSet rs;
 	private Color LtGray = Color.decode("#eeeeee");
-
 	private CreateConnection connecting;
 	private ConnDetails conDeets;
-
 	private SalesPane sp;
 	private DefaultTableModel model1;
-
 	private JTableHeader header;
 	private TableColumnModel columnModel;
 	private JPanel tablePanel;
 	private JPanel infoPanel;
 	private JTable salesTbl;
-
 	private JTextArea custInfoTxtArea;
 	private JLabel sChkBookingLbl;
 	private JLabel siteCheckByLbl;
 	private JSpinner dateSpn;
-	//private JSpinner timeSpn;
 	private JComboBox<String> timeComboBox;
 	private JComboBox<String> sChkDoneByComBx;
 	private JButton cancelBtn;
 	private JButton saveBtn;
 	private Boolean rowSelected;
-	
 	private JCheckBox sCheckBookedChckBx;
 	private JCheckBox sCheckCompChckBx;
 	private Date date;
@@ -139,7 +126,7 @@ class SiteCheckPanel extends JPanel {
 
 		SpinnerDateModel modelTime = new SpinnerDateModel();
 		modelTime.setCalendarField(Calendar.MINUTE);
-		
+
 		timeComboBox = new JComboBox();
 		timeComboBox.setModel(new DefaultComboBoxModel(new String[] {"8:00", "8:30", "9:00", "9:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00"}));
 		timeComboBox.setBounds(774, 65, 144, 20);
@@ -299,7 +286,7 @@ class SiteCheckPanel extends JPanel {
 		yesterday.add(Calendar.DATE, -1);
 
 		Date dateVal = (Date) dateSpn.getValue();	
-		
+
 		if (dateVal.before(yesterday.getTime())){
 			errorChk = true;
 			error = error + "DATE: must be set for the future\n";
@@ -343,7 +330,6 @@ class SiteCheckPanel extends JPanel {
 					Time time 					= rs.getTime("Site Check Time");
 					Boolean booked 				= rs.getBoolean("Site Check Booked");
 					String salesPerson 			= rs.getString("Done By");
-					//int userID						= rs.getInt("User ID");
 
 					if (SCdate==null){
 						dateSpn.setValue(date);
@@ -353,7 +339,6 @@ class SiteCheckPanel extends JPanel {
 					if (time == null ){
 						timeComboBox.setSelectedItem(null);
 					}else{
-						
 						if (time.toString().equals("08:00:00")){
 							timeComboBox.setSelectedIndex(0);
 						}else if (time.toString().equals("08:30:00")){
@@ -404,8 +389,7 @@ class SiteCheckPanel extends JPanel {
 							timeComboBox.setSelectedIndex(23);
 						}else if (time.toString().equals("20:00:00")){
 							timeComboBox.setSelectedIndex(24);
-						}
-						
+						}	
 					}
 					if (booked==false){
 						sCheckBookedChckBx.setSelected(false);
@@ -460,7 +444,6 @@ class SiteCheckPanel extends JPanel {
 	}
 
 	public String getDate(){  	
-
 		Date dte = (Date) dateSpn.getValue(); 
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
 		String dt = sdf1.format(dte);
@@ -469,19 +452,15 @@ class SiteCheckPanel extends JPanel {
 
 	public String getTime(){
 		java.sql.Time ppstime = null;
-		 SimpleDateFormat format = new SimpleDateFormat("HH:mm"); // 12 hour format
-
-		    java.util.Date d1;
-			try {
-				d1 = (java.util.Date)format.parse((String) timeComboBox.getSelectedItem());
-				ppstime = new java.sql.Time(d1.getTime());
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-		    
-		System.out.println(timeComboBox.getSelectedItem());
+		SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+		java.util.Date d1;
+		try {
+			d1 = (java.util.Date)format.parse((String) timeComboBox.getSelectedItem());
+			ppstime = new java.sql.Time(d1.getTime());
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return (String) ppstime.toString();
 	}
 
@@ -511,9 +490,7 @@ class SiteCheckPanel extends JPanel {
 		{ 
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}
-
 		return slsID;
-
 	}
 
 	public Boolean getBooked(){
