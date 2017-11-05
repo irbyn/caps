@@ -1,70 +1,47 @@
 package Installs;
 
+/*
+ * GUI PANEL:	Bookings
+ * Allows User to view install status & Make or delete bookings
+ */
+
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Desktop;
-import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.GregorianCalendar;
 import java.util.Locale;
-
 import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SpinnerDateModel;
-import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.DefaultCaret;
-import javax.swing.text.DocumentFilter;
 
 import com.microsoft.sqlserver.jdbc.SQLServerException;
-
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
-import Main.GetJobs;
 import Main.bookingColumnRenderer;
-import Permit.PermitPane;
 import Schedule.SchedulePane;
 import net.proteanit.sql.DbUtils;
 
@@ -334,9 +311,7 @@ class BookingsPanel extends JPanel {
 					clearStock();
 					try{
 						invoiceNum = installTbl.getValueAt(installTbl.getSelectedRow(), 0).toString();
-
 						stockTxtArea.setText(ip.DisplayStockOnOrder(invoiceNum));
-
 						detailsTxtArea.setText(ip.DisplayClientShortDetails(invoiceNum));
 
 						instTxtBx.setText(ip.getInstaller());        
@@ -465,6 +440,7 @@ class BookingsPanel extends JPanel {
 			pm.setString(1, inv);
 
 			pm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -492,6 +468,7 @@ class BookingsPanel extends JPanel {
 			pm.setString(4, inst);
 
 			pm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -674,8 +651,8 @@ class BookingsPanel extends JPanel {
 			pm.setString(1, invoiceNum);
 			pm.setString(2, note2);
 
-
 			pm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -685,9 +662,7 @@ class BookingsPanel extends JPanel {
 		{ 
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 		}	
-
 	}
-
 
 
 	public JTable getInstallTbl(){

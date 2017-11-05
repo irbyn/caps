@@ -1,5 +1,10 @@
 package Installs;
 
+/*
+ * GUI PANEL:	INSTALLS - Place Orders
+ * Allows User to Record Purchase  
+ */
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -48,7 +53,7 @@ class PlaceOrdPanel extends JPanel {
 	private String upPONum = "{Call AWS_WCH_DB.dbo.[i_updateStockPONumber] (?,?,?)}";
 	private String[][] poItems;
 
-	private String param = "";  
+	private String invoiceNum = "";  
 	private ResultSet rs;
 
 	private CreateConnection connecting;
@@ -59,6 +64,8 @@ class PlaceOrdPanel extends JPanel {
 
 	private JTable installTbl;	
 	private JTableHeader header;
+	private JScrollPane scrollPane;
+	private JScrollPane sp;
 	private TableColumnModel columnModel;
 	private DefaultTableModel model1;
 
@@ -66,8 +73,6 @@ class PlaceOrdPanel extends JPanel {
 	private JTableHeader hd2;
 	private TableColumnModel cmod2;
 	private DefaultTableModel tmod2;
-
-	//	private JTextArea detailsTxtArea;
 
 	private JLabel poLbl;
 	private JTextField poTxtBx;
@@ -78,10 +83,7 @@ class PlaceOrdPanel extends JPanel {
 	private String inv; 
 	private String stk; 
 	private String po; 
-
-
-	private CreateConnection conn;
-
+	
 	private Boolean lockForm;
 	private ConnDetails conDeets;
 	private InstallsPane ip;
@@ -100,9 +102,7 @@ class PlaceOrdPanel extends JPanel {
 		installTbl = new JTable(model1);
 		installTbl.setRowSelectionAllowed(false);
 		installTbl.setAutoCreateRowSorter(true);
-
-		JScrollPane scrollPane = new JScrollPane(installTbl);
-
+		scrollPane = new JScrollPane(installTbl);
 		header= installTbl.getTableHeader();
 		columnModel = header.getColumnModel();
 		add(header); 
@@ -122,7 +122,7 @@ class PlaceOrdPanel extends JPanel {
 		tmod2 = new DefaultTableModel(colNames,0);
 		poTbl = new JTable(tmod2);
 		poTbl.setAutoCreateRowSorter(true);        
-		JScrollPane sp = new JScrollPane(poTbl);	  
+		sp = new JScrollPane(poTbl);	  
 		hd2= poTbl.getTableHeader();        
 		cmod2 = hd2.getColumnModel();
 		spaceHeader(cmod2, columnWidth);
@@ -186,7 +186,7 @@ class PlaceOrdPanel extends JPanel {
 				if (!arg0.getValueIsAdjusting()){
 
 					try{
-						param = installTbl.getValueAt(installTbl.getSelectedRow(), 0).toString();			
+						invoiceNum = installTbl.getValueAt(installTbl.getSelectedRow(), 0).toString();			
 					} catch (IndexOutOfBoundsException e){
 						//Ignoring IndexOutOfBoundsExceptions!
 					}
@@ -236,10 +236,8 @@ class PlaceOrdPanel extends JPanel {
 				po = poTxtBx.getText();
 				updateStockItem();
 			}		
-
 			resetTable();
 		}
-
 	}
 
 
@@ -257,6 +255,7 @@ class PlaceOrdPanel extends JPanel {
 			pm.setString(3,	po);
 
 			pm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -306,7 +305,7 @@ class PlaceOrdPanel extends JPanel {
 		ResultSet rs = ip.getResults(2,  conDeets);
 		installTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 		spaceHeader(columnModel, columnWidth);
-		param = "";
+		invoiceNum = "";
 		poTxtBx.setText("");
 		tmod2.setRowCount(0);
 

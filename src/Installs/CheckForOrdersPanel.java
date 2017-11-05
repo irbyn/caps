@@ -1,10 +1,13 @@
 package Installs;
 
+/*
+ * GUI PANEL:	INSTALLS - Check for Orders
+ * Allows User to view invoices & select items that are required to be ordered
+ */
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -16,24 +19,16 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.regex.Pattern;
-
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -41,22 +36,16 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
-
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import DB_Comms.CreateConnection;
-import Installs.LoadDocsPanel.FileCellRenderer;
-import Installs.LoadDocsPanel.ListTransferHandler;
 import Main.ConnDetails;
-import Permit.PermitPane;
 import documents.ReadInvoice;
 import net.proteanit.sql.DbUtils;
 
 class CheckForOrdersPanel extends JPanel {
 
-	private int [] columnWidth = {20, 150, 150, 100, 100, 100, 100, 100}; 	
+	private int [] columnWidth = {30, 150, 150, 100, 100, 100, 100, 100}; 	
 	private String getSaleID = "EXEC AWS_WCH_DB.dbo.[i_InstallsGetSaleID] ";
 	private String upStkList = "{Call AWS_WCH_DB.dbo.[i_InstallsUpdateFire] (?,?,?,?,?)}";
 	private String upStkItem = "{Call AWS_WCH_DB.dbo.[i_InstallsUpdateItems] (?,?,?,?,?)}";
@@ -141,7 +130,7 @@ class CheckForOrdersPanel extends JPanel {
 		this.lockForm = lockForm;
 		this.conDeets = conDetts;
 		this.ip = ipn;
-
+		//Link classes
 		connecting = new CreateConnection();
 		rInv = new ReadInvoice();
 
@@ -384,9 +373,7 @@ class CheckForOrdersPanel extends JPanel {
 		CallableStatement pm = null;
 
 		try {
-
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
-
 			pm = conn.prepareCall(upStkList);
 
 			pm.setString(1, invoiceNum);
@@ -396,6 +383,7 @@ class CheckForOrdersPanel extends JPanel {
 			pm.setInt(5,  checked);
 
 			pm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -412,9 +400,7 @@ class CheckForOrdersPanel extends JPanel {
 		CallableStatement pm = null;
 
 		try {
-
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
-
 			pm = conn.prepareCall(upStkItem);
 
 			pm.setString(1, invoiceNum);
@@ -424,6 +410,7 @@ class CheckForOrdersPanel extends JPanel {
 			pm.setInt(5,  checked);
 
 			pm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -447,7 +434,7 @@ class CheckForOrdersPanel extends JPanel {
 				qt = ""; 
 				code = "";
 				dsc = ""; 
-				//		   JOptionPane.showMessageDialog(null, "FIRE = " + fireTxtBx.getText());
+				//	JOptionPane.showMessageDialog(null, "FIRE = " + fireTxtBx.getText());
 
 				rows = model2.getRowCount();
 				for (int i = 0 ; i< rows ; i++){
@@ -455,7 +442,7 @@ class CheckForOrdersPanel extends JPanel {
 					dsc = model2.getValueAt(i, 2).toString(); 
 					stkItems = stkItems + qt + " x " + dsc + "\n" ;
 				}
-				//		   JOptionPane.showMessageDialog(null, stkItems);
+				//	JOptionPane.showMessageDialog(null, stkItems);
 				updateStockList(checked);
 
 				qt = ""; 
@@ -470,7 +457,7 @@ class CheckForOrdersPanel extends JPanel {
 					qt = model2.getValueAt(rowNum, 0).toString(); 
 					code = model2.getValueAt(rowNum, 1).toString(); 
 					dsc = model2.getValueAt(rowNum, 2).toString();			   
-					//			   JOptionPane.showMessageDialog(null,  "[" + qt + "] [" + code + "] [" + dsc + "]");
+					//	JOptionPane.showMessageDialog(null,  "[" + qt + "] [" + code + "] [" + dsc + "]");
 					updateStockItem(checked);
 				}	
 			}
@@ -538,7 +525,6 @@ class CheckForOrdersPanel extends JPanel {
 			viewPhotoBtn.setVisible(false);
 			photoExists = false;
 		}
-
 	}
 
 
@@ -548,14 +534,11 @@ class CheckForOrdersPanel extends JPanel {
 
 		try {
 			while(rs.next()){
-
 				saleID 		= rs.getString("SID");						 						
-
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
 	}	
 
 

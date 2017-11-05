@@ -1,20 +1,22 @@
 package documents;
-
+/*
+ * Storeage of Filenames & filepaths for application for easy alteration
+ */
 public class FileSystem {
 	//File Names
 	private String producerStatement;
 	private String ps3Storage;
-	
+
 	private String consent;
 	private String consentStorage;
 
-	
-	
+
+
 	public FileSystem() {
-		
+
 		producerStatement = "//C:/WFS/Forms/PS3.pdf";
 		ps3Storage = 		"//C:/WFS/Files/Consent";
-		
+
 		consent = 			"//C:/WFS/Forms/Consent.pdf";
 		consentStorage = 	"//C:/WFS/Files/Consent";
 	}
@@ -26,7 +28,7 @@ public class FileSystem {
 	public String getPS3Storage() {
 		return ps3Storage;
 	}
-	
+
 	public String getConsentForm() {
 		return consent;
 	}

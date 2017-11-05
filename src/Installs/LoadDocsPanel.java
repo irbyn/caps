@@ -1,12 +1,18 @@
 package Installs;
 
+/*
+ * GUI PANEL:	INSTALLS - Load Documents
+ * Allows User drop 1 pdf or up to 5 photos into the file system.
+ * Application renames files as required.
+ */
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
-import java.awt.EventQueue;
+//import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.GraphicsEnvironment;
+//import java.awt.GraphicsEnvironment;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
@@ -21,8 +27,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+//import java.text.SimpleDateFormat;
+//import java.util.Date;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -447,6 +453,7 @@ class LoadDocsPanel extends JPanel {
 			pm.setString(5, getPhotoLoaded());
 
 			pm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -721,7 +728,6 @@ class LoadDocsPanel extends JPanel {
 
 		/*
 		 * Formats the output of the drop to Show an Icon and filename (not full path)
-		 * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
 		 */
 		public Component getListCellRendererComponent(JList list,Object value,int index,boolean isSelected,boolean cellHasFocus) {
 

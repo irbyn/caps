@@ -1,10 +1,13 @@
 package Installs;
 
+/*
+ * GUI PANEL:	INSTALLS - Receive Orders
+ * Allows User to Record stock items have been received 
+ */
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -17,14 +20,10 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -41,10 +40,8 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import com.microsoft.sqlserver.jdbc.SQLServerException;
-
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
-import Permit.PermitPane;
 import net.proteanit.sql.DbUtils;
 
 class RecvOrderPanel extends JPanel {
@@ -60,7 +57,6 @@ class RecvOrderPanel extends JPanel {
 	private String inv; 
 	private String stk;
 
-	private ResultSet rs;
 	private Color LtGray = Color.decode("#eeeeee");
 
 	private Boolean rowSelected = false;
@@ -72,10 +68,8 @@ class RecvOrderPanel extends JPanel {
 	private JPanel tablePanel;
 	private JPanel infoPanel;
 	private JPanel poPanel;
-
 	private JTable installTbl;
 	private DefaultTableModel model1;
-
 	private JTextArea detailsTxtArea;
 
 	private JTable poTbl;
@@ -83,13 +77,10 @@ class RecvOrderPanel extends JPanel {
 	private TableColumnModel cmod2;
 	private DefaultTableModel tmod2;
 
-
 	private JButton printAllGoodsRcvdBtn; 
 	private JButton cancelGoodsRcvdBtn; 
 	private JButton saveGoodsRcvdBtn; 
 	private JSpinner reportDate;
-
-	private CreateConnection conn;
 
 	private Boolean lockForm;
 	private ConnDetails conDeets;
@@ -101,7 +92,6 @@ class RecvOrderPanel extends JPanel {
 		this.lockForm = lockForm;
 		this.conDeets = conDetts;
 		this.ip = ipn;
-
 		connecting = new CreateConnection();
 
 		model1 = new DefaultTableModel();  
@@ -193,7 +183,6 @@ class RecvOrderPanel extends JPanel {
 				{ 
 					if(tmod2.getRowCount()!=-1){ 
 						receiveStock();
-
 					}
 				}
 			}
@@ -240,6 +229,8 @@ class RecvOrderPanel extends JPanel {
 		});
 	}
 
+	//	create data to update DB 
+	// currently sends each row individually - future work: Create batch update!
 	protected void receiveStock() {
 
 		int rows = tmod2.getRowCount();
@@ -250,17 +241,14 @@ class RecvOrderPanel extends JPanel {
 		for (i = 0; i < rows; i++ ){
 			inv = tmod2.getValueAt(i, 0).toString(); 
 			stk = tmod2.getValueAt(i, 3).toString();
-			//		   JOptionPane.showMessageDialog(null, "inv: " + inv + "  stk: " + stk);
 			updateStockReceived();
 		}		
-
 		resetTable();
-
 	}
 
+	// DB Comms of update
 	private void updateStockReceived() {
 		CallableStatement pm = null;
-
 		try {
 
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
@@ -271,6 +259,7 @@ class RecvOrderPanel extends JPanel {
 			pm.setString(2, stk);
 
 			pm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -282,8 +271,10 @@ class RecvOrderPanel extends JPanel {
 		}			
 	}
 
+	//	OUTPUTS txt file of received Goods by Date
+	//	future work: Create custom class under documents!
 	protected void showReceivedItems() {
-
+		//create Report date from dialog
 		SimpleDateFormat repModel = new SimpleDateFormat("dd.MMM.yyyy");
 		reportDate = new JSpinner(new SpinnerDateModel());
 		reportDate.setEditor(new JSpinner.DateEditor(reportDate, repModel.toPattern()));
@@ -298,12 +289,10 @@ class RecvOrderPanel extends JPanel {
 			String dt = sdf1.format(dte);
 
 			sb = ip.reportStockReceived(dt);
-
 			String prefix = "stockReceived_";
 			String suffix = ".txt";
 
-
-			File tempFile;
+			File tempFile;		//	creates a temporary file that will not save unless user explicitly saves
 			try {
 				tempFile = File.createTempFile(prefix, suffix);
 				tempFile.deleteOnExit();
@@ -323,7 +312,7 @@ class RecvOrderPanel extends JPanel {
 			}
 		}		
 	}
-
+	//	Sends row data from top table to bottom
 	private void moveRow(int row){
 		String po;
 		if (installTbl.getValueAt(row, 3)!=null){
@@ -337,7 +326,6 @@ class RecvOrderPanel extends JPanel {
 		} else {
 			instDate = "";
 		}
-
 		String[] rowData = new String[]{installTbl.getValueAt(row, 0).toString(),
 				po,
 				installTbl.getValueAt(row, 4).toString(),
@@ -346,6 +334,8 @@ class RecvOrderPanel extends JPanel {
 				instDate};
 		tmod2.addRow(rowData);
 	}
+	
+//	Sends row data from bottom table to top
 	private void returnRow(int row){
 		DefaultTableModel mod = (DefaultTableModel) installTbl.getModel();
 		String[] rowData = new String[]{poTbl.getValueAt(row, 0).toString(), "", "",
@@ -376,12 +366,12 @@ class RecvOrderPanel extends JPanel {
 		tmod2.setRowCount(0);
 		rowSelected=false;
 		invoiceNum = "";
-
-
 	}		
+	
 	public JTable getInstallTbl(){
 		return installTbl;
 	}
+	
 	public JPanel getInfoPanel(){
 		return infoPanel;
 	}

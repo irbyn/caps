@@ -26,38 +26,42 @@ import javax.swing.JOptionPane;
 
 import Main.ConnDetails;
 
-public class CreateConnection implements Connection {
-	
+/*
+ * Basic connection class from application to DB
+ */
 
-		private String user;
-		private String pass;
-		private String dbURL;
+public class CreateConnection implements Connection {
+
+
+	private String user;
+	private String pass;
+	private String dbURL;
 
 	public Connection CreateConnection(ConnDetails conDeets) {
-		  
-  		user = conDeets.getUser();
-  		pass = conDeets.getPass();
-  		dbURL = conDeets.getURL();
-		  
-	        Connection conn = null;
 
-	        try {
-	          
-	            conn = DriverManager.getConnection(dbURL, user, pass);
-	            
-	            if (conn != null) {
-	            	return conn;
-	            }
-	        } catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		user = conDeets.getUser();
+		pass = conDeets.getPass();
+		dbURL = conDeets.getURL();
+
+		Connection conn = null;
+
+		try {
+
+			conn = DriverManager.getConnection(dbURL, user, pass);
+
+			if (conn != null) {
+				return conn;
 			}
-	        
-	        JOptionPane.showMessageDialog(null, "Connection Failed!");	        
-	        System.out.println("Conn failed");
-	        return conn;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-	  }
+		JOptionPane.showMessageDialog(null, "Connection Failed!");	        
+		System.out.println("Conn failed");
+		return conn;
+
+	}
 
 	@Override
 	public boolean isWrapperFor(Class<?> arg0) throws SQLException {
@@ -74,25 +78,25 @@ public class CreateConnection implements Connection {
 	@Override
 	public void abort(Executor executor) throws SQLException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void clearWarnings() throws SQLException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void close() throws SQLException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void commit() throws SQLException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -300,61 +304,61 @@ public class CreateConnection implements Connection {
 	@Override
 	public void releaseSavepoint(Savepoint savepoint) throws SQLException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void rollback() throws SQLException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void rollback(Savepoint savepoint) throws SQLException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setAutoCommit(boolean autoCommit) throws SQLException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setCatalog(String catalog) throws SQLException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setClientInfo(Properties properties) throws SQLClientInfoException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setClientInfo(String name, String value) throws SQLClientInfoException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setHoldability(int holdability) throws SQLException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setReadOnly(boolean readOnly) throws SQLException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -372,19 +376,19 @@ public class CreateConnection implements Connection {
 	@Override
 	public void setSchema(String schema) throws SQLException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setTransactionIsolation(int level) throws SQLException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
 		// TODO Auto-generated method stub
-		
+
 	}
-	   
-	}
+
+}

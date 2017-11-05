@@ -1,10 +1,10 @@
 package documents;
-
+/*
+ * 
+ */
 import java.awt.Desktop;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,15 +16,12 @@ import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDTextField;
 
-import com.microsoft.sqlserver.jdbc.SQLServerException;
-
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 
 public class PrintSiteCheck {
 	private String getSCDetails = "EXEC AWS_WCH_DB.dbo.sc_PrintSiteChecks";
 	private ResultSet qryResults;
-//	private String scForm = "//C:/pdfs/Invoice/InstType_FS.pdf"; 
 
 	private String file = "//C:/pdfs/Invoice/SC_Sale"; 
 	private CreateConnection connecting;
@@ -63,16 +60,16 @@ public class PrintSiteCheck {
         	else{
 				while(qryResults.next()){
 					
-					scPath			= qryResults.getString("scPath");
-					salesperson 	= qryResults.getString("salesperson");
-		        	customer		= qryResults.getString("customer");
-	 	     		site 			= qryResults.getString("site");
-					phone 	 		= qryResults.getString("phone");
-					mobile 			= qryResults.getString("mobile");
-					email 			= qryResults.getString("email");
-					fire 			= qryResults.getString("fire");
-					date 			= qryResults.getString("date");
-					time 			= qryResults.getString("time");       	
+					scPath			= qryResults.getString("scPath");			//InstallType, siteCheck form
+					salesperson 	= qryResults.getString("salesperson");		
+		        	customer		= qryResults.getString("customer");			
+	 	     		site 			= qryResults.getString("site");				
+					phone 	 		= qryResults.getString("phone");			
+					mobile 			= qryResults.getString("mobile");			
+					email 			= qryResults.getString("email");			
+					fire 			= qryResults.getString("fire");				
+					date 			= qryResults.getString("date");				
+					time 			= qryResults.getString("time");  			     	
 				
 				}
         	}

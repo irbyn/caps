@@ -1,20 +1,23 @@
 package Installs;
-
+/*
+ * GUI PANEL:	INSTALLS - JPanel to hold tabs
+ * acts as a controller for some common functionality for Install tabs 
+ */
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.io.File;
-import java.io.FilenameFilter;
+//import java.awt.EventQueue;
+//import java.io.File;
+//import java.io.FilenameFilter;
 import java.sql.Connection;
-import java.sql.Date;
+//import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
+//import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
+//import javax.swing.JButton;
+//import javax.swing.JComboBox;
+//import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -34,7 +37,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Main.Homescreen;
-import Installs.*;
+//import Installs.*;
 import net.proteanit.sql.DbUtils;
 
 public class InstallsPane extends JPanel
@@ -93,10 +96,10 @@ public class InstallsPane extends JPanel
 	"EXEC AWS_WCH_DB.dbo.i_InstallsToBook"};	// procedure[4]
 
 	private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// procedure[0]
-		{30, 100, 120, 80, 40, 40, 40, 40},	 		// procedure[1]
+		{30, 150, 150, 100, 100, 100, 100, 100},		// procedure[1]
 		{20, 100, 120, 20, 80, 400}, 					// procedure[2]
 		{20, 100, 100, 40, 20, 80, 300, 50}, 			// procedure[3]
-		{30, 100, 100, 80, 50, 50, 50, 40}};		// procedure[4]
+		{30, 100, 100, 80, 50, 50, 50, 40}};			// procedure[4]
 
 
 		public InstallsPane(ConnDetails conDeets, Homescreen hs)
@@ -233,7 +236,6 @@ public class InstallsPane extends JPanel
 				else{
 
 					while(qryResults.next()){
-
 						invoice 			= qryResults.getString("Invoice");
 						rees				= qryResults.getString("Rees");
 						customerName 		= qryResults.getString("CustomerName");
@@ -260,6 +262,7 @@ public class InstallsPane extends JPanel
 						return str;
 					}
 				}
+				conn.close();
 			}
 			catch(Exception ex)
 			{ 
@@ -281,7 +284,6 @@ public class InstallsPane extends JPanel
 				}
 				else{
 					while(qryResults.next()){
-
 						invoice 			= qryResults.getString("Invoice");
 						rees				= qryResults.getString("Rees");
 						customerName 		= qryResults.getString("CustomerName");
@@ -324,13 +326,6 @@ public class InstallsPane extends JPanel
 					while(qryResults.next()){
 
 						toInstaller		= qryResults.getString("toInstaller");
-
-						/*	        str = 	" INVOICE:\t" + instNumber + "\n" +
-			        				" REES CODE:\t" + rees +"\n" +
-			        				" CLIENT:\t" + customerName + "\n\n" + 
-			        				" PHONE:\t" + customerPhone + "\n" + 
-			        				" MOBILE:\t" + customerMobile + "\n" +
-			        				" EMAIL:\t" + customerEmail;	        	*/	
 						return toInstaller;
 					}
 				}
@@ -372,12 +367,6 @@ public class InstallsPane extends JPanel
 			}      		            
 			return "";
 		}  	
-
-
-
-
-
-
 
 
 		public ResultSet getResults(int ind, ConnDetails connDeets){      	
