@@ -758,13 +758,13 @@ class CustomerPanel extends JPanel {
 
 			ResultSet qryResults = sm.executeQuery();
 			rs = qryResults;
-			conn.close();
+
 
 		}catch (SQLServerException sqex){
 			JOptionPane.showMessageDialog(null, "DB_ERROR: " + sqex);
 		}catch(Exception ex){ 
 			JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
-		}	 
+		}
 
 		return rs;
 	}
@@ -776,7 +776,6 @@ class CustomerPanel extends JPanel {
 			String qry = "{" + query +"(?,?,?)}";	
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
 			sm = conn.prepareCall(qry);
-			conn.close();
 
 			if (!sFNameTxtBx.getText().equals("")){
 				sm.setString(1, sFNameTxtBx.getText());
@@ -819,7 +818,6 @@ class CustomerPanel extends JPanel {
 			sm.setString(3, getSSuburb());
 
 			sm.executeUpdate();
-			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -851,7 +849,6 @@ class CustomerPanel extends JPanel {
 			sm.setString(10, getSSuburb());
 
 			sm.executeUpdate();
-			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -883,7 +880,6 @@ class CustomerPanel extends JPanel {
 			sm.setString(8, getEmail());
 
 			sm.executeUpdate();
-			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -918,7 +914,6 @@ class CustomerPanel extends JPanel {
 			sm.setString(11, getSSuburb());
 
 			sm.executeUpdate();
-			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -944,7 +939,7 @@ class CustomerPanel extends JPanel {
 
 			ResultSet qryResults = sm.executeQuery();
 			rs = qryResults;
-			conn.close();
+
 			while(qryResults.next()){
 				customerID	= qryResults.getInt("customerID");
 			}

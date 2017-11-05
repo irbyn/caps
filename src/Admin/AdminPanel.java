@@ -380,6 +380,7 @@ public class AdminPanel extends JFrame {
 							disableFields();
 							clearFields();
 							updateBtn.setEnabled(false);
+							createNewUserBtn.setEnabled(true);
 							resetTable();
 							JOptionPane.showMessageDialog(null, "The user has been updated!");
 						}
@@ -389,6 +390,7 @@ public class AdminPanel extends JFrame {
 						disableFields();
 						clearFields();
 						updateBtn.setEnabled(false);
+						createNewUserBtn.setEnabled(true);
 						resetTable();
 						JOptionPane.showMessageDialog(null, "The user has been updated!");
 					}
@@ -568,7 +570,6 @@ public class AdminPanel extends JFrame {
 			Connection conn = connecting.CreateConnection(conDeets);
 			PreparedStatement st =conn.prepareStatement(qryList);
 			results = st.executeQuery();
-			conn.close();
 		}
 		catch(Exception ex)
 		{ 
@@ -583,7 +584,6 @@ public class AdminPanel extends JFrame {
 			Connection conn = connecting.CreateConnection(conDeets);
 			PreparedStatement st2 =conn.prepareStatement(qry + param);	
 			qryResults = st2.executeQuery();
-			conn.close();
 			if (qryResults==null){
 				System.out.println("null query");
 			}
@@ -624,7 +624,7 @@ public class AdminPanel extends JFrame {
 			stm.setString(19, md5Hash);
 
 			stm.executeUpdate();
-			conn.close();
+			
 		}
 		catch (SQLServerException sqex)
 		{
@@ -1130,7 +1130,7 @@ public class AdminPanel extends JFrame {
 			sm.setString(1, usertxtBx.getText());
 
 			rs = sm.executeQuery();	 
-			conn.close();
+			
 			if (rs.next()){
 				error = true;	
 			}

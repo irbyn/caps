@@ -262,7 +262,7 @@ public class Homescreen extends JFrame {
 
 			ResultSet qryResults = sm.executeQuery();
 			rs = qryResults;
-			conn.close();
+			//conn.close();
 			//Setting who is logged into the application 
 			while(qryResults.next()){
 				lblUser.setText("Logged in as: " + rs.getString("Name"));

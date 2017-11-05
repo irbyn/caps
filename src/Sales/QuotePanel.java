@@ -453,7 +453,7 @@ class QuotePanel extends JPanel {
 			pm.setString(7, getPhotoLoaded());
 
 			pm.executeUpdate();
-			conn.close();
+			//conn.close();
 		}
 		catch (SQLServerException sqex)
 		{

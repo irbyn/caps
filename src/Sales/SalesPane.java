@@ -186,7 +186,6 @@ public class SalesPane extends JPanel
 						return str;
 					}
 				}
-				conn.close();
 			}
 			catch(Exception ex)
 			{ 
@@ -200,8 +199,8 @@ public class SalesPane extends JPanel
 			{
 				Connection conn = connecting.CreateConnection(conDeets);
 				PreparedStatement st =conn.prepareStatement(procedure[ind]);
-				results = st.executeQuery(); 
-				conn.close();
+				results = st.executeQuery();   
+				
 			}
 			catch(Exception ex)
 			{ 
@@ -216,7 +215,6 @@ public class SalesPane extends JPanel
 				Connection conn = connecting.CreateConnection(conDeets);
 				PreparedStatement st =conn.prepareStatement(qry + param);
 				results = st.executeQuery(); 
-				conn.close();
 			}
 			catch(Exception ex)
 			{ 
@@ -232,7 +230,6 @@ public class SalesPane extends JPanel
 				Connection conn = connecting.CreateConnection(conDeets);
 				PreparedStatement st2 =conn.prepareStatement(qry + param);	
 				qryResults = st2.executeQuery();
-				conn.close();
 				if (qryResults==null){
 					System.out.println("null query");
 				}
