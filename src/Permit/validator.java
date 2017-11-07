@@ -1,5 +1,9 @@
 package Permit;
 
+/*
+ * class to validate user entries when there are multiple fields to check 
+ */
+
 import java.awt.Component;
 import java.util.Calendar;
 

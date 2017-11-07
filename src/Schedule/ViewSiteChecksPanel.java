@@ -1,46 +1,30 @@
 package Schedule;
 
+/*
+ * GUI PANEL:	SCHEDULE - Site Checks
+ * Allows User to view upcoming site checks & print the correct form
+ */
+
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Desktop;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.sql.CallableStatement;
-import java.sql.Connection;
 import java.sql.ResultSet;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
-import javax.swing.SpinnerDateModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-import com.microsoft.sqlserver.jdbc.SQLServerException;
-
 import DB_Comms.CreateConnection;
-import Installs.InstallsPane;
 import Main.ConnDetails;
 import documents.PrintSiteCheck;
 import net.proteanit.sql.DbUtils;
@@ -51,7 +35,6 @@ class ViewSiteChecksPanel extends JPanel {
 	private int [] columnWidth = {40, 100, 100, 60, 60, 60, 60}; 	
 	private String upReceived = "{Call AWS_WCH_DB.dbo.[i_updateStockReceived] (?,?)}";
 	private String[] colNames = {"Sale ID", "Customer Name", "Street Address", "Suburb", "SC Date", "SC Time", "SC By"};
-
 	private StringBuilder sb;
 
 	private String invoiceNum = "";
@@ -60,34 +43,29 @@ class ViewSiteChecksPanel extends JPanel {
 	private String stk;
 
 	private ResultSet rs;
-	private Color LtGray = Color.decode("#eeeeee");
-
 	private Boolean rowSelected = false;
-
 	private CreateConnection connecting;
 
-	private JTableHeader header;
-	private TableColumnModel columnModel;
 	private JPanel tablePanel;
 	private JPanel infoPanel;
 	private JPanel poPanel;
 
-	private JTable timeTbl;
+	private JTableHeader header;
+	private TableColumnModel columnModel;
+	private JScrollPane scrollPane;private JTable timeTbl;
 	private DefaultTableModel model1;
 
 	private JTable scTbl;
 	private JTableHeader hd2;
 	private TableColumnModel cmod2;
 	private DefaultTableModel tmod2;
-
+	private JScrollPane sPane;
 
 	private JButton printSiteCheckBtn; 
 	private JButton cancelGoodsRcvdBtn; 
-	//	private JButton saveGoodsRcvdBtn; 
 	private JSpinner reportDate;
 
 	private CreateConnection conn;
-
 	private Boolean lockForm;
 	private ConnDetails conDeets;
 	private SchedulePane sp;
@@ -98,16 +76,12 @@ class ViewSiteChecksPanel extends JPanel {
 		this.conDeets = conDetts;
 		this.sp = spn;
 
-		//		connecting = new CreateConnection();
-
 		model1 = new DefaultTableModel();  
 		model1.setRowCount(0);
 		timeTbl = new JTable(model1);
 		timeTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		timeTbl.setAutoCreateRowSorter(true);
-
-		JScrollPane scrollPane = new JScrollPane(timeTbl);
-
+		scrollPane = new JScrollPane(timeTbl);
 		header= timeTbl.getTableHeader();
 		columnModel = header.getColumnModel();
 		add(header); 
@@ -127,7 +101,7 @@ class ViewSiteChecksPanel extends JPanel {
 		tmod2 = new DefaultTableModel(colNames,0);
 		scTbl = new JTable(tmod2);
 		scTbl.setAutoCreateRowSorter(true);        
-		JScrollPane spane = new JScrollPane(scTbl);	  
+		sPane = new JScrollPane(scTbl);	  
 		hd2= scTbl.getTableHeader();        
 		cmod2 = hd2.getColumnModel();
 		spaceHeader(cmod2, columnWidth);
@@ -146,7 +120,7 @@ class ViewSiteChecksPanel extends JPanel {
 		infoPanel.add(poPanel);
 		this.add(infoPanel);
 
-		poPanel.add(spane, BorderLayout.CENTER);
+		poPanel.add(sPane, BorderLayout.CENTER);
 		poPanel.add(scTbl.getTableHeader(), BorderLayout.NORTH); 
 
 		tablePanel.add(scrollPane, BorderLayout.CENTER);
@@ -163,12 +137,9 @@ class ViewSiteChecksPanel extends JPanel {
 							String saleID = scTbl.getValueAt(i, 0).toString();
 							PrintSiteCheck sc = new PrintSiteCheck(saleID, conDeets);
 						}
-
 					}else {
 						sp.showMessage("Select a Sale to Print (Double-Right-Click)");
 					}
-
-					//showReceivedItems();
 				}					
 			}
 		});
@@ -181,28 +152,10 @@ class ViewSiteChecksPanel extends JPanel {
 				}					
 			}
 		});
-		timeTbl.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			@Override
-			public void valueChanged(ListSelectionEvent arg0) {
-				if (!arg0.getValueIsAdjusting()){
-					rowSelected=true;
-					//			pp.setFormsLocked();
-					try{
-						//						invoiceNum = timeTbl.getValueAt(timeTbl.getSelectedRow(), 0).toString();
-
-						//					detailsTxtArea.setText(ip.DisplayClientDetails(invoiceNum));
-
-					} catch (IndexOutOfBoundsException e){
-						//Ignoring IndexOutOfBoundsExceptions!
-					}
-				}
-			}
-		});
 		timeTbl.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent evt) {
 				if (evt.getClickCount() == 2) {
-
 					int actualRow = timeTbl.convertRowIndexToModel(timeTbl.rowAtPoint(evt.getPoint())); 
 					int clickedRow = timeTbl.rowAtPoint(evt.getPoint());	
 					moveRow(clickedRow, timeTbl, scTbl);		
@@ -225,48 +178,6 @@ class ViewSiteChecksPanel extends JPanel {
 	}
 
 
-	/*
-protected void showReceivedItems() {
-
-    SimpleDateFormat repModel = new SimpleDateFormat("dd.MMM.yyyy");
-	reportDate = new JSpinner(new SpinnerDateModel());
-	reportDate.setEditor(new JSpinner.DateEditor(reportDate, repModel.toPattern()));
-	int option = JOptionPane.showOptionDialog(null, reportDate, "Enter Date of Report start", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-	if (option == JOptionPane.CANCEL_OPTION)
-	{
-	    // user hit cancel
-	} else if (option == JOptionPane.OK_OPTION)
-	{
-    	Date dte = (Date) reportDate.getValue(); 
-       	SimpleDateFormat sdf1 = new SimpleDateFormat("dd-MMM-yyyy");
-    	String dt = sdf1.format(dte);
-
-//    	sb = sp.reportStockReceived(dt);
-
-	    String prefix = "stockReceived_";
-	    String suffix = ".txt";
-
-
-	    File tempFile;
-		try {
-			tempFile = File.createTempFile(prefix, suffix);
-		    tempFile.deleteOnExit();
-
-		    try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
-		        writer.write(sb.toString());
-		    }
-		      if (Desktop.isDesktopSupported()) {
-		    	    try {
-		    	        Desktop.getDesktop().open(tempFile);
-		    	    } catch (IOException ex) {
-		    	    }
-		    	}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}		
-	}
-	 */
 	private void moveRow(int row, JTable fromTbl, JTable toTbl){
 		String date;
 		if (fromTbl.getValueAt(row, 4)!=null){
@@ -327,4 +238,3 @@ protected void showReceivedItems() {
 		return infoPanel;
 	}
 }
-

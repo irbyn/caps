@@ -413,17 +413,28 @@ class BookingsPanel extends JPanel {
 	}
 
 	protected void closeInstall() {
+											 
+//		JOptionPane.showMessageDialog(null,  installTbl.getValueAt(installTbl.getSelectedRow(), 7).toString());
+		if(installTbl.getValueAt(installTbl.getSelectedRow(), 7).toString()!=null){
+			
+		
 		String str = installTbl.getValueAt(installTbl.getSelectedRow(), 7).toString();
+		if (str.length()> 8){
 		str = str.substring(0,8);
+		}
 		if (str.equals("Complete")){
 
 			int input = JOptionPane.showConfirmDialog(null,"Close Install?\n "
 					+ "This Action is final, Install will no longer be tracked!",  "Close Install?", JOptionPane.YES_NO_OPTION);
 			if (input == 0){		
-				ip.showMessage("Closing Permit");
+				ip.showMessage("Closing Install");
 				UpdateInstallClosed(invoiceNum);
 				resetTable();
 			}
+			
+		}else {
+			JOptionPane.showMessageDialog(null, "Installer must mark this Install as complete before Closing");
+		}
 		}
 	}
 

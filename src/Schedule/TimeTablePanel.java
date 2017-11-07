@@ -1,7 +1,7 @@
 package Schedule;
 
 /*
- * GUI PANEL:	T
+ * GUI PANEL:	SCHEDULE - Installations
  * Allows User to view install status & Make or delete bookings
  */
 
@@ -61,6 +61,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
+import Main.bookingColumnRenderer;
 import Permit.PermitPane;
 import Permit.validator;
 import net.proteanit.sql.DbUtils;
@@ -76,14 +77,6 @@ class TimeTablePanel extends JPanel {
 	private String upConsent = "call AWS_WCH_DB.dbo.p_PermitUpdateConsent ";
 	private String upSent = "{call AWS_WCH_DB.dbo.p_PermitUpdateSent (?)}";
 	private String upFire = "{call AWS_WCH_DB.dbo.p_PermitUpdateFire (?,?,?,?,?,?,?,?)}";
-	private Color LtBlue = Color.decode("#e8e8ff");	
-	private Color DkBlue = Color.decode("#174082");
-	private Color LtGray = Color.decode("#eeeeee");	
-	private Color inst1 = Color.decode("#eeffd6");
-	private Color inst2 = Color.decode("#fff1e2");
-	private Color inst3 = Color.decode("#e2fff5");
-	private Color inst4 = Color.decode("#ffe2f8");
-	private Color[] instColors = {inst1, inst2, inst3, inst4};
 	private CreateConnection connecting;
 
 	private String param = "";  
@@ -189,30 +182,6 @@ class TimeTablePanel extends JPanel {
 				updateWeek();
 			}
 		});		
-		/*			  	timeTbl.addMouseListener(new java.awt.event.MouseAdapter() {
-			  		@Override
-			  		 public void mouseClicked(java.awt.event.MouseEvent evt) {
-			  		    row = timeTbl.rowAtPoint(evt.getPoint());
-			  		    col = timeTbl.columnAtPoint(evt.getPoint());
-			  		    if (col >= 2) {		
-
-								if (timeTbl.getValueAt(row, col) == null || timeTbl.getValueAt(row, col).equals("")) {
-									String inst = timeTbl.getValueAt(row,0).toString();
-									String tme = timeTbl.getValueAt(row,1).toString();					
-								try {
-										DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-										LocalDate date = LocalDate.parse("2017-10-22", formatter);
-										date = date.plusDays(col-2);
-										sp.showMessage("SLOT: " + inst + ", " + tme + " ON: " + date.toString());	
-									}
-									catch (DateTimeParseException exc) {
-									}								
-								}else {
-									JOptionPane.showMessageDialog(null, timeTbl.getValueAt(row, col).toString());
-								}
-							}
-			  		 	}
-			  		});		*/
 
 		// Calendar for today
 		cal.getInstance();   
@@ -273,25 +242,14 @@ class TimeTablePanel extends JPanel {
 		spaceHeader();
 
 		JTableHeader th = timeTbl.getTableHeader();		
+		TableColumn tc = timeTbl.getColumnModel().getColumn(0);		
 
-		TableColumn tc = timeTbl.getColumnModel().getColumn(0);			    
-		tc.setCellRenderer(new installerColumnRenderer());
-		tc = timeTbl.getColumnModel().getColumn(1);			    
-		tc.setCellRenderer(new installerColumnRenderer());
-		tc = timeTbl.getColumnModel().getColumn(2);			    
-		tc.setCellRenderer(new installerColumnRenderer());
-		tc = timeTbl.getColumnModel().getColumn(3);			    
-		tc.setCellRenderer(new installerColumnRenderer());
-		tc = timeTbl.getColumnModel().getColumn(4);			    
-		tc.setCellRenderer(new installerColumnRenderer());
-		tc = timeTbl.getColumnModel().getColumn(5);			    
-		tc.setCellRenderer(new installerColumnRenderer());
-		tc = timeTbl.getColumnModel().getColumn(6);			    
-		tc.setCellRenderer(new installerColumnRenderer());
-		tc = timeTbl.getColumnModel().getColumn(7);			    
-		tc.setCellRenderer(new installerColumnRenderer());
-		tc = timeTbl.getColumnModel().getColumn(8);			    
-		tc.setCellRenderer(new installerColumnRenderer());		
+		int cols = timeTbl.getColumnModel().getColumnCount();
+
+		for(int i = 0; i<cols; i++){
+			tc = timeTbl.getColumnModel().getColumn(i);
+			tc.setCellRenderer(new bookingColumnRenderer());
+		}
 	}
 
 
@@ -299,55 +257,12 @@ class TimeTablePanel extends JPanel {
 
 		ResultSet rs = sp.getResults(0, weekOf );
 		timeTbl.setModel(DbUtils.resultSetToTableModel(rs)); 
-
 		spaceHeader();			  	
 		param = "";  
 		timeTbl.clearSelection();
 		rowSelected=false;
 		updateWeek();
 	}
-
-
-	/*		private void displayClientDetails(String parameter) {
-
-				rs2 = sp.getDetails(qry, param);
-
-		        	 try {
-						while(rs2.next()){
-	 */								    					
-	/*			        	String invoice 			= rs2.getString("Invoice");
-				        	String rees				= rs2.getString("Rees");
-							 String customerName 	= rs2.getString("CustomerName");
-							 String customerAddress = rs2.getString("CustomerAddress");
-							 String customerSuburb 	= rs2.getString("CustomerSuburb");
-							 String customerPostCode= rs2.getString("CustomerPostCode");
-							 String customerPhone 	= rs2.getString("CustomerPhone");
-							 String customerMobile 	= rs2.getString("CustomerMobile");
-							 String customerEmail 	= rs2.getString("CustomerEmail");
-							 String streetAddress 	= rs2.getString("StreetAddress");
-							 String suburb 			= rs2.getString("Suburb");
-	 */	/*					 String status 			= rs2.getString("PermitStatus");
-							 String consent 		= rs2.getString("Consent");						 						
-							 String lot 			= rs2.getString("Lot");
-							 String dP 				= rs2.getString("DP"); 
-							 String ownershipDoc 	= rs2.getString("ownershipDoc");							
-							 String building 		= rs2.getString("Building");
-							 String unit_Level 		= rs2.getString("Unit_Level");						
-							 String yearConstructed = rs2.getString("YearConstructed");
-							 String fireID 			= rs2.getString("FireID");						 
-							 Boolean wetback 		= rs2.getBoolean("Wetback");						 
-							 String value 			= rs2.getString("Value");						 
-							 String fire_Location 	= rs2.getString("Fire_Location");			
-
-						}
-
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-//		       	 updateFireDetails(fireIDTxtBx.getText());
-			}        	 
-	  */	        
 
 
 	public void spaceHeader() {
@@ -360,48 +275,7 @@ class TimeTablePanel extends JPanel {
 		header.repaint();
 	}
 
-
-
-	class installerColumnRenderer extends DefaultTableCellRenderer
-	{		         
-		public installerColumnRenderer() {
-			super();
-		}
-
-		public Component getTableCellRendererComponent
-		(JTable table, Object value, boolean isSelected,
-				boolean hasFocus, int row, int column)
-		{
-			Component cell = super.getTableCellRendererComponent
-					(table, value, isSelected, hasFocus, row, column);
-			if (column == 0 || column == 1 ){	
-				cell.setBackground( instColors[(row/2)%4]);  
-				cell.setForeground( DkBlue );		          
-				cell.setFont(cell.getFont().deriveFont(Font.BOLD));	
-				setHorizontalAlignment(SwingConstants.CENTER);
-				return cell;
-			}else if (column == 2 || column == 8 ){
-				cell.setBackground( LtGray);  
-				cell.setForeground( DkBlue );
-				cell.setFont(cell.getFont().deriveFont(12, Font.BOLD));	
-				return cell;
-			}else {
-				//		    	  JLabel l = (JLabel)cell;
-
-				String contents = (String)value;
-				((JComponent) cell).setToolTipText(contents);		    	  		    	  
-				cell.setBackground( instColors[(row/2)%4]);
-
-				return cell;
-			}
-
-		}
-	}
-
 	public JTable getScheduleTbl(){
 		return timeTbl;
 	}
-
-
-
 }

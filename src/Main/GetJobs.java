@@ -1,5 +1,10 @@
 package Main;
 
+/*
+ * Fills combo boxes for staff able to perform different roles,
+ * Installers, Salespeople & Sitecheckers 
+ */
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

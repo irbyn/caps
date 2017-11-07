@@ -1,5 +1,10 @@
 package Permit;
 
+/*
+ * GUI PANEL:	PERMITS - Receive Permit
+ * Allows User to Record permit number or Permit number & that it has been issued
+ */
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -45,10 +50,7 @@ import net.proteanit.sql.DbUtils;
 import DB_Comms.CreateConnection;
 import Main.*;
 
-
-
 class RecvPermitPanel extends JPanel {
-
 
 	private int [] columnWidth = {20, 120, 160, 100, 100, 100};
 	private String qry = "EXEC AWS_WCH_DB.dbo.[p_PermitsDetails] ";
@@ -60,11 +62,11 @@ class RecvPermitPanel extends JPanel {
 	private ResultSet rs;
 	private ResultSet rs2;
 	private Boolean rowSelected;
-
 	private CreateConnection connecting;
 
 	private JTableHeader header;
 	private TableColumnModel columnModel;
+	private JScrollPane scrollPane;
 	private JPanel tablePanel;
 	private JPanel infoPanel;
 
@@ -93,7 +95,6 @@ class RecvPermitPanel extends JPanel {
 		this.lockForm = lockForm;
 		this.conDeets = conDetts;
 		this.pp = ppn;
-
 		connecting = new CreateConnection();
 
 		model2 = new DefaultTableModel();  
@@ -102,7 +103,7 @@ class RecvPermitPanel extends JPanel {
 		permitsTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		permitsTbl.setAutoCreateRowSorter(true);
 
-		JScrollPane scrollPane = new JScrollPane(permitsTbl);
+		scrollPane = new JScrollPane(permitsTbl);
 
 		header= permitsTbl.getTableHeader();
 		columnModel = header.getColumnModel();
@@ -242,11 +243,9 @@ class RecvPermitPanel extends JPanel {
 
 	protected void resetTable() {
 		clearFields();
-
 		ResultSet rs = pp.getResults(1);
 		permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 		spaceHeader();
-
 		rowSelected=false;
 		invNum = "";
 		detailsTxtArea.setText("");
@@ -254,7 +253,6 @@ class RecvPermitPanel extends JPanel {
 		receivedChk.setSelected(false);
 		receivedDate.setVisible(false);
 		receivedDateLbl.setVisible(false); 	
-
 	}
 
 
@@ -263,16 +261,13 @@ class RecvPermitPanel extends JPanel {
 		CallableStatement pm = null;
 
 		try {
-
 			String update = "{" + upNumber +"(?,?)}";	
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
-
 			pm = conn.prepareCall(update);
-
 			pm.setString(1, invNum);
 			pm.setString(2, getConsentNum());
-
 			pm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -292,14 +287,12 @@ class RecvPermitPanel extends JPanel {
 
 			String update = "{" + upReceived +"(?,?,?)}";	
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
-
 			pm = conn.prepareCall(update);
-
 			pm.setString(1, invNum);
 			pm.setString(2, getConsentNum());
 			pm.setString(3, getReceivedDate());
-
 			pm.executeUpdate();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -375,6 +368,8 @@ class RecvPermitPanel extends JPanel {
 	public JTable getPermitsTbl(){
 		return permitsTbl;
 	}
-
+	public JPanel getInfoPanel(){
+		return infoPanel;
+	}
 
 }

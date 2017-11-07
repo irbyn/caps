@@ -93,13 +93,13 @@ public class InstallsPane extends JPanel
 			"EXEC AWS_WCH_DB.dbo.i_InstallsToCheck", 	// procedure[1]
 			"EXEC AWS_WCH_DB.dbo.i_InstallsPlaceOrders",// procedure[2]
 			"EXEC AWS_WCH_DB.dbo.i_InstallsReceiveOrders",//procedure[3]
-	"EXEC AWS_WCH_DB.dbo.i_InstallsToBook"};	// procedure[4]
+			"EXEC AWS_WCH_DB.dbo.i_InstallsToBook"};	// procedure[4]
 
 	private int[][] spacing = new int[][]	{{30, 100, 120, 80, 40, 40, 40}, 				// procedure[0]
-		{30, 150, 150, 100, 100, 100, 100, 100},		// procedure[1]
-		{20, 100, 120, 20, 80, 400}, 					// procedure[2]
-		{20, 100, 100, 40, 20, 80, 300, 50}, 			// procedure[3]
-		{30, 100, 100, 80, 50, 50, 50, 40}};			// procedure[4]
+											{30, 150, 150, 100, 100, 100, 100, 100},		// procedure[1]
+											{20, 100, 120, 20, 80, 400}, 					// procedure[2]
+											{20, 100, 100, 40, 20, 80, 300, 50}, 			// procedure[3]
+											{30, 100, 100, 80, 50, 50, 50, 40}};			// procedure[4]
 
 
 		public InstallsPane(ConnDetails conDeets, Homescreen hs)
