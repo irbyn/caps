@@ -12,9 +12,14 @@ public class ConnDetails {
 	private String pass;
 	
 	public ConnDetails(){
-
+/*
 		dbURL = "jdbc:sqlserver://wchonaws.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:47947";
 //		dbURL = "jdbc:sqlserver://wch-db.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:47947";
+		user = "LKiy63iLFuh23ci5";
+		pass = "Lsubibigxuiohaoha97sH";
+	*/
+//		dbURL = "jdbc:sqlserver://wchonaws.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:47947";
+		dbURL = "jdbc:sqlserver://wch-db.cnfoxyxq90wv.ap-southeast-2.rds.amazonaws.com:47947";
 		user = "nhfnKGF519hinsd897665465jbsdsf";
 		pass = "NJiugi7btdjyFbe99n9n09UU";
 	}

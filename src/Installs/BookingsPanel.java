@@ -414,10 +414,8 @@ class BookingsPanel extends JPanel {
 
 	protected void closeInstall() {
 											 
-//		JOptionPane.showMessageDialog(null,  installTbl.getValueAt(installTbl.getSelectedRow(), 7).toString());
 		if(installTbl.getValueAt(installTbl.getSelectedRow(), 7).toString()!=null){
-			
-		
+				
 		String str = installTbl.getValueAt(installTbl.getSelectedRow(), 7).toString();
 		if (str.length()> 8){
 		str = str.substring(0,8);
