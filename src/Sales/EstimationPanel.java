@@ -257,6 +257,34 @@ class EstimationPanel extends JPanel {
 							throw new RuntimeException("desktop doesn't support mailto; mail is dead anyway ;)");
 						}
 					}
+					else if (dialogResult == JOptionPane.NO_OPTION){
+						
+
+						Desktop desktop;
+						if (Desktop.isDesktopSupported() 
+								&& (desktop = Desktop.getDesktop()).isSupported(Desktop.Action.MAIL)) {
+
+							String custEmail = sp.getEmailAddr();
+							String emailBody = getEmailBody();
+
+							URI mailto;
+							try {
+								mailto = new URI("mailto:" + custEmail + "?subject=Fire%20Estimation&body=" + emailBody);
+								desktop.mail(mailto);				
+							} catch (URISyntaxException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+						} else {
+							// TODO fallback to some Runtime.exec(..) voodoo?
+							throw new RuntimeException("desktop doesn't support mailto; mail is dead anyway ;)");
+						}
+						
+					}
 				}
 			}
 		});

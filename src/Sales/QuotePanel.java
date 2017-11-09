@@ -453,7 +453,7 @@ class QuotePanel extends JPanel {
 			pm.setString(7, getPhotoLoaded());
 
 			pm.executeUpdate();
-			//conn.close();
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -808,8 +808,6 @@ class QuotePanel extends JPanel {
 	public void getNumbers(){
 		CallableStatement sm = null;
 		try {
-
-			//String update = "{" + getQuoteDetails +"(?,?)}";	
 			Connection conn = connecting.CreateConnection(conDeets);	        	   	
 
 			sm = conn.prepareCall(getQuoteDetails);
@@ -817,7 +815,7 @@ class QuotePanel extends JPanel {
 			sm.setInt(2, Integer.parseInt(custID));
 
 			rs = sm.executeQuery();	 
-			conn.close();
+			
 			if (rs==null){
 				JOptionPane.showMessageDialog(null, "null query");
 			}
@@ -831,6 +829,7 @@ class QuotePanel extends JPanel {
 					quoteNumTxtBx.setText(quote);
 				}
 			}
+			conn.close();
 		}
 		catch(Exception ex)
 		{ 

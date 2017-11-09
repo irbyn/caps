@@ -318,7 +318,7 @@ class SiteCheckPanel extends JPanel {
 			sm.setInt(1, Integer.parseInt(parameter));
 
 			rs = sm.executeQuery();	 
-			conn.close();
+			
 			if (rs==null){
 				JOptionPane.showMessageDialog(null, "null query");
 			}
@@ -393,7 +393,6 @@ class SiteCheckPanel extends JPanel {
 					}
 					if (booked==false){
 						sCheckBookedChckBx.setSelected(false);
-						//group.clearSelection();
 					}else{
 						sCheckBookedChckBx.setSelected(true);
 					}
@@ -405,6 +404,7 @@ class SiteCheckPanel extends JPanel {
 					}
 				}
 			}
+			conn.close();
 		}
 		catch(Exception ex)
 		{ 

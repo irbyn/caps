@@ -354,10 +354,10 @@ class FollowUpPanel extends JPanel {
 			sm = conn.prepareCall(comm);
 			sm.setString(1, paramSID);
 			rs2 = sm.executeQuery();
-			conn.close();
-
+			
 			commentTbl.setModel(DbUtils.resultSetToTableModel(rs2));
 			spaceHeader(columnModelComm, columnWidthComm);
+			conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
@@ -475,7 +475,7 @@ class FollowUpPanel extends JPanel {
 			pm.setDate(3, (java.sql.Date) date);
 
 			pm.executeUpdate();
-			conn.close();
+			//conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
