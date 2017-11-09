@@ -477,10 +477,11 @@ class SiteCheckPanel extends JPanel {
 			sm.setString(1, slSName);
 
 			ResultSet rs = sm.executeQuery();
-			conn.close();
+			
 			while (rs.next()){
 				slsID = rs.getInt("UserID");
 			}
+		conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
