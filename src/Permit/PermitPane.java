@@ -114,7 +114,7 @@ public class PermitPane extends JPanel
 					ClearFields(fieldz[tabIndex]);
 					JTabbedPane pane = (JTabbedPane) e.getSource();
 					tabIndex = pane.getSelectedIndex();
-					getResults(tabIndex); 
+					getTable(tabIndex); 
 					tablez[tabIndex].setModel(DbUtils.resultSetToTableModel(results));         
 					TableColumnModel tcm = tablez[tabIndex].getColumnModel();					
 					spaceHeader(spacing[tabIndex], tcm); 					
@@ -144,12 +144,12 @@ public class PermitPane extends JPanel
 	}
 
 	// Fills client details in textArea (bottom Left of GUI)
-	public String DisplayClientDetails(String parameter){
+	public String DisplayClientDetails(String invNum){
 
 		try
 		{
 			Connection conn = connecting.CreateConnection(conDeets);
-			PreparedStatement st2 =conn.prepareStatement(custDetails + ' ' +  parameter);	    	
+			PreparedStatement st2 =conn.prepareStatement(custDetails + ' ' +  invNum);	    	
 			qryResults = st2.executeQuery();
 			if (qryResults==null){
 				JOptionPane.showMessageDialog(null, "null query");
@@ -169,7 +169,7 @@ public class PermitPane extends JPanel
 					String streetAddress 	= qryResults.getString("StreetAddress");
 					String suburb 			= qryResults.getString("Suburb");
 
-					String str = " INVOICE:\t" + parameter + "\n" +
+					String str = " INVOICE:\t" + invNum + "\n" +
 							" REES CODE:\t" + rees +"\n" +
 							" CLIENT:\t" + customerName + "\n\n" + 
 							" SITE:\t" + streetAddress + "\n" +
@@ -192,7 +192,7 @@ public class PermitPane extends JPanel
 	}
 
 
-	public ResultSet getResults(int ind){      	
+	public ResultSet getTable(int ind){      	
 
 		try
 		{
@@ -200,7 +200,7 @@ public class PermitPane extends JPanel
 			PreparedStatement st =conn.prepareStatement(procedure[ind]);	//ind]);
 			results = st.executeQuery();
 			if (results==null){
-				getResults(0);
+				getTable(0);
 			}
 		}
 		catch(Exception ex)
