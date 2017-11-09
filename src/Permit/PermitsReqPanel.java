@@ -438,7 +438,7 @@ class PermitsReqPanel extends JPanel {
 
 	protected void resetTable() {
 
-		ResultSet rs = pp.getResults(0);
+		ResultSet rs = pp.getTable(0);
 		permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 		spaceHeader();		  	
 		invoiceNum = "";  

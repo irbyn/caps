@@ -47,7 +47,9 @@ public class AKLConsent {
 	private String date = "";
 	private String make = "";
 	private String model = "";
-	private String life = "";	
+	private String life = "";
+	private String ecan = "";
+	private String nelson = "";
 	private String value = "";
 	private String wb = "";
 
@@ -125,6 +127,10 @@ public class AKLConsent {
 				field.setValue(life);
 				field = (PDTextField) acroForm.getField( "value" );
 				field.setValue(value);
+				field = (PDTextField) acroForm.getField( "ECAN" );
+				field.setValue(ecan);
+				field = (PDTextField) acroForm.getField( "Nelson" );
+				field.setValue(nelson);
 
 				/*  
 				    field = (PDTextField) acroForm.getField( "wb" );
@@ -189,6 +195,8 @@ public class AKLConsent {
 				make			= rs2.getString("make");
 				model			= rs2.getString("model");
 				life			= rs2.getString("life");
+				ecan			= rs2.getString("ecan");
+				nelson			= rs2.getString("nelson");
 				value			= rs2.getString("value");
 				wb				= rs2.getString("wb");
 				docs			= rs2.getString("docs");
