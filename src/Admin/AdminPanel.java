@@ -437,6 +437,7 @@ public class AdminPanel extends JFrame {
 						if (!validatePassword()){
 							createNewUser();
 							saveNewUserBtn.setEnabled(false);
+							createNewUserBtn.setEnabled(true);
 							clearFields();
 							disableFields();
 							resetTable();

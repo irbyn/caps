@@ -46,7 +46,7 @@ class SiteCheckPanel extends JPanel {
 	private String siteDetails = "call AWS_WCH_DB.dbo.s_SalesSiteCheckDetails";
 	private String updateSite = "call AWS_WCH_DB.dbo.s_SalesUpdateSiteCheck";
 	private String getInstID = "call AWS_WCH_DB.dbo.s_SaleGetInstID";
-	private int [] columnWidth = {50, 50, 100, 100, 50, 100, 60, 50, 50, 70};
+	private int [] columnWidth = {50, 50, 100, 100, 50, 100, 60, 50, 70};
 	private String param = "";
 	private String paramSID = "";
 	private ResultSet rs;
@@ -200,6 +200,9 @@ class SiteCheckPanel extends JPanel {
 					//Check to see if the user is sure about creating the customer
 					if (!validatedata()){
 						sp.showMessage("Updating Sale");
+						
+						String id = paramSID;
+						
 						updateSiteCheck(paramSID);
 						//Displaying confirmation message
 						if (sCheckCompChckBx.isSelected()){
@@ -208,7 +211,9 @@ class SiteCheckPanel extends JPanel {
 									+ "sitecheck date has passed");
 						}
 						resetTable();
-						clearFields();				
+						clearFields();	
+						reselectRow(id);
+						
 					}
 				}else{
 					JOptionPane.showMessageDialog(null, "You must select a row first.");
@@ -512,5 +517,13 @@ class SiteCheckPanel extends JPanel {
 
 	public JPanel getInfoPanel(){
 		return infoPanel;
+	}
+	
+	protected void reselectRow(String inv) {
+		for (int i = 0; i < salesTbl.getRowCount(); i++){
+			if (inv.equals(salesTbl.getModel().getValueAt(i, 0).toString())){
+				salesTbl.setRowSelectionInterval(i, i);
+			}
+		}
 	}
 }
