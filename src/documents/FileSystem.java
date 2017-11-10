@@ -29,7 +29,7 @@ public class FileSystem {
 		consentForm = 			"//C:/WFS/Forms/Consent.pdf";		//Location of Form Template
 		consentFiled = 			"//C:/WFS/Files/Consent/Consent_";	//Location where files are created
 		
-		siteCheckForm = 		"//C:/WFS/Forms/";			// + filename from DB (InstalType FilePath)
+		siteCheckForm = 		"//C:/WFS/Forms/";					// + filename from DB (InstalType FilePath)
 		sc_Filed = 				"//C:/WFS/Files/SCBlank";				//Location where files are created
 		
 		invoiceFiled = 			"//C:/WFS/Files/INV/INV_";			//Location where files are stored

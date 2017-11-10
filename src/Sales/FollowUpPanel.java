@@ -36,6 +36,7 @@ import javax.swing.table.TableColumnModel;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
+import documents.FileSystem;
 import net.proteanit.sql.DbUtils;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -88,19 +89,22 @@ class FollowUpPanel extends JPanel {
 	private ImageIcon fll;
 	private ImageIcon pic;
 	private File[] photosArr;
-
+/*
 	private String folder = "//C:/pdfs/Invoice/";
 	private String qutPfx = "QUT_";
 	private String sitePfx = "SC_";
-	private String photoPfx = "PH_";
+	private String photoPfx = "PH_";*/
 
 	private JTextField invNumbTxtBx;
 	private JTextField commentTxtBx;
+	private FileSystem fs;
 
 	public FollowUpPanel(ConnDetails ConDeets, SalesPane sp) {
 
 		this.sp = sp;
 		this.conDeets = ConDeets;
+		
+		fs = new FileSystem();
 		connecting = new CreateConnection();
 		fll = new ImageIcon(getClass().getResource("pdf.png"));
 		pic = new ImageIcon(getClass().getResource("pictures.png"));
@@ -542,7 +546,7 @@ class FollowUpPanel extends JPanel {
 
 	protected void checkForFiles() {
 		//Check for stored Quote
-		quote = new File(folder+qutPfx+paramSID+".pdf");//Uses InstallID/Quote number
+		quote = new File(fs.getQuote()+paramSID+".pdf");//Uses InstallID/Quote number
 		if (quote.exists()){
 			viewQutBtn.setVisible(true);
 			qutExists = true;
@@ -551,7 +555,7 @@ class FollowUpPanel extends JPanel {
 			qutExists = false;
 		}	
 		//Check for stored SiteCheck Forms	
-		site = new File(folder+sitePfx+paramSID+".pdf");//Uses SaleID number
+		site = new File(fs.getSiteChk()+paramSID+".pdf");//Uses SaleID number
 		if (site.exists()){
 			viewSiteBtn.setVisible(true);
 			siteExists = true;
@@ -561,10 +565,10 @@ class FollowUpPanel extends JPanel {
 		}
 		//Check for stored Photo(s)	
 		//Create array of photos
-		File f = new File(folder);					
+		File f = new File(fs.getPhotoFolder());					
 		photosArr = f.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				return name.startsWith(photoPfx+paramSID+"_");	//Uses SaleID number
+				return name.startsWith(fs.getPhotoPrefix()+paramSID+"_");	//Uses SaleID number
 			}
 		});
 

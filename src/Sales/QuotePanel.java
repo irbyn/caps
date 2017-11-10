@@ -47,6 +47,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Sales.SalesPane;
+import documents.FileSystem;
 import net.proteanit.sql.DbUtils;
 
 class QuotePanel extends JPanel {
@@ -64,10 +65,6 @@ class QuotePanel extends JPanel {
 	private File photo;
 	private File[] photosArr;
 	private int photoLimit = 5;
-	private String folder = "//C:/pdfs/Invoice/";
-	private String qutPfx = "QUT_";
-	private String sitePfx = "SC_";
-	private String photoPfx = "PH_";
 	private String qut;
 	private String sck;
 	private String pht;
@@ -118,11 +115,13 @@ class QuotePanel extends JPanel {
 	private ImageIcon pic;
 	private ConnDetails conDeets;
 	private SalesPane sp;
+	private FileSystem fs;
 
 	public QuotePanel(ConnDetails conDetts, SalesPane spn) {
 		this.conDeets = conDetts;
 		this.sp = spn;
 
+		fs = new FileSystem();
 		connecting = new CreateConnection();
 		fll = new ImageIcon(getClass().getResource("pdf.png"));
 		pic = new ImageIcon(getClass().getResource("pictures.png"));
@@ -305,7 +304,6 @@ class QuotePanel extends JPanel {
 		{	@Override
 			public void actionPerformed(ActionEvent arg0) {
 			int ph = photosArr.length;
-			sp.showMessage("" + ph);
 			for (int i =0; i< ph; i++){
 				if (photosArr[i].exists())
 					if (Desktop.isDesktopSupported()) {
@@ -528,7 +526,7 @@ class QuotePanel extends JPanel {
 		if(f instanceof File){
 			quote = (File)f;
 			File src = new File(quote.getAbsolutePath());
-			File target = new File(folder+qutPfx+saleID+".pdf");
+			File target = new File(fs.getQuote()+saleID+".pdf");
 			try {
 				Files.copy(src.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
@@ -544,7 +542,7 @@ class QuotePanel extends JPanel {
 		if(f instanceof File){
 			site = (File)f;
 			File src = new File(site.getAbsolutePath());
-			File target = new File(folder+sitePfx+saleID+".pdf");
+			File target = new File(fs.getSiteChk()+saleID+".pdf");
 			try {
 				Files.copy(src.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
@@ -560,7 +558,7 @@ class QuotePanel extends JPanel {
 			File src = new File(photo.getAbsolutePath());
 			String file = photo.getAbsolutePath().toString();
 			String fileExt = file.split("\\.")[1];
-			File target = new File(folder+photoPfx+saleID+"_"+fotoNum+"."+fileExt);
+			File target = new File(fs.getPhotos()+saleID+"_"+fotoNum+"."+fileExt);
 
 			try {
 				Files.copy(src.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -650,7 +648,7 @@ class QuotePanel extends JPanel {
 	 */
 	protected void checkForFiles() {
 		//Check for stored Quote
-		quote = new File(folder+qutPfx+saleID+".pdf");
+		quote = new File(fs.getQuote()+saleID+".pdf");
 		if (quote.exists()){
 			viewQutBtn.setVisible(true);
 			qutExists = true;
@@ -659,7 +657,7 @@ class QuotePanel extends JPanel {
 			qutExists = false;
 		}	
 		//Check for stored SiteCheck Forms	
-		site = new File(folder+sitePfx+saleID+".pdf");
+		site = new File(fs.getSiteChk()+saleID+".pdf");
 		if (site.exists()){
 			viewSiteBtn.setVisible(true);
 			siteExists = true;
@@ -669,10 +667,10 @@ class QuotePanel extends JPanel {
 		}
 		//Check for stored Photo(s)	
 		//Create array of photos
-		File f = new File(folder);					
+		File f = new File(fs.getPhotoFolder());					
 		photosArr = f.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				return name.startsWith(photoPfx+saleID+"_");
+				return name.startsWith(fs.getPhotoPrefix()+saleID+"_");
 			}
 		});
 		if (photosArr.length>0){
