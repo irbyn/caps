@@ -243,7 +243,7 @@ class RecvPermitPanel extends JPanel {
 
 	protected void resetTable() {
 		clearFields();
-		ResultSet rs = pp.getResults(1);
+		ResultSet rs = pp.getTable(1);
 		permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 		spaceHeader();
 		rowSelected=false;

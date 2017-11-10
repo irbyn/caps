@@ -23,10 +23,10 @@ public class ProducerStatement {
 
 	private CreateConnection connecting;
 	private String result2 = "EXEC AWS_WCH_DB.dbo.[p_PermitsCCC] ";
-
+/*
 	private String ps3 = "//C:/pdfs/Invoice/ps3.pdf"; 
 	private String file = "//C:/pdfs/Invoice/ps3"; 
-
+*/
 	private String inst = "";
 	private String auth = "";
 	private String consnt = "";
@@ -36,6 +36,7 @@ public class ProducerStatement {
 	private String fire = "";
 	private String dateinst = "";
 
+	private FileSystem fs;
 	private Boolean lockForm;
 	private ConnDetails conDeets;
 	private PermitPane pp;
@@ -43,9 +44,10 @@ public class ProducerStatement {
 	public void fillPS3(String invNum, String dte, ConnDetails condeets)   { 
 		this.conDeets = condeets;
 		connecting = new CreateConnection();
+		fs = new FileSystem();
 		displayClientDetails( invNum);
 		dateinst = dte;
-		try (PDDocument pdfDocument = PDDocument.load(new File(ps3)))
+		try (PDDocument pdfDocument = PDDocument.load(new File(fs.getPS3Form())))
 		{
 			// get the document catalog
 			PDAcroForm acroForm = pdfDocument.getDocumentCatalog().getAcroForm();
@@ -72,11 +74,11 @@ public class ProducerStatement {
 				field.setValue(dte);
 			}	            
 			// Save and close the filled out form.
-			pdfDocument.save(file+"_"+invNum+".pdf");
+			pdfDocument.save(fs.getPS3Storage()+invNum+".pdf");
 
 			if (Desktop.isDesktopSupported()) {
 				try {
-					File myFile = new File(file+"_"+invNum+".pdf");
+					File myFile = new File(fs.getPS3Storage()+invNum+".pdf");
 					Desktop.getDesktop().open(myFile);
 				} catch (FileNotFoundException f){
 

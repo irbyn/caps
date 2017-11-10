@@ -282,11 +282,11 @@ class CCCApprovedPanel extends JPanel {
 	}
 
 	protected void getCCCApproved() {
-		int upD = model2.getRowCount();
+		int rows = model2.getRowCount();
 
-		if (upD > 0){
-			for (int i = 0 ; i< upD ; i++){
-				String st = permitsTbl.getValueAt( i, 0).toString();
+		if (rows > 0){
+			for (int i = 0 ; i< rows ; i++){
+				String st = cccTbl.getValueAt( i, 0).toString();
 
 				updateCCCApproved(st);		
 			}		
@@ -317,7 +317,7 @@ class CCCApprovedPanel extends JPanel {
 	}      
 
 	protected void resetTable() {
-		ResultSet rs = pp.getResults(3);
+		ResultSet rs = pp.getTable(3);
 		permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 		spaceHeader(columnModel, columnWidth);
 		rowSelected=false;

@@ -228,7 +228,7 @@ class ProdStatementPanel extends JPanel {
 
 	protected void resetTable() {
 
-		ResultSet rs = pp.getResults(2);
+		ResultSet rs = pp.getTable(2);
 		permitsTbl.setModel(DbUtils.resultSetToTableModel(rs)); 		  	
 		spaceHeader();
 		rowSelected=false;

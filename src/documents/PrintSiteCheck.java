@@ -40,11 +40,18 @@ public class PrintSiteCheck {
 	private String dp = "";
 	private String date = "";
 	private String time = "";	
+	
+	private FileSystem fs;
 		
 	public PrintSiteCheck(String saleId, ConnDetails condeets){
 	
 		this.condeets = condeets;
 		this.saleID = saleId;
+		
+		fs = new FileSystem();
+
+//		consent = fs.getConsentForm();	//	"//C:/pdfs/Invoice/ps3.pdf"; 
+//		file = fs.getConsentStorage();	//	"//C:/pdfs/Invoice/ps3"; 
 		
 		connecting = new CreateConnection();
    	
@@ -79,7 +86,7 @@ public class PrintSiteCheck {
         JOptionPane.showMessageDialog(null, ex.toString());
         }      		            
 
-        try (PDDocument pdfDocument = PDDocument.load(new File(scPath)))
+        try (PDDocument pdfDocument = PDDocument.load(new File(fs.getSiteCheckForm() + scPath)))
         {
             // get the document catalog
             PDAcroForm acroForm = pdfDocument.getDocumentCatalog().getAcroForm();

@@ -40,6 +40,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
+import documents.FileSystem;
 import documents.ReadInvoice;
 import net.proteanit.sql.DbUtils;
 
@@ -49,10 +50,6 @@ class CheckForOrdersPanel extends JPanel {
 	private String getSaleID = "EXEC AWS_WCH_DB.dbo.[i_InstallsGetSaleID] ";
 	private String upStkList = "{Call AWS_WCH_DB.dbo.[i_InstallsUpdateFire] (?,?,?,?,?)}";
 	private String upStkItem = "{Call AWS_WCH_DB.dbo.[i_InstallsUpdateItems] (?,?,?,?,?)}";
-	private String folder = "//C:/pdfs/Invoice/";	
-	private String invPfx = "INV_";
-	private String sitePfx = "SC_";
-	private String photoPfx = "PH_";
 
 	private String invoiceNum = ""; 
 	private String saleID = ""; 
@@ -120,6 +117,7 @@ class CheckForOrdersPanel extends JPanel {
 	private CreateConnection conn;
 	private ReadInvoice rInv;
 
+	private FileSystem fs;
 	private Boolean lockForm;
 	private ConnDetails conDeets;
 	private InstallsPane ip;
@@ -133,6 +131,7 @@ class CheckForOrdersPanel extends JPanel {
 		//Link classes
 		connecting = new CreateConnection();
 		rInv = new ReadInvoice();
+		fs = new FileSystem();
 
 		model1 = new DefaultTableModel();  
 		model1.setRowCount(0);
@@ -492,7 +491,7 @@ class CheckForOrdersPanel extends JPanel {
 	 */
 	protected void checkForFiles() {
 		//Check for stored Invoice
-		inv = new File(folder+invPfx+invoiceNum+".pdf");//Uses InstallID/Invoice number
+		inv = new File(fs.getInvoice()+invoiceNum+".pdf");//Uses InstallID/Invoice number
 		if (inv.exists()){
 			viewInvBtn.setVisible(true);
 			invExists = true;
@@ -501,7 +500,7 @@ class CheckForOrdersPanel extends JPanel {
 			invExists = false;
 		}	
 		//Check for stored SiteCheck Forms	
-		site = new File(folder+sitePfx+saleID+".pdf");//Uses SaleID number
+		site = new File(fs.getSiteChk()+saleID+".pdf");//Uses SaleID number
 		if (site.exists()){
 			viewSiteBtn.setVisible(true);
 			siteExists = true;
@@ -511,10 +510,10 @@ class CheckForOrdersPanel extends JPanel {
 		}
 		//Check for stored Photo(s)	
 		//Create array of photos
-		File f = new File(folder);					
+		File f = new File(fs.getPhotoFolder());					
 		photosArr = f.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				return name.startsWith(photoPfx+saleID+"_");	//Uses SaleID number
+				return name.startsWith(fs.getPhotoPrefix()+saleID+"_");	//Uses SaleID number
 			}
 		});
 

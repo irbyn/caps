@@ -26,9 +26,6 @@ public class AKLConsent {
 	private String consentDetails = "EXEC AWS_WCH_DB.dbo.[p_PermitsConsent] ";
 	private ResultSet rs;
 
-	private String consent = ""; 
-	private String file = ""; 
-
 	private String site = "";
 	private String lot = "";
 	private String dp = "";
@@ -59,9 +56,13 @@ public class AKLConsent {
 
 	//		if wb = true	wetY  wetN	wetYO = O  	wetNO = O
 	//		if fire = is2   chimYO = O  chimNO = O
+	
+	private String consent = ""; 
+	private String file = "";
+	
+	private FileSystem fs;
 	private Boolean lockForm;
 	private ConnDetails conDeets;
-	private FileSystem fs;
 
 
 	public void fillConsent(String invNum, ConnDetails condeets)   { 
@@ -69,8 +70,8 @@ public class AKLConsent {
 		connecting = new CreateConnection();
 		fs = new FileSystem();
 
-		consent = fs.getConsentForm();	//	"//C:/pdfs/Invoice/ps3.pdf"; 
-		file = fs.getConsentStorage();	//	"//C:/pdfs/Invoice/ps3"; 
+		consent = fs.getConsentForm();		//	"//C:/WFS/Forms/Consent.pdf";
+		file = fs.getConsentStorage();		//	"//C:/WFS/Files/Consents/Consent_";	
 
 		getConsentDetails( invNum);
 

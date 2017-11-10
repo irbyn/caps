@@ -14,17 +14,19 @@ import org.apache.pdfbox.text.PDFTextStripper;
  */
 public class ReadInvoice {
 
-	private String folder = "//C:/pdfs/Invoice/";	
+/*	private String folder = "//C:/pdfs/Invoice/";	
 	private String invPfx = "INV_";
 	private String sitePfx = "SC_";
-	private String photoPfx = "PH_";
+	private String photoPfx = "PH_";*/
 	private String text;
+	private FileSystem fs;
 
 
 	public void readInvoice(String invoiceNum, DefaultTableModel mod) {
 
-
-		String src = folder + invPfx + invoiceNum + ".pdf";
+		fs = new FileSystem();
+		
+		String src = fs.getInvoice() + invoiceNum + ".pdf";
 		//Loading an existing document
 		File file = new File(src);
 		if (file.exists()){

@@ -66,6 +66,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
 import Permit.PermitPane;
+import documents.FileSystem;
 import net.proteanit.sql.DbUtils;
 
 
@@ -86,10 +87,6 @@ class LoadDocsPanel extends JPanel {
 	private File photo;
 	private File[] photosArr;
 	private int photoLimit = 5;
-	private String folder = "//C:/pdfs/Invoice/";
-	private String invPfx = "INV_";
-	private String sitePfx = "SC_";
-	private String photoPfx = "PH_";
 
 	private String invc;
 	private String sck;
@@ -153,7 +150,8 @@ class LoadDocsPanel extends JPanel {
 	private Boolean lockForm;
 	private ConnDetails conDeets;
 	private InstallsPane ip;
-
+	private FileSystem fs;
+		
 
 	public LoadDocsPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
 
@@ -161,6 +159,7 @@ class LoadDocsPanel extends JPanel {
 		this.conDeets = conDetts;
 		this.ip = ipn;
 
+		fs = new FileSystem();
 		connecting = new CreateConnection();
 		fll = new ImageIcon(getClass().getResource("pdf.png"));
 		pic = new ImageIcon(getClass().getResource("pictures.png"));
@@ -531,7 +530,8 @@ class LoadDocsPanel extends JPanel {
 		if(f instanceof File){
 			inv = (File)f;
 			File src = new File(inv.getAbsolutePath());
-			File target = new File(folder+invPfx+invoiceNum+".pdf");
+			File target = new File(fs.getInvoice()+invoiceNum+".pdf");
+			
 
 			try {
 				if (target.exists()){
@@ -552,7 +552,7 @@ class LoadDocsPanel extends JPanel {
 		if(f instanceof File){
 			site = (File)f;
 			File src = new File(site.getAbsolutePath());
-			File target = new File(folder+sitePfx+saleID+".pdf");
+			File target = new File(fs.getSiteChk()+saleID+".pdf");
 
 			try {
 				if (target.exists()){
@@ -573,7 +573,7 @@ class LoadDocsPanel extends JPanel {
 			File src = new File(photo.getAbsolutePath());
 			String file = photo.getAbsolutePath().toString();
 			String fileExt = file.split("\\.")[1];
-			File target = new File(folder+photoPfx+saleID+"_"+fotoNum+"."+fileExt);
+			File target = new File(fs.getPhotos()+saleID+"_"+fotoNum+"."+fileExt);
 
 			try {
 				Files.copy(src.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -645,7 +645,7 @@ class LoadDocsPanel extends JPanel {
 	 */
 	protected void checkForFiles() {
 		//Check for stored Invoice
-		inv = new File(folder+invPfx+invoiceNum+".pdf");//Uses InstallID/Invoice number
+		inv = new File(fs.getInvoice()+invoiceNum+".pdf");//Uses InstallID/Invoice number
 		if (inv.exists()){
 			viewInvBtn.setVisible(true);
 			invExists = true;
@@ -654,7 +654,7 @@ class LoadDocsPanel extends JPanel {
 			invExists = false;
 		}	
 		//Check for stored SiteCheck Forms	
-		site = new File(folder+sitePfx+saleID+".pdf");//Uses SaleID number
+		site = new File(fs.getSiteChk()+saleID+".pdf");//Uses SaleID number
 		if (site.exists()){
 			viewSiteBtn.setVisible(true);
 			siteExists = true;
@@ -664,10 +664,10 @@ class LoadDocsPanel extends JPanel {
 		}
 		//Check for stored Photo(s)	
 		//Create array of photos
-		File f = new File(folder);					
+		File f = new File(fs.getPhotoFolder());					
 		photosArr = f.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				return name.startsWith(photoPfx+saleID+"_");	//Uses SaleID number
+				return name.startsWith(fs.getPhotoPrefix()+saleID+"_");	//Uses SaleID number
 			}
 		});
 

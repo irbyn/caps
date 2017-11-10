@@ -255,7 +255,7 @@ class PlaceOrdPanel extends JPanel {
 			pm.setString(3,	po);
 
 			pm.executeUpdate();
-			conn.close();
+		//	conn.close();
 		}
 		catch (SQLServerException sqex)
 		{
