@@ -342,7 +342,7 @@ class SiteCheckPanel extends JPanel {
 						dateSpn.setValue(SCdate);
 					}
 					if (time == null ){
-						timeComboBox.setSelectedItem(null);
+						timeComboBox.setSelectedItem(8);
 					}else{
 						if (time.toString().equals("08:00:00")){
 							timeComboBox.setSelectedIndex(0);
