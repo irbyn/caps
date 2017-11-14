@@ -220,71 +220,76 @@ class EstimationPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent arg0){
 				//Validating that the email can actually be sent
-				if (emailCanBeSent()){
-					int dialogButton = JOptionPane.YES_NO_OPTION;
-					int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to mark this email as sent?\n"
-							+ "There is no going back!\n"
-							+ "This customer will be moved to Site checks.","Warning",dialogButton);
-					if(dialogResult == JOptionPane.YES_OPTION){
+				if (rowSelected){
 
-						Desktop desktop;
-						if (Desktop.isDesktopSupported() 
-								&& (desktop = Desktop.getDesktop()).isSupported(Desktop.Action.MAIL)) {
 
-							String custEmail = sp.getEmailAddr();
-							String emailBody = getEmailBody();
+					if (emailCanBeSent()){
+						int dialogButton = JOptionPane.YES_NO_OPTION;
+						int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to mark this email as sent?\n"
+								+ "There is no going back!\n"
+								+ "This customer will be moved to Site checks.","Warning",dialogButton);
+						if(dialogResult == JOptionPane.YES_OPTION){
 
-							URI mailto;
-							try {
-								mailto = new URI("mailto:" + custEmail + "?subject=Fire%20Estimation&body=" + emailBody);
-								desktop.mail(mailto);
-								String custName = sp.getCustName();
-								JOptionPane.showMessageDialog(null,  custName +" has been moved to Site Checks!");
-							} catch (URISyntaxException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+							Desktop desktop;
+							if (Desktop.isDesktopSupported() 
+									&& (desktop = Desktop.getDesktop()).isSupported(Desktop.Action.MAIL)) {
+
+								String custEmail = sp.getEmailAddr();
+								String emailBody = getEmailBody();
+
+								URI mailto;
+								try {
+									mailto = new URI("mailto:" + custEmail + "?subject=Fire%20Estimation&body=" + emailBody);
+									desktop.mail(mailto);
+									String custName = sp.getCustName();
+									JOptionPane.showMessageDialog(null,  custName +" has been moved to Site Checks!");
+								} catch (URISyntaxException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								//The date the estimation was sent to the customer
+								updateEstimistionDate();
+								resetTable();
+								clearFields();
+
+							} else {
+								// TODO fallback to some Runtime.exec(..) voodoo?
+								throw new RuntimeException("desktop doesn't support mailto; mail is dead anyway ;)");
 							}
-							//The date the estimation was sent to the customer
-							updateEstimistionDate();
-							resetTable();
-							clearFields();
+						}
+						else if (dialogResult == JOptionPane.NO_OPTION){
 
-						} else {
-							// TODO fallback to some Runtime.exec(..) voodoo?
-							throw new RuntimeException("desktop doesn't support mailto; mail is dead anyway ;)");
+
+							Desktop desktop;
+							if (Desktop.isDesktopSupported() 
+									&& (desktop = Desktop.getDesktop()).isSupported(Desktop.Action.MAIL)) {
+
+								String custEmail = sp.getEmailAddr();
+								String emailBody = getEmailBody();
+
+								URI mailto;
+								try {
+									mailto = new URI("mailto:" + custEmail + "?subject=Fire%20Estimation&body=" + emailBody);
+									desktop.mail(mailto);				
+								} catch (URISyntaxException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+
+							} else {
+								// TODO fallback to some Runtime.exec(..) voodoo?
+								throw new RuntimeException("desktop doesn't support mailto; mail is dead anyway ;)");
+							}
 						}
 					}
-					else if (dialogResult == JOptionPane.NO_OPTION){
-						
-
-						Desktop desktop;
-						if (Desktop.isDesktopSupported() 
-								&& (desktop = Desktop.getDesktop()).isSupported(Desktop.Action.MAIL)) {
-
-							String custEmail = sp.getEmailAddr();
-							String emailBody = getEmailBody();
-
-							URI mailto;
-							try {
-								mailto = new URI("mailto:" + custEmail + "?subject=Fire%20Estimation&body=" + emailBody);
-								desktop.mail(mailto);				
-							} catch (URISyntaxException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-
-						} else {
-							// TODO fallback to some Runtime.exec(..) voodoo?
-							throw new RuntimeException("desktop doesn't support mailto; mail is dead anyway ;)");
-						}
-						
-					}
+				}else{
+					JOptionPane.showMessageDialog(null,  "You must select a row first!");
 				}
 			}
 		});
