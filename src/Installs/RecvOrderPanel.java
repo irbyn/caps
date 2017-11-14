@@ -42,6 +42,7 @@ import javax.swing.table.TableColumnModel;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 import DB_Comms.CreateConnection;
 import Main.ConnDetails;
+import documents.StockReceivedReport;
 import net.proteanit.sql.DbUtils;
 
 class RecvOrderPanel extends JPanel {
@@ -85,6 +86,7 @@ class RecvOrderPanel extends JPanel {
 	private Boolean lockForm;
 	private ConnDetails conDeets;
 	private InstallsPane ip;
+	private StockReceivedReport srr;
 
 
 	public RecvOrderPanel(Boolean lockForm, ConnDetails conDetts, InstallsPane ipn) {
@@ -92,6 +94,7 @@ class RecvOrderPanel extends JPanel {
 		this.lockForm = lockForm;
 		this.conDeets = conDetts;
 		this.ip = ipn;
+		srr = new StockReceivedReport(conDeets);
 		connecting = new CreateConnection();
 
 		model1 = new DefaultTableModel();  
@@ -288,7 +291,7 @@ class RecvOrderPanel extends JPanel {
 			SimpleDateFormat sdf1 = new SimpleDateFormat("dd-MMM-yyyy");
 			String dt = sdf1.format(dte);
 
-			sb = ip.reportStockReceived(dt);
+			sb = srr.reportStockReceived(dt);
 			String prefix = "stockReceived_";
 			String suffix = ".txt";
 
