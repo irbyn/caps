@@ -315,6 +315,7 @@ class RecvOrderPanel extends JPanel {
 			}
 		}		
 	}
+	
 	//	Sends row data from top table to bottom
 	private void moveRow(int row){
 		String po;

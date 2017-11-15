@@ -406,7 +406,7 @@ public class InstallsPane extends JPanel
 			return qryResults;       		            
 		}
 
-
+/*
 		protected void updatePermit(String update, String param, ConnDetails connDeets) {
 
 			JOptionPane.showMessageDialog(null, update);
@@ -427,7 +427,7 @@ public class InstallsPane extends JPanel
 				JOptionPane.showMessageDialog(null, "CONNECTION_ERROR: " + ex);
 			}
 		}
-
+*/
 
 		public String getInstTime(){
 			return bookedTime;

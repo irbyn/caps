@@ -14,10 +14,6 @@ import org.apache.pdfbox.text.PDFTextStripper;
  */
 public class ReadInvoice {
 
-/*	private String folder = "//C:/pdfs/Invoice/";	
-	private String invPfx = "INV_";
-	private String sitePfx = "SC_";
-	private String photoPfx = "PH_";*/
 	private String text;
 	private FileSystem fs;
 
